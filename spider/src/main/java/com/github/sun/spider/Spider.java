@@ -1,27 +1,71 @@
 package com.github.sun.spider;
 
-import java.io.IOException;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.util.List;
 
 /**
  * @Author LinSH
  * @Date: 12:00 AM 2019-07-11
  */
 public interface Spider {
-  void climb();
+  /**
+   * 开始采集
+   */
+  void start();
 
-  interface Crawler {
+  /**
+   * 停止采集
+   */
+  void stop();
 
+  /**
+   * @return 是否在采集
+   */
+  boolean isRunning();
+
+  /**
+   * 增加一个线程，加快采集速率
+   */
+  void add();
+
+  /**
+   * 移除一个线程，减缓采集速率
+   */
+  void remove();
+
+  /**
+   * @return 采集进度
+   */
+  Progress progress();
+
+  interface Progress {
+    /**
+     * @return 并行数
+     */
+    int parallelism();
+
+    /**
+     * @return 采集的条数
+     */
+    int total();
+
+    /**
+     * @return 开始时间
+     */
+    String startTime();
+
+    /**
+     * @return 耗时
+     */
+    String usedTime();
   }
 
-  interface Fetcher {
-    String fetch(String url) throws IOException;
+  interface Factory {
+    Spider create(JsonNode schema, Consumer consumer);
+  }
 
-    String fetch(String url, String method, String body) throws IOException;
-
-    String fetch(String url, int timeout, String method, String body) throws IOException;
-
-    String fetch(String url, int readTimeout, int connectTimeout, String method, String body) throws IOException;
-
-    String fetch(String url, int readTimeout, int connectTimeout, String method, String body, String encoding) throws IOException;
+  interface Consumer {
+    void consume(List<JsonNode> values) throws Exception;
   }
 }

@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: Rest-Server
+server:
+  port: 1388
