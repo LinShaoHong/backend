@@ -1,0 +1,78 @@
+# mac
+.DS_Store
+
+# eclipse
+*.pydevproject
+.classpath
+.project
+.metadata/
+.settings/
+*/bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+local.properties
+.loadpath
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# IDEA
+*.iml
+*.ipr
+*.iws
+.idea/
+classes/
+
+# gradle
+.gradle/
+
+# build
+target/
+build/
+out/
+*.class
+*/.gitignore
+
+# nodejs
+node_modules
+npm-debug.log
+
+# bower
+bower_components
+
+# brackets
+.brackets.json
+
+# visual studio code
+.vscode
+
+# atom-sync
+.sync-config.cson
+
+# Logs
+logs
+*.log
+
+# Runtime data
+*.pid
+*.seed
+
+# vagrant
+.vagrant
+
+# aspectj
+native/
+
+# doclet
+generated/
+
+# maven
+artifacts/%
+
+#node_modules
+manager/node_modules
