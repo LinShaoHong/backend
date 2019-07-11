@@ -1,7 +1,5 @@
 dependencies {
   compile project(":$rootName-test")
-  compile project(":$rootName-boot")
-  compile "org.jsoup:jsoup:$vers.jsoup"
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")
