@@ -2,12 +2,8 @@ package com.github.sun.spider;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import java.util.List;
+import java.util.function.Consumer;
 
-/**
- * @Author LinSH
- * @Date: 12:00 AM 2019-07-11
- */
 public interface Spider {
   /**
    * 开始采集
@@ -63,9 +59,5 @@ public interface Spider {
 
   interface Factory {
     Spider create(JsonNode schema, Consumer consumer);
-  }
-
-  interface Consumer {
-    void consume(List<JsonNode> values) throws Exception;
   }
 }

@@ -3,10 +3,8 @@ package com.github.sun.spider.internal;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.spider.Spider;
 
-/**
- * @Author LinSH
- * @Date: 9:53 AM 2019-07-11
- */
+import java.util.function.Consumer;
+
 public class SpiderImpl implements Spider {
   private final JsonNode schema;
   private final Consumer consumer;
