@@ -1,6 +1,7 @@
 dependencies {
   compile project(":$rootName-test")
   compile project(":$rootName-rest")
+  compile project(":$rootName-mybatis")
   compile "org.jsoup:jsoup:$vers.jsoup"
 }
 

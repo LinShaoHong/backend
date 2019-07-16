@@ -1,4 +1,4 @@
-package com.github.sun.spider;
+package com.github.sun.spider.spi;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

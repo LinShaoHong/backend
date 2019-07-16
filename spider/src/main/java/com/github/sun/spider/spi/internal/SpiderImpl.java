@@ -1,7 +1,7 @@
-package com.github.sun.spider.internal;
+package com.github.sun.spider.spi.internal;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.sun.spider.Spider;
+import com.github.sun.spider.spi.Spider;
 
 import java.util.function.Consumer;
 
