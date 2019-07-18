@@ -3,6 +3,8 @@ dependencies {
   compile project(":$rootName-rest")
   compile project(":$rootName-mybatis")
   compile "org.jsoup:jsoup:$vers.jsoup"
+  compile 'net.sf.saxon:Saxon-HE:9.9.1-4'
+  compile "net.sourceforge.htmlcleaner:htmlcleaner:$vers.htmlcleaner"
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

@@ -1,0 +1,60 @@
+{
+  "source": "www.mmmjpg.com",
+  "process": {
+    "baseUrl": "http://www.mmmjpg.com",
+    "paging": {
+      "param": "/home/%s",
+      "start": 0,
+      "end": 1,
+      "exclusive": true,
+      "total": "replace(//div[@class='page']/em[@class='info']/text(), '共(\\d+)页', '$1')"
+    },
+    "xpath": "//div[@class='pic']/ul/li",
+    "type": "list",
+    "indexes": [
+      0
+    ],
+    "fields": [
+      {
+        "name": "title",
+        "type": "text",
+        "xpath": "span/a/text()",
+        "subXpath": true
+      },
+      {
+        "name": "originalUrl",
+        "type": "text",
+        "xpath": "a/img/@src"
+      },
+      {
+        "name": "details",
+        "type": "$sub",
+        "subType": "href",
+        "xpath": "concat('http://www.mmmjpg.com',span[1]/a/@href)",
+        "subProcess": {
+          "type": "single",
+          "paging": {
+            "param": "/%s",
+            "start": 1,
+            "end": 10,
+            "exclusive": false,
+            "total": "//div[@class='page']/a[last()-1]/text()"
+          },
+          "fields": [
+            {
+              "name": "originalUrl",
+              "type": "text",
+              "xpath": "//div[@id='content']/a/img/@src"
+            },
+            {
+              "name": "tags",
+              "type": "text",
+              "parent": true,
+              "xpath": "string-join(//div[@class='tags']/a/text(), '|')"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

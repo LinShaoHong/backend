@@ -1,0 +1,37 @@
+{
+  "source": "movie.douban.com",
+  "process": {
+    "baseUrl": "https://movie.douban.com",
+    "xpath": "//div[@class='reviews-bd']/div",
+    "type": "list",
+    "fields": [
+      {
+        "name": "title",
+        "type": "text",
+        "xpath": "./div[@class='review-bd']/h3/a/text()",
+        "subXpath": true
+      },
+      {
+        "name": "review",
+        "type": "$sub",
+        "subType": "href",
+        "xpath": "./div[@class='review-bd']/h3/a/@href",
+        "subProcess": {
+          "type": "single",
+          "fields": [
+            {
+              "name": "rating",
+              "type": "int",
+              "xpath": "//span[@class='main-title-hide']/text()"
+            },
+            {
+              "name": "content",
+              "type": "text",
+              "xpath": "string-join(//div[@class='review-content clearfix']/p/text(), '')"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

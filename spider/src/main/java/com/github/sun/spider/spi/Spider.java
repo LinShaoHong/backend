@@ -1,10 +1,18 @@
 package com.github.sun.spider.spi;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.Builder;
+import lombok.Data;
 
-import java.util.function.Consumer;
+import java.util.List;
 
 public interface Spider {
+  /**
+   * 来源
+   */
+  String source();
+
   /**
    * 开始采集
    */
@@ -35,29 +43,57 @@ public interface Spider {
    */
   Progress progress();
 
-  interface Progress {
+  @Data
+  @Builder
+  @JsonPropertyOrder({"source", "running", "parallelism", "total", "finished", "startTime", "endTime", "usedTime"})
+  class Progress {
     /**
-     * @return 并行数
+     * 来源
      */
-    int parallelism();
+
+    private String source;
 
     /**
-     * @return 采集的条数
+     * 并行数
      */
-    int total();
+    private int parallelism;
 
     /**
-     * @return 开始时间
+     * 采集页总数
      */
-    String startTime();
+    private int total;
 
     /**
-     * @return 耗时
+     * 是否在执行采集
      */
-    String usedTime();
+    private boolean isRunning;
+
+    /**
+     * 采集的条数
+     */
+    private int finished;
+
+    /**
+     * 开始时间
+     */
+    private String startTime;
+
+    /**
+     * 结束时间
+     */
+    private String endTime;
+
+    /**
+     * 耗时
+     */
+    private String usedTime;
+  }
+
+  interface Processor {
+    void process(List<JsonNode> values);
   }
 
   interface Factory {
-    Spider create(JsonNode schema, Consumer consumer);
+    Spider create(Setting setting, JsonNode schema);
   }
 }
