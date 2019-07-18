@@ -1,5 +1,6 @@
 package com.github.sun.spider.spi;
 
+import net.sf.saxon.xpath.XPathFactoryImpl;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -10,7 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class XPaths {
-  private final static XPath xPath = new net.sf.saxon.xpath.XPathFactoryImpl().newXPath();
+  private final static XPath xPath;
+
+  static {
+    XPathFactoryImpl factory = new XPathFactoryImpl();
+    xPath = factory.newXPath();
+  }
+
   private final Node node;
   private final String xpath;
 

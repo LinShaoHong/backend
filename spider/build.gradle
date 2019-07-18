@@ -5,6 +5,7 @@ dependencies {
   compile "org.jsoup:jsoup:$vers.jsoup"
   compile 'net.sf.saxon:Saxon-HE:9.9.1-4'
   compile "net.sourceforge.htmlcleaner:htmlcleaner:$vers.htmlcleaner"
+  compile 'org.apache.commons:commons-text:1.7'
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

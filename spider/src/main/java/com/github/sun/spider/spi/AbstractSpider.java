@@ -6,6 +6,7 @@ import com.github.sun.foundation.boot.utility.Cache;
 import com.github.sun.foundation.boot.utility.Iterators;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.Tuple;
+import org.apache.commons.text.StringEscapeUtils;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
@@ -153,7 +154,7 @@ abstract class AbstractSpider implements Spider {
   private void put(Field field, XPaths xPaths, ObjectNode node) {
     switch (field.type) {
       case "text":
-        node.put(field.name, xPaths.asText());
+        node.put(field.name, StringEscapeUtils.unescapeHtml4(xPaths.asText()));
         break;
       case "int":
         node.put(field.name, xPaths.asInt());
