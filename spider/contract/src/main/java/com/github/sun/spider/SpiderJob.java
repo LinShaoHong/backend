@@ -24,7 +24,7 @@ public class SpiderJob {
   private String id;
   private String group;
   private boolean publish;
-  private String startTime;
+  private Date startTime;
   private String rate;
   @Handler(SettingHandler.class)
   private Setting setting;

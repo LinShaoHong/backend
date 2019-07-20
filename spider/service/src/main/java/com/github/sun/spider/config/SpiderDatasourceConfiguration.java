@@ -3,9 +3,9 @@ package com.github.sun.spider.config;
 import com.github.sun.foundation.mybatis.config.PersistenceConfiguration;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -28,25 +28,21 @@ public class SpiderDatasourceConfiguration extends PersistenceConfiguration {
     return "com.github.sun.spider.mapper";
   }
 
-  @Primary
   @Bean(name = ID + SQL_SESSION_FACTORY_NAME)
-  public SqlSessionFactoryBean sqlSessionFactoryBean(DataSource dataSource) throws Exception {
+  public SqlSessionFactoryBean sqlSessionFactoryBean(@Qualifier(ID + DATASOURCE_NAME) DataSource dataSource) throws Exception {
     return super.sqlSessionFactoryBean(dataSource);
   }
 
-  @Primary
   @Bean(name = ID + DATASOURCE_NAME)
   public DataSource dataSource(Environment env) throws SQLException {
     return super.dataSource(env);
   }
 
-  @Primary
   @Bean(name = ID + TRANSACTION_MANAGER_NAME)
-  public DataSourceTransactionManager transactionManager(DataSource dataSource) {
+  public DataSourceTransactionManager transactionManager(@Qualifier(ID + DATASOURCE_NAME) DataSource dataSource) {
     return super.transactionManager(dataSource);
   }
 
-  @Primary
   @Bean(name = ID + SCANNER_NAME)
   protected MapperScannerConfigurer scannerConfigurer() {
     return super.scannerConfigurer(ID + SQL_SESSION_FACTORY_NAME);

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.boot.utility.Iterators;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.spider.Setting;
+import com.github.sun.spider.Spider;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;
 
 import java.text.SimpleDateFormat;
@@ -329,5 +331,21 @@ public abstract class BasicSpider extends AbstractSpider {
       sb.append(millis).append("秒");
     }
     return sb.toString();
+  }
+
+  @Component
+  public static class SpiderFactory implements Spider.Factory {
+    @Override
+    public Spider create(Setting setting, JsonNode schema, Spider.Processor processor) {
+      BasicSpider spider = new BasicSpider() {
+        @Override
+        protected Processor create() {
+          return processor;
+        }
+      };
+      spider.setSchema(schema);
+      spider.setSetting(setting);
+      return spider;
+    }
   }
 }

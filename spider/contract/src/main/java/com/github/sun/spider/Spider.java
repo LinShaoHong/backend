@@ -108,6 +108,6 @@ public interface Spider {
   }
 
   interface Factory {
-    Spider create(Setting setting, JsonNode schema);
+    Spider create(Setting setting, JsonNode schema, Processor processor);
   }
 }
