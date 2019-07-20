@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public abstract class BasicSpider extends AbstractSpider {
-  protected Setting setting;
+  private Setting setting;
   private String source;
   private JsonNode schema;
   private JSON.Valuer process;
@@ -269,7 +269,7 @@ public abstract class BasicSpider extends AbstractSpider {
           try {
             JsonNode value = parse(node, process);
             List<JsonNode> nodes = Iterators.asList(value);
-            processor.process(nodes);
+            processor.process(nodes, setting);
             finished.addAndGet(nodes.size());
           } catch (SpiderException ex) {
             // skip

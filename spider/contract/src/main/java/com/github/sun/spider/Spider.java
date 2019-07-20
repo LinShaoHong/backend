@@ -104,7 +104,7 @@ public interface Spider {
   interface Processor {
     String SUFFIX = ":spider:processor";
 
-    void process(List<JsonNode> values);
+    void process(List<JsonNode> values, Setting setting);
   }
 
   interface Factory {
