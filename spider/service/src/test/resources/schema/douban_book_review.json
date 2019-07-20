@@ -1,0 +1,51 @@
+{
+  "source": "book.douban.com",
+  "process": {
+    "baseUrl": "https://book.douban.com/",
+    "xpath": "//div[@class='section popular-books']/div[@class='bd']/ul/li",
+    "type": "list",
+    "fields": [
+      {
+        "name": "name",
+        "type": "text",
+        "xpath": "./div[@class='info']/h4[@class='title']/a/text()"
+      },
+      {
+        "name": "author",
+        "type": "text",
+        "xpath": "replace(./div[@class='info']/p[@class='author']/text(),' 作者：(.+) ', '$1')"
+      },
+      {
+        "name": "type",
+        "type": "text",
+        "xpath": "normalize-space(./div[@class='info']/p[@class='book-list-classification']/text())"
+      },
+      {
+        "name": "rating",
+        "type": "double",
+        "xpath": "./div[@class='info']/p/span[@class='average-rating']/text()"
+      },
+      {
+        "name": "introduction",
+        "type": "$sub",
+        "subType": "href",
+        "xpath": "./div[@class='info']/h4[@class='title']/a/@href",
+        "subProcess": {
+          "type": "single",
+          "fields": [
+            {
+              "name": "content",
+              "type": "text",
+              "xpath": "string-join(//div[@class='indent'][1]//div[@class='intro']/p/text(),'')"
+            },
+            {
+              "name": "author",
+              "type": "text",
+              "xpath": "string-join(//div[@class='indent'][2]//div[@class='intro']/p/text(),'')"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

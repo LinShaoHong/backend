@@ -1,5 +1,0 @@
-dependencies {
-  compile project(":$rootName-test")
-}
-
-apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

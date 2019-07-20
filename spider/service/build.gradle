@@ -1,0 +1,16 @@
+dependencies {
+  compile project(":$rootName-picture-spider")
+  compile project(":$rootName-spider-contract")
+
+  compile project(":$rootName-test")
+  compile project(":$rootName-quartz")
+
+  compile "org.jsoup:jsoup:$vers.jsoup"
+  compile 'net.sf.saxon:Saxon-HE:9.9.1-4'
+  compile 'org.apache.commons:commons-text:1.7'
+  compile 'com.jayway.jsonpath:json-path:2.4.0'
+  compile "net.sourceforge.htmlcleaner:htmlcleaner:$vers.htmlcleaner"
+}
+
+apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")
+apply from: rootProject.file("buildscript/gradle/sub_springboot.gradle")
