@@ -31,6 +31,24 @@
     ],
     "fields": [
       {
+        "name": "source",
+        "type": "text",
+        "value": "www.mmmjpg.com"
+      },
+      {
+        "name": "type",
+        "type": "text",
+        "value": "meizi"
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "xpath": {
+          "path": "string-join(./p[last()-1]/a/text(), '|')",
+          "script": "if($value.indexOf('丝') > -1 || $value.indexOf('袜') > -1 || $value.indexOf('腿') > -1) {'siwa';} else if($value.indexOf('青春') > -1 || $value.indexOf('清纯') > -1) {'young';} else if($value.indexOf('萝莉') > -1) {'luoli';} else {'other';}"
+        }
+      },
+      {
         "name": "title",
         "type": "text",
         "xpath": "./p[@class='p_title']/a/text()",
@@ -39,7 +57,7 @@
       {
         "name": "originalUrl",
         "type": "text",
-        "xpath": "./a/img/@src"
+        "xpath": "concat('https://www.meitulu.com/img.html?img=',./a/img/@src)"
       },
       {
         "name": "tags",

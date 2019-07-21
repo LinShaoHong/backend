@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Date;
 
 @Data
 @Builder
@@ -19,14 +20,16 @@ public class Picture {
   @Id
   private String id;
   private String title;
+  private String source;
   private String type;
+  private String category;
   private String tags;
-  private String localUrl;
+  private String localPath;
   private String originUrl;
   private long likes;
   private long visits;
-  private long createTime;
-  private long updateTime;
+  private Date createTime;
+  private Date updateTime;
 
   @Data
   @Builder
@@ -34,13 +37,14 @@ public class Picture {
   @AllArgsConstructor
   @NamingStrategy
   @Table(name = "picture_details")
-  public static class Details {
+  public static class Detail {
     @Id
     private String id;
     private String picId;
-    private String localUrl;
+    private String source;
+    private String localPath;
     private String originUrl;
-    private long createTime;
-    private long updateTime;
+    private Date createTime;
+    private Date updateTime;
   }
 }

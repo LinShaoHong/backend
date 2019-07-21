@@ -1,5 +1,6 @@
 package com.github.sun.spider;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.mybatis.handler.JsonHandler;
 import com.github.sun.foundation.sql.Handler;
@@ -24,6 +25,7 @@ public class SpiderJob {
   private String id;
   private String group;
   private boolean publish;
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
   private Date startTime;
   private String rate;
   @Handler(SettingHandler.class)

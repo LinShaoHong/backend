@@ -90,6 +90,11 @@ public abstract class BasicSpider extends AbstractSpider {
   }
 
   @Override
+  public Setting getSetting() {
+    return setting;
+  }
+
+  @Override
   public void setSchema(JsonNode schema) {
     this.schema = schema;
   }
@@ -177,7 +182,7 @@ public abstract class BasicSpider extends AbstractSpider {
               root = get(req);
               paging = parsePaging(root, process);
             } catch (SpiderException ex) {
-              log.warn(ex.getMessage());
+              log.warn(ex.getMessage(), ex.getCause());
               return;
             }
             List<String> uris = category == null ?
@@ -204,7 +209,7 @@ public abstract class BasicSpider extends AbstractSpider {
                   });
                 } catch (SpiderException ex) {
                   // skip
-                  log.warn(ex.getMessage());
+                  log.warn(ex.getMessage(), ex.getCause());
                 }
               }
             }
@@ -220,7 +225,7 @@ public abstract class BasicSpider extends AbstractSpider {
                 sleep(setting.getTaskInterval());
               } catch (SpiderException ex) {
                 // skip
-                log.warn(ex.getMessage());
+                log.warn(ex.getMessage(), ex.getCause());
               }
             }));
             break;
@@ -269,11 +274,13 @@ public abstract class BasicSpider extends AbstractSpider {
           try {
             JsonNode value = parse(node, process);
             List<JsonNode> nodes = Iterators.asList(value);
-            processor.process(nodes, setting);
+            if (!nodes.isEmpty()) {
+              processor.process(source, nodes, setting);
+            }
             finished.addAndGet(nodes.size());
           } catch (SpiderException ex) {
             // skip
-            log.warn(ex.getMessage());
+            log.warn(ex.getMessage(), ex.getCause());
           } catch (Throwable ex) {
             log.error("Error process source=" + source, ex);
             running.set(false);

@@ -17,6 +17,7 @@ import java.sql.SQLException;
 @EnableTransactionManagement
 public class PictureDatasourceConfiguration extends PersistenceConfiguration {
   private static final String ID = "picture";
+  public static final String TX_MANAGER = ID + TRANSACTION_MANAGER_NAME;
 
   @Override
   protected String id() {
@@ -38,7 +39,7 @@ public class PictureDatasourceConfiguration extends PersistenceConfiguration {
     return super.dataSource(env);
   }
 
-  @Bean(name = ID + TRANSACTION_MANAGER_NAME)
+  @Bean(name = TX_MANAGER)
   public DataSourceTransactionManager transactionManager(@Qualifier(ID + DATASOURCE_NAME) DataSource dataSource) {
     return super.transactionManager(dataSource);
   }

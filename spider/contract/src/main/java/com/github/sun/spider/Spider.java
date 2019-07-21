@@ -16,12 +16,17 @@ public interface Spider {
   String source();
 
   /**
-   * 设置参数
+   * 设置运行参数
    */
   void setSetting(Setting setting);
 
   /**
-   * 设置爬取规则
+   * @return 获取运行参数
+   */
+  Setting getSetting();
+
+  /**
+   * 设置采集规则
    */
   void setSchema(JsonNode schema);
 
@@ -104,7 +109,7 @@ public interface Spider {
   interface Processor {
     String SUFFIX = ":spider:processor";
 
-    void process(List<JsonNode> values, Setting setting);
+    void process(String source, List<JsonNode> values, Setting setting);
   }
 
   interface Factory {

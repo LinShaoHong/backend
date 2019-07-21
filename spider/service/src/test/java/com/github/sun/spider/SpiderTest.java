@@ -54,7 +54,7 @@ public class SpiderTest {
 
     private class ProcessorImpl implements Spider.Processor {
       @Override
-      public void process(List<JsonNode> values, Setting setting) {
+      public void process(String source, List<JsonNode> values, Setting setting) {
         System.out.println(JSON.serialize(values));
       }
     }

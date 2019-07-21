@@ -3,10 +3,7 @@ package com.github.sun.spider.spi;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.sun.foundation.boot.utility.Cache;
-import com.github.sun.foundation.boot.utility.Iterators;
-import com.github.sun.foundation.boot.utility.JSON;
-import com.github.sun.foundation.boot.utility.Tuple;
+import com.github.sun.foundation.boot.utility.*;
 import com.github.sun.spider.Fetcher;
 import com.github.sun.spider.Spider;
 import org.apache.commons.text.StringEscapeUtils;
@@ -60,7 +57,8 @@ abstract class AbstractSpider implements Spider {
 
   Node get(String url) {
     try {
-      return new DomSerializer(new CleanerProperties()).createDOM(hc.clean(fetcher.fetch(url)));
+      return Retry.execute(getSetting().getRetryCount(), getSetting().getRetryDelays(),
+        () -> new DomSerializer(new CleanerProperties()).createDOM(hc.clean(fetcher.fetch(url))));
     } catch (Exception ex) {
       throw new SpiderException("Error get html from url: " + url, ex);
     }
@@ -68,8 +66,10 @@ abstract class AbstractSpider implements Spider {
 
   Node get(Request req) {
     try {
-      String body = fetcher.fetch(req.uri, req.timeout, req.method, req.body, req.charset);
-      return new DomSerializer(new CleanerProperties()).createDOM(hc.clean(body));
+      return Retry.execute(getSetting().getRetryCount(), getSetting().getRetryDelays(), () -> {
+        String body = fetcher.fetch(req.uri, req.timeout, req.method, req.body, req.charset);
+        return new DomSerializer(new CleanerProperties()).createDOM(hc.clean(body));
+      });
     } catch (Exception ex) {
       throw new SpiderException("Error get html from url: " + req.uri, ex);
     }
@@ -103,8 +103,8 @@ abstract class AbstractSpider implements Spider {
   private JsonNode parse(int index, int subIndex, Path path, Node parent, Node node, List<Field> fields, Map<Path, List<Tuple2<Field, XPaths>>> parentPaths) {
     ObjectNode value = JSON.getMapper().createObjectNode();
     for (Field field : fields) {
-      XPaths xPaths = XPaths.of(field.subXpath ? node : parent, field.xpath.path);
-      if (field.parent && path != null) {
+      XPaths xPaths = field.value.hasValue() ? null : XPaths.of(field.subXpath ? node : parent, field.xpath.path);
+      if (xPaths != null && field.parent && path != null) {
         List<Tuple2<Field, XPaths>> xps = parentPaths.computeIfAbsent(path.parent, r -> new ArrayList<>());
         if (xps.size() <= index) {
           xps.add(Tuple.of(field, xPaths));
@@ -125,7 +125,7 @@ abstract class AbstractSpider implements Spider {
                 value.putPOJO(field.name, parse(subIndex, p, node, field.subProcess, parentPaths));
                 break;
               case "href":
-                String baseUri = xPaths.asText();
+                String baseUri = xPaths == null ? field.value.asText() : xPaths.asText();
                 String method = field.subProcess.get("method").asText("GET");
                 Category category = parseCategory(field.subProcess);
                 List<Request> requests = parseRequest(baseUri, field.subProcess);
@@ -186,23 +186,28 @@ abstract class AbstractSpider implements Spider {
   private void put(Field field, XPaths xPaths, ObjectNode node) {
     switch (field.type) {
       case "text":
-        String t = js(field.xpath.script, StringEscapeUtils.unescapeHtml4(xPaths.asText()));
+        String t = field.value.hasValue() ?
+          field.value.asText() : js(field.xpath.script, StringEscapeUtils.unescapeHtml4(xPaths.asText()));
         node.put(field.name, t);
         break;
       case "int":
-        int i = ((Number) js(field.xpath.script, xPaths.asInt())).intValue();
+        int i = field.value.hasValue() ?
+          field.value.asInt() : ((Number) js(field.xpath.script, xPaths.asInt())).intValue();
         node.put(field.name, i);
         break;
       case "long":
-        long l = ((Number) js(field.xpath.script, xPaths.asLong())).longValue();
+        long l = field.value.hasValue() ?
+          field.value.asLong() : ((Number) js(field.xpath.script, xPaths.asLong())).longValue();
         node.put(field.name, l);
         break;
       case "double":
-        double d = ((Number) js(field.xpath.script, xPaths.asDouble())).doubleValue();
+        double d = field.value.hasValue() ?
+          field.value.asDouble() : ((Number) js(field.xpath.script, xPaths.asDouble())).doubleValue();
         node.put(field.name, d);
         break;
       case "bool":
-        boolean b = js(field.xpath.script, xPaths.asBoolean());
+        boolean b = field.value.hasValue() ?
+          field.value.asBoolean() : js(field.xpath.script, xPaths.asBoolean());
         node.put(field.name, b);
         break;
       default:
@@ -379,7 +384,8 @@ abstract class AbstractSpider implements Spider {
       boolean parent = fv.get("parent").asBoolean(false);
       boolean subXpath = fv.get("subXpath").asBoolean(true);
       JSON.Valuer subProcess = fv.get("subProcess");
-      fields.add(new Field(name, type, xpath, subType, parent, subXpath, subProcess));
+      JSON.Valuer value = fv.get("value");
+      fields.add(new Field(name, type, xpath, value, subType, parent, subXpath, subProcess));
     });
     return fields;
   }
@@ -387,11 +393,12 @@ abstract class AbstractSpider implements Spider {
   private XPath parseXPath(JSON.Valuer xp) {
     if (xp.raw().isTextual()) {
       return new XPath(xp.asText(), null);
-    } else {
+    } else if (xp.raw().isObject()) {
       String path = xp.get("path").asText();
       String script = xp.get("script").asText();
       return new XPath(path, script);
     }
+    return null;
   }
 
   private static class Path {
@@ -412,15 +419,17 @@ abstract class AbstractSpider implements Spider {
     private final String name;
     private final String type;
     private final XPath xpath;
+    private final JSON.Valuer value;
     private final String subType;
     private final boolean parent;
     private final boolean subXpath;
     private final JSON.Valuer subProcess;
 
-    private Field(String name, String type, XPath xpath, String subType, boolean parent, boolean subXpath, JSON.Valuer subProcess) {
+    private Field(String name, String type, XPath xpath, JSON.Valuer value, String subType, boolean parent, boolean subXpath, JSON.Valuer subProcess) {
       this.name = name;
       this.type = type;
       this.xpath = xpath;
+      this.value = value;
       this.subType = subType;
       this.parent = parent;
       this.subXpath = subXpath;

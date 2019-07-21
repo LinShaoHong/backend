@@ -2,6 +2,7 @@ package com.github.sun.spider.spi;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.boot.utility.JSON;
+import com.github.sun.foundation.boot.utility.SSL;
 import com.github.sun.spider.Fetcher;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -20,32 +21,30 @@ public class JSoupFetcher implements Fetcher {
   private static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
 
   @Override
-  public String fetch(String uri, int timeout, String method, JsonNode body, String charset) {
-    try {
-      String host = new URL(uri).getHost();
-      Connection connection = Jsoup.connect(uri)
-        .header("Accept", ACCEPT)
-        .header("Accept-Charset", ACCEPT_CHARSET)
-        .header("Accept-Encoding", ENCODING)
-        .header("Accept-Language", LANGUAGE)
-        .header("Connection", CONNECTION)
-        .header("Content-Type", CONTENT_TYPE + ";" + charset)
-        .header("Referer", uri)
-        .header("Host", host)
-        .timeout(timeout)
-        .ignoreContentType(true);
-      switch (method.toUpperCase()) {
-        case "GET":
-          return connection.get().body().html();
-        case "POST":
-          Map<String, String> data = body != null ?
-            JSON.deserializeAsMap(body, String.class) : Collections.emptyMap();
-          return connection.data(data).post().body().html();
-        default:
-          throw new SpiderException("Unknown method: " + method);
-      }
-    } catch (IOException ex) {
-      throw new SpiderException("Error get html from url: " + uri, ex);
+  public String fetch(String uri, int timeout, String method, JsonNode body, String charset) throws IOException {
+    String host = new URL(uri).getHost();
+    Connection connection = Jsoup.connect(uri)
+      .header("Accept", ACCEPT)
+      .header("Accept-Charset", ACCEPT_CHARSET)
+      .header("Accept-Encoding", ENCODING)
+      .header("Accept-Language", LANGUAGE)
+      .header("Connection", CONNECTION)
+      .header("Content-Type", CONTENT_TYPE + ";" + charset)
+      .header("Referer", uri)
+      .header("Host", host)
+      .userAgent("Mozilla")
+      .timeout(timeout)
+      .sslSocketFactory(SSL.getContext().getSocketFactory())
+      .ignoreContentType(true);
+    switch (method.toUpperCase()) {
+      case "GET":
+        return connection.get().body().html();
+      case "POST":
+        Map<String, String> data = body != null ?
+          JSON.deserializeAsMap(body, String.class) : Collections.emptyMap();
+        return connection.data(data).post().body().html();
+      default:
+        throw new SpiderException("Unknown method: " + method);
     }
   }
 }
