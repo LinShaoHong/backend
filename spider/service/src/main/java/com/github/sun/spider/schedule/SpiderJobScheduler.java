@@ -11,59 +11,65 @@ import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
-import java.util.List;
 
 @Service
 @Order(Order.BACKGROUND_TASK - 100)
-public class SpiderJobAdapters implements Lifecycle {
+public class SpiderJobScheduler implements Lifecycle {
   private static final String JOB_ID = "JOB_ID";
 
+  @Resource
+  private Scheduler scheduler;
   @Resource
   private SpiderJobMapper mapper;
   @Autowired
   private Spider.Factory factory;
 
-  public void startup() {
-    List<SpiderJob> jobs = mapper.findAll();
-    jobs.stream().filter(SpiderJob::isPublish).forEach(job -> {
-      Scheduler.JobAdapter adapter = new Scheduler.JobAdapter() {
-        @Override
-        public String id() {
-          return job.getId();
-        }
+  public void addJob(SpiderJob spiderJob) {
+    Scheduler.Task task = new Scheduler.Task() {
+      @Override
+      public String id() {
+        return spiderJob.getId();
+      }
 
-        @Override
-        public Date start() {
-          return job.getStartTime();
-        }
+      @Override
+      public Date start() {
+        return spiderJob.getStartTime();
+      }
 
-        @Override
-        public String rate() {
-          return job.getRate();
-        }
+      @Override
+      public String rate() {
+        return spiderJob.getRate();
+      }
 
-        @Override
-        public JobDataMap data() {
-          JobDataMap data = new JobDataMap();
-          data.put(JOB_ID, id());
-          return data;
-        }
+      @Override
+      public JobDataMap data() {
+        JobDataMap data = new JobDataMap();
+        data.put(JOB_ID, id());
+        return data;
+      }
 
-        @Override
-        public Class<? extends Job> jobClass() {
-          return JobImpl.class;
-        }
-      };
-      Injector.inject(job.getId() + ":job:spider", adapter);
-    });
+      @Override
+      public Class<? extends Job> jobClass() {
+        return JobImpl.class;
+      }
+    };
+    if (spiderJob.getRate() == null) {
+      scheduler.scheduleOnce(spiderJob.getStartTime(), task);
+    } else {
+      Scheduler.Rate rate = Scheduler.parseRate(spiderJob.getRate());
+      scheduler.schedule(spiderJob.getStartTime(), rate.value, rate.unit, task);
+    }
   }
 
-  @Component
+  @Override
+  public void startup() {
+    mapper.findAll().stream().filter(SpiderJob::isPublish).forEach(this::addJob);
+  }
+
   private class JobImpl implements Job {
     @Override
     public void execute(JobExecutionContext context) {
