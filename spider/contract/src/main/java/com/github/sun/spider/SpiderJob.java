@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Date;
 
 @Data
@@ -30,7 +31,9 @@ public class SpiderJob {
   private Setting setting;
   @Handler(JsonHandler.JsonNodeHandler.class)
   private JsonNode schema;
+  @Transient
   private Date createTime;
+  @Transient
   private Date updateTime;
 
   public static class SettingHandler extends JsonHandler<Setting> {

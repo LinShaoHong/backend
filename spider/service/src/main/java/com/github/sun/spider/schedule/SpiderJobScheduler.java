@@ -31,6 +31,10 @@ public class SpiderJobScheduler implements Lifecycle {
   public void addJob(SpiderJob spiderJob) {
     Scheduler.Task task = new Scheduler.Task() {
       @Override
+      public void run() {
+      }
+
+      @Override
       public String id() {
         return spiderJob.getId();
       }

@@ -29,7 +29,6 @@ public class SpiderJobResource extends AbstractResource {
 
   @POST
   public void create(@NotNull JobRequest req) {
-    Date now = new Date();
     JsonNode schema = req.getSchema();
     String id = schema.get("source").asText();
     SpiderJob job = SpiderJob.builder()
@@ -40,8 +39,6 @@ public class SpiderJobResource extends AbstractResource {
       .publish(req.isPublish())
       .setting(req.getSetting())
       .schema(req.getSchema())
-      .createTime(now)
-      .updateTime(now)
       .build();
     scheduler.addJob(job);
     mapper.insert(job);

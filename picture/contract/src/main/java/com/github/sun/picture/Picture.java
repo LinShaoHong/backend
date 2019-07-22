@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Date;
 
 @Data
@@ -28,7 +29,9 @@ public class Picture {
   private String originUrl;
   private long likes;
   private long visits;
+  @Transient
   private Date createTime;
+  @Transient
   private Date updateTime;
 
   @Data
@@ -44,7 +47,9 @@ public class Picture {
     private String source;
     private String localPath;
     private String originUrl;
+    @Transient
     private Date createTime;
+    @Transient
     private Date updateTime;
   }
 }
