@@ -103,7 +103,7 @@ abstract class AbstractSpider implements Spider {
   private JsonNode parse(int index, int subIndex, Path path, Node parent, Node node, List<Field> fields, Map<Path, List<Tuple2<Field, XPaths>>> parentPaths) {
     ObjectNode value = JSON.getMapper().createObjectNode();
     for (Field field : fields) {
-      XPaths xPaths = field.value.hasValue() ? null : XPaths.of(field.subXpath ? node : parent, field.xpath.path);
+      XPaths xPaths = field.value.hasValue() ? null : XPaths.of(field.subXpath ? node : parent, field.xpath.path.value);
       if (xPaths != null && field.parent && path != null) {
         List<Tuple2<Field, XPaths>> xps = parentPaths.computeIfAbsent(path.parent, r -> new ArrayList<>());
         if (xps.size() <= index) {
@@ -184,34 +184,52 @@ abstract class AbstractSpider implements Spider {
   }
 
   private void put(Field field, XPaths xPaths, ObjectNode node) {
+    String type = field.xpath.path.value;
     switch (field.type) {
       case "text":
         String t = field.value.hasValue() ?
-          field.value.asText() : js(field.xpath.script, StringEscapeUtils.unescapeHtml4(xPaths.asText()));
+          field.value.asText() : js(field.xpath.script, get(xPaths, type));
         node.put(field.name, t);
         break;
       case "int":
         int i = field.value.hasValue() ?
-          field.value.asInt() : ((Number) js(field.xpath.script, xPaths.asInt())).intValue();
+          field.value.asInt() : ((Number) js(field.xpath.script, get(xPaths, type))).intValue();
         node.put(field.name, i);
         break;
       case "long":
         long l = field.value.hasValue() ?
-          field.value.asLong() : ((Number) js(field.xpath.script, xPaths.asLong())).longValue();
+          field.value.asLong() : ((Number) js(field.xpath.script, get(xPaths, type))).longValue();
         node.put(field.name, l);
         break;
       case "double":
         double d = field.value.hasValue() ?
-          field.value.asDouble() : ((Number) js(field.xpath.script, xPaths.asDouble())).doubleValue();
+          field.value.asDouble() : ((Number) js(field.xpath.script, get(xPaths, type))).doubleValue();
         node.put(field.name, d);
         break;
       case "bool":
         boolean b = field.value.hasValue() ?
-          field.value.asBoolean() : js(field.xpath.script, xPaths.asBoolean());
+          field.value.asBoolean() : js(field.xpath.script, get(xPaths, type));
         node.put(field.name, b);
         break;
       default:
         throw new SpiderException("Unknown type: " + field.type);
+    }
+  }
+
+  private Object get(XPaths xPaths, String type) {
+    switch (type) {
+      case "text":
+        return StringEscapeUtils.unescapeHtml4(xPaths.asText());
+      case "int":
+        return xPaths.asInt();
+      case "long":
+        return xPaths.asLong();
+      case "double":
+        return xPaths.asDouble();
+      case "bool":
+        return xPaths.asBoolean();
+      default:
+        throw new SpiderException("Unknown type: " + type);
     }
   }
 
@@ -233,9 +251,11 @@ abstract class AbstractSpider implements Spider {
 
   List<String> categoryUrl(Node node, Category category) {
     List<String> total = new ArrayList<>();
-    XPaths.of(node, category.xpath.path).asArray()
+    XPaths.of(node, category.xpath.path.value).asArray()
       .forEach(n -> {
-        String url = js(category.subXpath.script, XPaths.of(n, category.subXpath.path).asText());
+        XPaths xPaths = XPaths.of(n, category.subXpath.path.value);
+        Object value = get(xPaths, category.subXpath.path.type);
+        String url = js(category.subXpath.script, value);
         total.add(url);
       });
     if (category.indexes != null) {
@@ -379,7 +399,7 @@ abstract class AbstractSpider implements Spider {
     process.get("fields").asArray().forEach(fv -> {
       String name = fv.get("name").asText();
       String type = fv.get("type").asText("text");
-      XPath xpath = parseXPath(fv.get("xpath"));
+      XPath xpath = parseXPath(fv.get("xpath"), type);
       String subType = fv.get("subType").asText("local");
       boolean parent = fv.get("parent").asBoolean(false);
       boolean subXpath = fv.get("subXpath").asBoolean(true);
@@ -391,11 +411,23 @@ abstract class AbstractSpider implements Spider {
   }
 
   private XPath parseXPath(JSON.Valuer xp) {
+    return parseXPath(xp, "text");
+  }
+
+  private XPath parseXPath(JSON.Valuer xp, String type) {
     if (xp.raw().isTextual()) {
-      return new XPath(xp.asText(), null);
+      return new XPath(new XPath.Path(xp.asText(), "text"), null);
     } else if (xp.raw().isObject()) {
-      String path = xp.get("path").asText();
       String script = xp.get("script").asText();
+      JSON.Valuer valuer = xp.get("path");
+      XPath.Path path;
+      if (valuer.raw().isObject()) {
+        type = valuer.get("type").asText();
+        String value = valuer.get("value").asText();
+        path = new XPath.Path(type, value);
+      } else {
+        path = new XPath.Path(type, valuer.asText());
+      }
       return new XPath(path, script);
     }
     return null;
@@ -487,12 +519,22 @@ abstract class AbstractSpider implements Spider {
   }
 
   private static class XPath {
-    private final String path;
+    private final Path path;
     private final String script;
 
-    private XPath(String path, String script) {
+    private XPath(Path path, String script) {
       this.path = path;
       this.script = script;
+    }
+
+    private static class Path {
+      private final String type;
+      private final String value;
+
+      private Path(String type, String value) {
+        this.type = type;
+        this.value = value;
+      }
     }
   }
 }

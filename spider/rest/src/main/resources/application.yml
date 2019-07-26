@@ -12,4 +12,4 @@ spring:
       password: "root"
 
 server:
-  port: 1388
+  port: 1488

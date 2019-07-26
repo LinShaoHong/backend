@@ -10,7 +10,7 @@ import javax.xml.xpath.XPathExpressionException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XPaths {
+class XPaths {
   private final static XPath xPath;
 
   static {
@@ -26,11 +26,11 @@ public class XPaths {
     this.xpath = xpath;
   }
 
-  public static XPaths of(Node node, String xpath) {
+  static XPaths of(Node node, String xpath) {
     return new XPaths(node, xpath);
   }
 
-  public String asText() {
+  String asText() {
     try {
       return xPath.evaluate(xpath, node);
     } catch (XPathExpressionException ex) {
@@ -38,7 +38,7 @@ public class XPaths {
     }
   }
 
-  public int asInt() {
+  int asInt() {
     try {
       return ((Double) xPath.evaluate(xpath, node, XPathConstants.NUMBER)).intValue();
     } catch (XPathExpressionException ex) {
@@ -46,7 +46,7 @@ public class XPaths {
     }
   }
 
-  public double asDouble() {
+  double asDouble() {
     try {
       return (Double) xPath.evaluate(xpath, node, XPathConstants.NUMBER);
     } catch (XPathExpressionException ex) {
@@ -54,7 +54,7 @@ public class XPaths {
     }
   }
 
-  public long asLong() {
+  long asLong() {
     try {
       return ((Double) xPath.evaluate(xpath, node, XPathConstants.NUMBER)).longValue();
     } catch (XPathExpressionException ex) {
@@ -62,7 +62,7 @@ public class XPaths {
     }
   }
 
-  public boolean asBoolean() {
+  boolean asBoolean() {
     try {
       return (Boolean) xPath.evaluate(xpath, node, XPathConstants.BOOLEAN);
     } catch (XPathExpressionException ex) {
@@ -70,7 +70,7 @@ public class XPaths {
     }
   }
 
-  public Node as() {
+  Node as() {
     try {
       return (Node) xPath.evaluate(this.xpath, node, XPathConstants.NODE);
     } catch (XPathExpressionException ex) {
@@ -78,7 +78,7 @@ public class XPaths {
     }
   }
 
-  public List<Node> asArray() {
+  List<Node> asArray() {
     try {
       NodeList nodes = (NodeList) xPath.evaluate(this.xpath, node, XPathConstants.NODESET);
       List<Node> list = new ArrayList<>();

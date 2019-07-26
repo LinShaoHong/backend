@@ -1,5 +1,6 @@
 package com.github.sun.spider;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Setting {
   /**
    * 采集线程相关参数
@@ -30,7 +32,6 @@ public class Setting {
    * processor 相关参数
    */
   private int batchSize; // 单次批处理量
-  private int fetchSize; // jdbc fetchSize
   private long batchInterval; // 批处理睡眠量
 
   public void reCorrect() {
@@ -41,13 +42,10 @@ public class Setting {
       this.retryDelays = 5000;
     }
     if (this.parallelism < 0) {
-      this.parallelism = 0;
+      this.parallelism = 1;
     }
     if (this.poolSize == 0) {
       this.poolSize = 10;
-    }
-    if (this.fetchSize == 0) {
-      this.fetchSize = 10000;
     }
     if (this.batchSize == 0) {
       this.batchSize = 1000;
