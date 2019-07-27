@@ -184,31 +184,30 @@ abstract class AbstractSpider implements Spider {
   }
 
   private void put(Field field, XPaths xPaths, ObjectNode node) {
-    String type = field.xpath.path.value;
     switch (field.type) {
       case "text":
         String t = field.value.hasValue() ?
-          field.value.asText() : js(field.xpath.script, get(xPaths, type));
+          field.value.asText() : js(field.xpath.script, get(xPaths, field.xpath.path.type));
         node.put(field.name, t);
         break;
       case "int":
         int i = field.value.hasValue() ?
-          field.value.asInt() : ((Number) js(field.xpath.script, get(xPaths, type))).intValue();
+          field.value.asInt() : ((Number) js(field.xpath.script, get(xPaths, field.xpath.path.type))).intValue();
         node.put(field.name, i);
         break;
       case "long":
         long l = field.value.hasValue() ?
-          field.value.asLong() : ((Number) js(field.xpath.script, get(xPaths, type))).longValue();
+          field.value.asLong() : ((Number) js(field.xpath.script, get(xPaths, field.xpath.path.type))).longValue();
         node.put(field.name, l);
         break;
       case "double":
         double d = field.value.hasValue() ?
-          field.value.asDouble() : ((Number) js(field.xpath.script, get(xPaths, type))).doubleValue();
+          field.value.asDouble() : ((Number) js(field.xpath.script, get(xPaths, field.xpath.path.type))).doubleValue();
         node.put(field.name, d);
         break;
       case "bool":
         boolean b = field.value.hasValue() ?
-          field.value.asBoolean() : js(field.xpath.script, get(xPaths, type));
+          field.value.asBoolean() : js(field.xpath.script, get(xPaths, field.xpath.path.type));
         node.put(field.name, b);
         break;
       default:
@@ -416,7 +415,7 @@ abstract class AbstractSpider implements Spider {
 
   private XPath parseXPath(JSON.Valuer xp, String type) {
     if (xp.raw().isTextual()) {
-      return new XPath(new XPath.Path(xp.asText(), "text"), null);
+      return new XPath(new XPath.Path("text", xp.asText()), null);
     } else if (xp.raw().isObject()) {
       String script = xp.get("script").asText();
       JSON.Valuer valuer = xp.get("path");

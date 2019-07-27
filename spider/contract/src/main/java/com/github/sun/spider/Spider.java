@@ -56,6 +56,11 @@ public interface Spider {
   void remove();
 
   /**
+   * 错误异常
+   */
+  List<Throwable> errors();
+
+  /**
    * @return 采集进度
    */
   Progress progress();
@@ -67,7 +72,6 @@ public interface Spider {
     /**
      * 来源
      */
-
     private String source;
 
     /**

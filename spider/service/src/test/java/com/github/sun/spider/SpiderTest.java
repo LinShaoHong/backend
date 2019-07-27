@@ -61,7 +61,7 @@ public class SpiderTest {
   }
 
   private void progress(Spider spider) {
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10000; i++) {
       try {
         Thread.sleep(1000);
       } catch (InterruptedException ex) {
@@ -72,7 +72,9 @@ public class SpiderTest {
 
   private Setting setting() {
     Setting setting = Setting.builder()
-      .parallelism(2)
+      .parallelism(1)
+      .retryCount(2)
+      .retryDelays(2000)
       .enable(true)
       .build();
     setting.reCorrect();

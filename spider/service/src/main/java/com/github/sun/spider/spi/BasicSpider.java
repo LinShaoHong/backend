@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public abstract class BasicSpider extends AbstractSpider {
+  public static final int MAX_ERRORS_SIZE = 30;
+
   private Setting setting;
   private String source;
   private JsonNode schema;
@@ -34,6 +36,7 @@ public abstract class BasicSpider extends AbstractSpider {
   private Producer producer;
   private ExecutorService executor;
   private AtomicInteger finished = new AtomicInteger(0);
+  private List<Throwable> errors = new CopyOnWriteArrayList<>();
   private ConcurrentLinkedQueue<Node> queue = new ConcurrentLinkedQueue<>();
   private CopyOnWriteArrayList<Consumer> consumers = new CopyOnWriteArrayList<>();
   private AtomicBoolean isRunning = new AtomicBoolean(false);
@@ -56,6 +59,7 @@ public abstract class BasicSpider extends AbstractSpider {
     this.total = 0;
     this.finished.set(0);
     this.queue.clear();
+    this.errors.clear();
     this.consumers.clear();
     this.monitor = new Thread(() -> {
       for (; ; ) {
@@ -102,6 +106,11 @@ public abstract class BasicSpider extends AbstractSpider {
   @Override
   public String source() {
     return source;
+  }
+
+  @Override
+  public List<Throwable> errors() {
+    return errors;
   }
 
   @Override
@@ -154,6 +163,13 @@ public abstract class BasicSpider extends AbstractSpider {
     }
   }
 
+  private void pushError(Throwable ex) {
+    if (errors.size() >= MAX_ERRORS_SIZE) {
+      errors.remove(0);
+    }
+    errors.add(ex);
+  }
+
   private class Producer implements Runnable {
     private AtomicBoolean running = new AtomicBoolean(false);
 
@@ -182,6 +198,7 @@ public abstract class BasicSpider extends AbstractSpider {
               root = get(req);
               paging = parsePaging(root, process);
             } catch (SpiderException ex) {
+              pushError(ex);
               log.warn(ex.getMessage(), ex.getCause());
               return;
             }
@@ -208,6 +225,7 @@ public abstract class BasicSpider extends AbstractSpider {
                     sleep(setting.getTaskInterval());
                   });
                 } catch (SpiderException ex) {
+                  pushError(ex);
                   // skip
                   log.warn(ex.getMessage(), ex.getCause());
                 }
@@ -224,6 +242,7 @@ public abstract class BasicSpider extends AbstractSpider {
                 }
                 sleep(setting.getTaskInterval());
               } catch (SpiderException ex) {
+                pushError(ex);
                 // skip
                 log.warn(ex.getMessage(), ex.getCause());
               }
@@ -255,6 +274,7 @@ public abstract class BasicSpider extends AbstractSpider {
       try {
         processor = create();
       } catch (Throwable ex) {
+        pushError(ex);
         log.error("Error create processor.", ex);
         return;
       }
@@ -280,8 +300,10 @@ public abstract class BasicSpider extends AbstractSpider {
             finished.addAndGet(nodes.size());
           } catch (SpiderException ex) {
             // skip
+            pushError(ex);
             log.warn(ex.getMessage(), ex.getCause());
           } catch (Throwable ex) {
+            pushError(ex);
             log.error("Error process source=" + source, ex);
             running.set(false);
             break;

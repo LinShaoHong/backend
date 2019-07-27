@@ -28,12 +28,6 @@ public class Setting {
   private int retryCount; // 重试次数
   private long retryDelays; // 重试睡眠毫秒量
 
-  /**
-   * processor 相关参数
-   */
-  private int batchSize; // 单次批处理量
-  private long batchInterval; // 批处理睡眠量
-
   public void reCorrect() {
     if (this.retryCount == 0) {
       this.retryCount = 10;
@@ -46,12 +40,6 @@ public class Setting {
     }
     if (this.poolSize == 0) {
       this.poolSize = 10;
-    }
-    if (this.batchSize == 0) {
-      this.batchSize = 1000;
-    }
-    if (this.batchInterval == 0) {
-      this.batchInterval = 200;
     }
     if (this.taskInterval == 0) {
       this.taskInterval = 10;
