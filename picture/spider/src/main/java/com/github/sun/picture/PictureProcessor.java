@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service("picture" + Spider.Processor.SUFFIX)
+@Service("PICTURE" + Spider.Processor.SUFFIX)
 public class PictureProcessor implements Spider.Processor {
   private static final String USER_AGENT =
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36";

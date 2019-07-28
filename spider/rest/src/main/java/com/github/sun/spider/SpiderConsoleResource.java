@@ -9,6 +9,7 @@ import com.github.sun.spider.mapper.SpiderJobMapper;
 import com.github.sun.spider.schedule.SpiderJobScheduler;
 import com.github.sun.spider.spi.BasicSpider;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -62,8 +63,8 @@ public class SpiderConsoleResource extends AbstractResource {
 
   @GET
   @Path("/groups")
-  public SetResponse<String> getGroups() {
-    Set<String> names = Injector.interfaceOf(Spider.Processor.class)
+  public ListResponse<GroupRes> getGroups() {
+    List<GroupRes> groups = Injector.interfaceOf(Spider.Processor.class)
       .stream()
       .map(v -> {
         Service a = v.getClass().getAnnotation(Service.class);
@@ -71,9 +72,19 @@ public class SpiderConsoleResource extends AbstractResource {
         if (name != null && name.endsWith(Spider.Processor.SUFFIX)) {
           name = name.substring(0, name.lastIndexOf(Spider.Processor.SUFFIX));
         }
-        return name;
-      }).filter(Objects::nonNull).collect(Collectors.toSet());
-    return responseOf(names);
+        SpiderJob.Group group = SpiderJob.Group.valueOf(name);
+        return GroupRes.builder().label(group.label).value(group.name()).build();
+      }).filter(Objects::nonNull).collect(Collectors.toList());
+    return responseOf(groups);
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class GroupRes {
+    public String label;
+    public String value;
   }
 
   @PUT
@@ -125,7 +136,7 @@ public class SpiderConsoleResource extends AbstractResource {
   @AllArgsConstructor
   public static class JobRequest {
     @NotNull(message = "require group")
-    private String group;
+    private SpiderJob.Group group;
     @NotNull(message = "require startTime")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Date startTime;

@@ -117,7 +117,7 @@ public interface Spider {
   }
 
   interface Processor {
-    String SUFFIX = ":spider:processor";
+    String SUFFIX = ":SPIDER:PROCESSOR";
 
     void process(String source, List<JsonNode> values, Setting setting);
   }

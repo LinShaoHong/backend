@@ -22,9 +22,19 @@ import java.util.Date;
 @NamingStrategy
 @Table(name = "spider_job")
 public class SpiderJob {
+  public enum Group {
+    PICTURE("图片");
+
+    public final String label;
+
+    Group(String label) {
+      this.label = label;
+    }
+  }
+
   @Id
   private String id;
-  private String group;
+  private Group group;
   private boolean publish;
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
   private Date startTime;
