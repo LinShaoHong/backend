@@ -40,23 +40,17 @@ public class SpiderTest {
   }
 
   private Spider newSpider(String file) {
-    SpiderImpl spider = new SpiderImpl();
+    Spider spider = new BasicSpider();
     spider.setSetting(setting());
     spider.setSchema(schema(file));
+    spider.setProcessorProvider(ProcessorImpl::new);
     return spider;
   }
 
-  private static class SpiderImpl extends BasicSpider {
+  private class ProcessorImpl implements Spider.Processor {
     @Override
-    protected Spider.Processor create() {
-      return new ProcessorImpl();
-    }
-
-    private class ProcessorImpl implements Spider.Processor {
-      @Override
-      public void process(String source, List<JsonNode> values, Setting setting) {
-        System.out.println(JSON.serialize(values));
-      }
+    public void process(String source, List<JsonNode> values, Setting setting) {
+      System.out.println(JSON.serialize(values));
     }
   }
 

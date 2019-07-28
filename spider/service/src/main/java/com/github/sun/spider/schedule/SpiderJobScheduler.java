@@ -3,6 +3,7 @@ package com.github.sun.spider.schedule;
 import com.github.sun.foundation.boot.Injector;
 import com.github.sun.foundation.boot.Lifecycle;
 import com.github.sun.foundation.boot.Order;
+import com.github.sun.foundation.boot.utility.Cache;
 import com.github.sun.foundation.quartz.Scheduler;
 import com.github.sun.spider.Spider;
 import com.github.sun.spider.SpiderJob;
@@ -18,6 +19,7 @@ import javax.annotation.Resource;
 @Order(Order.BACKGROUND_TASK - 100)
 public class SpiderJobScheduler implements Lifecycle {
   private static final String JOB_ID = "JOB_ID";
+  private static final Cache<String, Spider> cache = new Cache<>();
 
   @Resource
   private Scheduler scheduler;
@@ -59,7 +61,24 @@ public class SpiderJobScheduler implements Lifecycle {
   }
 
   public void delete(String taskId) {
+    Spider spider = cache.get(taskId);
+    if (spider != null) {
+      spider.stop();
+      cache.remove(taskId);
+    }
     scheduler.delete(taskId);
+  }
+
+  public void pause(String taskId) {
+    Spider spider = cache.get(taskId);
+    if (spider != null) {
+      spider.stop();
+    }
+    scheduler.pause(taskId);
+  }
+
+  public Spider getSpider(String taskId) {
+    return cache.get(taskId);
   }
 
   @Override
@@ -77,7 +96,10 @@ public class SpiderJobScheduler implements Lifecycle {
       String name = job.getGroup() + Spider.Processor.SUFFIX;
       Spider.Processor processor = (Spider.Processor) Injector.getInstance(name);
       Spider.Factory factory = Injector.getInstance(Spider.Factory.class);
-      Spider spider = factory.create(job.getSetting(), job.getSchema(), processor);
+      Spider spider = cache.get(id, () -> factory.create(job.getSetting(), job.getSchema(), processor));
+      spider.setSetting(job.getSetting());
+      spider.setSchema(job.getSchema());
+      spider.setProcessorProvider(() -> processor);
       spider.start();
     }
   }

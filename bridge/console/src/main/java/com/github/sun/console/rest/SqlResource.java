@@ -1,4 +1,4 @@
-package com.github.sun.admin.resurces;
+package com.github.sun.console.rest;
 
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.rest.AbstractResource;
@@ -21,11 +21,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
-@Path("/api/admin/consoles")
+@Path("/api/consoles/sql")
 @Component
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ConsoleResource extends AbstractResource {
+public class SqlResource extends AbstractResource {
   private static final int QUERY_MAX = 100;
   private static final int TIME_OUT = 20;
 
@@ -33,7 +33,7 @@ public class ConsoleResource extends AbstractResource {
   private Environment env;
 
   @POST
-  @Path("/sql/query")
+  @Path("/query")
   public ListResponse<Map<String, Object>> query(@NotNull(message = "缺少实体") QueryReq req) {
     List<Map<String, Object>> result = new ArrayList<>();
     try (Connection connection = create(env, req.database);
@@ -74,7 +74,7 @@ public class ConsoleResource extends AbstractResource {
   }
 
   @POST
-  @Path("/sql/write")
+  @Path("/write")
   public SingleResponse<String> write(@NotNull(message = "缺少实体") QueryReq req) {
     try (Connection connection = create(env, req.database);
       Statement statement = connection.createStatement()) {
@@ -87,7 +87,7 @@ public class ConsoleResource extends AbstractResource {
   }
 
   @GET
-  @Path("/sql/tables")
+  @Path("/tables")
   public SetResponse<String> getTables(@NotNull(message = "缺少数据库") @QueryParam("database") String database) {
     Set<String> tables = new LinkedHashSet<>();
     try (Connection connection = create(env, database)) {

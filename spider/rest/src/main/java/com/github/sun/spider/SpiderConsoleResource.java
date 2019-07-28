@@ -26,18 +26,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
-@Path("/api/spider/jobs")
+@Path("/api/consoles/spider/jobs")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class SpiderJobResource extends AbstractResource {
+public class SpiderConsoleResource extends AbstractResource {
   private final SpiderJobScheduler scheduler;
   private final SpiderJobMapper mapper;
   private final SqlBuilder.Factory factory;
 
   @Inject
-  public SpiderJobResource(SpiderJobScheduler scheduler,
-                           SpiderJobMapper mapper,
-                           @Named("mysql") SqlBuilder.Factory factory) {
+  public SpiderConsoleResource(SpiderJobScheduler scheduler,
+                               SpiderJobMapper mapper,
+                               @Named("mysql") SqlBuilder.Factory factory) {
     this.scheduler = scheduler;
     this.mapper = mapper;
     this.factory = factory;
@@ -139,8 +139,8 @@ public class SpiderJobResource extends AbstractResource {
   @DELETE
   @Path("{id}")
   public void delete(@PathParam("id") String id) {
-    mapper.deleteById(id);
     scheduler.delete(id);
+    mapper.deleteById(id);
   }
 
   @PUT
@@ -157,72 +157,76 @@ public class SpiderJobResource extends AbstractResource {
     mapper.update(spiderJob);
   }
 
+  @PUT
+  @Path("/unPublish/{id}")
+  public void unPublish(@PathParam("id") String id) {
+    SpiderJob spiderJob = mapper.findById(id);
+    if (spiderJob == null) {
+      throw new NotFoundException();
+    }
+    if (spiderJob.isPublish()) {
+      spiderJob.setPublish(false);
+    }
+    scheduler.pause(id);
+    mapper.update(spiderJob);
+  }
+
   private static final Map<String, Holder> holders = new ConcurrentHashMap<>();
 
   @POST
   @Path("/test")
   public SingleResponse<TestRes> test(@NotNull TestReq req) {
-    TestRes res = new TestRes(404, null, null);
-    JsonNode schema = req.getSchema();
-    String source = schema.get("source").asText();
-    String key = source + ":" + req.getRequestId();
-    if (req.isNewTry()) {
-      Set<String> removes = holders.entrySet()
-        .stream().filter(e -> e.getKey().startsWith(source))
-        .map(Map.Entry::getKey)
-        .collect(Collectors.toSet());
-      removes.forEach(k -> {
-        Holder holder = holders.get(k);
-        holder.stop();
-        holders.remove(k);
-      });
-      Holder holder = new Holder(req);
-      holder.start();
-      holders.put(key, holder);
-    } else {
+    String key = req.getRequestId();
+    TestRes res = new TestRes(404, new HashSet<>(), new ArrayList<>());
+    if (!key.isEmpty()) {
       Holder holder = holders.get(key);
       if (holder != null) {
-        if (holder.spider.errors().size() >= BasicSpider.MAX_ERRORS_SIZE) {
+        res = holder.get();
+        if (res.getCode() != 200 &&
+          (holder.spider.errors().size() >= BasicSpider.MAX_ERRORS_SIZE || !holder.spider.isRunning())) {
           Set<String> errors = holder.spider.errors()
-            .stream().map(SpiderJobResource::stackTraceOf)
+            .stream().map(SpiderConsoleResource::stackTraceOf)
             .collect(Collectors.toSet());
           res.setErrors(errors);
           res.setCode(200);
           holder.stop();
-        } else {
-          res = holder.get();
         }
       } else {
         holder = new Holder(req);
         holder.start();
         holders.put(key, holder);
       }
-    }
-    if (res.getCode() == 200) {
-      holders.remove(key);
+      if (res.getCode() == 200) {
+        holders.remove(key);
+      }
     }
     return responseOf(res);
+  }
+
+  @DELETE
+  @Path("/test/{requestId}")
+  public void deleteTest(@PathParam("requestId") String requestId) {
+    Holder holder = holders.get(requestId);
+    if (holder != null) {
+      holder.stop();
+      holders.remove(requestId);
+    }
   }
 
   private static class Holder {
     private final Spider spider;
     private final List<JsonNode> values = new ArrayList<>();
     private final CountDownLatch startSingle = new CountDownLatch(1);
-    private TestRes res = new TestRes(404, null, null);
+    private TestRes res = new TestRes(404, new HashSet<>(), new ArrayList<>());
 
     private Holder(TestReq req) {
-      this.spider = new BasicSpider() {
-        @Override
-        protected Processor create() {
-          return (source, nodes, setting) -> {
-            values.addAll(nodes);
-            stop();
-            startSingle.countDown();
-          };
-        }
-      };
+      this.spider = new BasicSpider();
       this.spider.setSetting(req.getSetting());
       this.spider.setSchema(req.getSchema());
+      this.spider.setProcessorProvider(() -> (source, nodes, setting) -> {
+        values.addAll(nodes);
+        stop();
+      });
     }
 
     private TestRes get() {
@@ -243,7 +247,7 @@ public class SpiderJobResource extends AbstractResource {
           throw new RuntimeException(ex);
         }
         Set<String> errors = spider.errors()
-          .stream().map(SpiderJobResource::stackTraceOf)
+          .stream().map(SpiderConsoleResource::stackTraceOf)
           .collect(Collectors.toSet());
         res = new TestRes(200, errors, values);
       }).start();
@@ -273,7 +277,6 @@ public class SpiderJobResource extends AbstractResource {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class TestReq {
-    private boolean newTry;
     @NotNull(message = "require requestId")
     private String requestId;
     @NotNull(message = "require setting")

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public interface Spider {
   void clear();
@@ -29,6 +30,11 @@ public interface Spider {
    * 设置采集规则
    */
   void setSchema(JsonNode schema);
+
+  /**
+   * 设置结果处理器
+   */
+  void setProcessorProvider(Supplier<Processor> provider);
 
   /**
    * 开始采集

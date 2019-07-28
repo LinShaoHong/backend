@@ -1,6 +1,5 @@
 dependencies {
-  compile project(":$rootName-rest")
-  compile project(":$rootName-mybatis")
+  compile project(":$rootName-spider-rest")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

@@ -19,15 +19,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 @Slf4j
-public abstract class BasicSpider extends AbstractSpider {
+public class BasicSpider extends AbstractSpider {
   public static final int MAX_ERRORS_SIZE = 30;
 
   private Setting setting;
   private String source;
   private JsonNode schema;
   private JSON.Valuer process;
+  private Supplier<Processor> provider;
 
   private int total;
   private Date startTime;
@@ -41,14 +43,15 @@ public abstract class BasicSpider extends AbstractSpider {
   private CopyOnWriteArrayList<Consumer> consumers = new CopyOnWriteArrayList<>();
   private AtomicBoolean isRunning = new AtomicBoolean(false);
 
-  protected abstract Processor create();
-
   private void init() {
     if (setting == null) {
       throw new IllegalArgumentException("Require setting");
     }
     if (schema == null) {
       throw new IllegalArgumentException("Require schema");
+    }
+    if (provider == null) {
+      throw new IllegalArgumentException("Require processor provider");
     }
     JSON.Valuer valuer = JSON.newValuer(schema);
     this.source = valuer.get("source").asText();
@@ -104,6 +107,11 @@ public abstract class BasicSpider extends AbstractSpider {
   }
 
   @Override
+  public void setProcessorProvider(Supplier<Processor> provider) {
+    this.provider = provider;
+  }
+
+  @Override
   public String source() {
     return source;
   }
@@ -142,7 +150,7 @@ public abstract class BasicSpider extends AbstractSpider {
 
   @Override
   public boolean isRunning() {
-    return consumers.stream().anyMatch(c -> !c.interrupted());
+    return !producer.interrupted() || consumers.stream().anyMatch(c -> !c.interrupted());
   }
 
   @Override
@@ -215,6 +223,7 @@ public abstract class BasicSpider extends AbstractSpider {
                   Paging vp = uri.equals(baseUrl) ? paging : parsePaging(get(req.set(uri)), process);
                   total = vp.end - vp.start;
                   total = total < 0 ? 0 : total;
+                  total = total * uris.size();
                   Iterators.slice(vp.start, vp.end).forEach(page -> {
                     String url = pagingUrl(uri, page, vp);
                     Node node;
@@ -272,7 +281,7 @@ public abstract class BasicSpider extends AbstractSpider {
     public void run() {
       Processor processor;
       try {
-        processor = create();
+        processor = provider.get();
       } catch (Throwable ex) {
         pushError(ex);
         log.error("Error create processor.", ex);
@@ -366,12 +375,8 @@ public abstract class BasicSpider extends AbstractSpider {
   public static class SpiderFactory implements Spider.Factory {
     @Override
     public Spider create(Setting setting, JsonNode schema, Spider.Processor processor) {
-      BasicSpider spider = new BasicSpider() {
-        @Override
-        protected Processor create() {
-          return processor;
-        }
-      };
+      BasicSpider spider = new BasicSpider();
+      spider.setProcessorProvider(() -> processor);
       spider.setSchema(schema);
       spider.setSetting(setting);
       return spider;
