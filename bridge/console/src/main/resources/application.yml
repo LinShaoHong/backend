@@ -10,7 +10,7 @@ spring:
       url: "jdbc:mysql://localhost:3306/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false"
       username: "root"
       password: "root"
-    picture:
+    image:
       url: "jdbc:mysql://localhost:3306/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false"
       username: "root"
       password: "root"

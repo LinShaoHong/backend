@@ -1,8 +1,8 @@
 package com.github.sun.spider;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.boot.Injector;
+import com.github.sun.foundation.boot.utility.Throws;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.spider.mapper.SpiderJobMapper;
@@ -19,9 +19,6 @@ import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -87,26 +84,6 @@ public class SpiderConsoleResource extends AbstractResource {
     public String value;
   }
 
-  @PUT
-  @Path("/{id}")
-  public void get(@PathParam("id") String id,
-                  @NotNull JobRequest req) {
-    SpiderJob exist = mapper.findById(id);
-    if (exist == null) {
-      throw new NotFoundException();
-    }
-    SpiderJob job = SpiderJob.builder()
-      .id(id)
-      .group(req.getGroup())
-      .startTime(req.getStartTime())
-      .rate(req.getRate())
-      .publish(exist.isPublish())
-      .setting(req.getSetting())
-      .schema(req.getSchema())
-      .build();
-    mapper.update(job);
-  }
-
   @POST
   public void create(@NotNull JobRequest req) {
     JsonNode schema = req.getSchema();
@@ -131,6 +108,36 @@ public class SpiderConsoleResource extends AbstractResource {
     }
   }
 
+  @PUT
+  @Path("/{id}")
+  public void update(@PathParam("id") String id,
+                     @NotNull JobRequest req) {
+    SpiderJob exist = mapper.findById(id);
+    if (exist == null) {
+      throw new NotFoundException();
+    }
+    SpiderJob job = SpiderJob.builder()
+      .id(id)
+      .group(req.getGroup())
+      .startTime(req.getStartTime())
+      .rate(req.getRate())
+      .publish(exist.isPublish())
+      .setting(req.getSetting())
+      .schema(req.getSchema())
+      .build();
+    if (job.isPublish()) {
+      scheduler.update(job);
+    }
+    try {
+      mapper.update(job);
+    } catch (Throwable ex) {
+      if (exist.isPublish()) {
+        scheduler.update(exist);
+      }
+      throw ex;
+    }
+  }
+
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
@@ -138,8 +145,8 @@ public class SpiderConsoleResource extends AbstractResource {
     @NotNull(message = "require group")
     private SpiderJob.Group group;
     @NotNull(message = "require startTime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
-    private Date startTime;
+    private long startTime;
+    private String time;
     private String rate;
     @NotNull(message = "require setting")
     private Setting setting;
@@ -163,8 +170,12 @@ public class SpiderConsoleResource extends AbstractResource {
     }
     if (!spiderJob.isPublish()) {
       spiderJob.setPublish(true);
+      if (!scheduler.has(spiderJob.getId())) {
+        scheduler.add(spiderJob);
+      } else {
+        scheduler.update(spiderJob);
+      }
     }
-    scheduler.add(spiderJob);
     mapper.update(spiderJob);
   }
 
@@ -182,6 +193,70 @@ public class SpiderConsoleResource extends AbstractResource {
     mapper.update(spiderJob);
   }
 
+  @GET
+  @Path("/progress/latest/{id}")
+  public ListResponse<ProgressRes> getLatestProgress(@PathParam("id") String id) {
+    Spider spider = scheduler.getSpider(id);
+    if (spider == null) {
+      return responseOf(Collections.emptyList());
+    }
+    List<ProgressRes> latest = spider.latestProgress().stream()
+      .map(ProgressRes::from)
+      .collect(Collectors.toList());
+    Collections.reverse(latest);
+    return responseOf(latest);
+  }
+
+  @GET
+  @Path("/progress/{id}")
+  public SingleResponse<ProgressRes> getProgress(@PathParam("id") String id) {
+    Spider spider = scheduler.getSpider(id);
+    if (spider == null) {
+      return responseOf(ProgressRes.builder().errors(Collections.emptySet()).build());
+    }
+    Date nextTime = spider.nextTime();
+    return responseOf(ProgressRes.from(nextTime, spider.progress()));
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class ProgressRes {
+    private int total;
+    private int finished;
+    private String endTime;
+    private String usedTime;
+    private int parallelism;
+    private String startTime;
+    private boolean isRunning;
+    private String remainTime;
+    private Set<String> errors;
+
+    private static ProgressRes from(Spider.Progress p) {
+      return from(null, p);
+    }
+
+    private static ProgressRes from(Date next, Spider.Progress p) {
+      String remainTime = null;
+      if (next != null) {
+        long remains = next.getTime() - System.currentTimeMillis();
+        remainTime = BasicSpider.formatTime(remains);
+      }
+      return ProgressRes.builder()
+        .parallelism(p.getParallelism())
+        .total(p.getTotal())
+        .isRunning(p.isRunning())
+        .finished(p.getFinished())
+        .startTime(p.getStartTime())
+        .endTime(p.getEndTime())
+        .usedTime(p.getUsedTime())
+        .remainTime(remainTime)
+        .errors(p.getErrors().stream().map(Throws::stackTraceOf).collect(Collectors.toSet()))
+        .build();
+    }
+  }
+
   private static final Map<String, Holder> holders = new ConcurrentHashMap<>();
 
   @POST
@@ -196,7 +271,7 @@ public class SpiderConsoleResource extends AbstractResource {
         if (res.getCode() != 200 &&
           (holder.spider.errors().size() >= BasicSpider.MAX_ERRORS_SIZE || !holder.spider.isRunning())) {
           Set<String> errors = holder.spider.errors()
-            .stream().map(SpiderConsoleResource::stackTraceOf)
+            .stream().map(Throws::stackTraceOf)
             .collect(Collectors.toSet());
           res.setErrors(errors);
           res.setCode(200);
@@ -258,20 +333,10 @@ public class SpiderConsoleResource extends AbstractResource {
           throw new RuntimeException(ex);
         }
         Set<String> errors = spider.errors()
-          .stream().map(SpiderConsoleResource::stackTraceOf)
+          .stream().map(Throws::stackTraceOf)
           .collect(Collectors.toSet());
         res = new TestRes(200, errors, values);
       }).start();
-    }
-  }
-
-  private static String stackTraceOf(Throwable ex) {
-    try (StringWriter sw = new StringWriter();
-      PrintWriter pw = new PrintWriter(sw)) {
-      ex.printStackTrace(pw);
-      return sw.toString();
-    } catch (IOException ex2) {
-      return ex.getMessage();
     }
   }
 

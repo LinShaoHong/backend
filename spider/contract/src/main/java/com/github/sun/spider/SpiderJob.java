@@ -1,6 +1,5 @@
 package com.github.sun.spider;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.mybatis.handler.JsonHandler;
 import com.github.sun.foundation.sql.Handler;
@@ -23,7 +22,7 @@ import java.util.Date;
 @Table(name = "spider_job")
 public class SpiderJob {
   public enum Group {
-    PICTURE("图片");
+    IMAGE("图片");
 
     public final String label;
 
@@ -36,8 +35,7 @@ public class SpiderJob {
   private String id;
   private Group group;
   private boolean publish;
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
-  private Date startTime;
+  private long startTime;
   private String rate;
   @Handler(SettingHandler.class)
   private Setting setting;

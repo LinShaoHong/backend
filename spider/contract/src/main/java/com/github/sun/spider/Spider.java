@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -67,9 +68,24 @@ public interface Spider {
   List<Throwable> errors();
 
   /**
-   * @return 采集进度
+   * @return 当前采集进度
    */
   Progress progress();
+
+  /**
+   * @return 最近采集情况
+   */
+  List<Progress> latestProgress();
+
+  /**
+   * 下次采集时间
+   */
+  Date nextTime();
+
+  /**
+   * 设置下次采集时间
+   */
+  Date setNextTime(Date next);
 
   @Data
   @Builder
@@ -114,6 +130,11 @@ public interface Spider {
      * 耗时
      */
     private String usedTime;
+
+    /**
+     * 错误异常
+     */
+    private List<Throwable> errors;
   }
 
   interface Processor {

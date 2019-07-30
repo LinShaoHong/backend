@@ -14,6 +14,7 @@ import org.quartz.JobExecutionContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 
 @Service
 @Order(Order.BACKGROUND_TASK - 100)
@@ -27,9 +28,6 @@ public class SpiderJobScheduler implements Lifecycle {
   private SpiderJobMapper mapper;
 
   public void add(SpiderJob spiderJob) {
-    if (scheduler.has(spiderJob.getId())) {
-      scheduler.delete(spiderJob.getId());
-    }
     Scheduler.Task task = new Scheduler.Task() {
       @Override
       public void run() {
@@ -53,10 +51,23 @@ public class SpiderJobScheduler implements Lifecycle {
       }
     };
     if (spiderJob.getRate() == null) {
-      scheduler.scheduleOnce(spiderJob.getStartTime(), task);
+      scheduler.scheduleOnce(new Date(spiderJob.getStartTime()), task);
     } else {
       Scheduler.Rate rate = Scheduler.parseRate(spiderJob.getRate());
-      scheduler.schedule(spiderJob.getStartTime(), rate.value, rate.unit, task);
+      scheduler.schedule(new Date(spiderJob.getStartTime()), rate.value, rate.unit, task);
+    }
+  }
+
+  public boolean has(String taskId) {
+    return scheduler.has(taskId);
+  }
+
+  public void update(SpiderJob spiderJob) {
+    if (spiderJob.getRate() == null) {
+      scheduler.rescheduleOnce(new Date(spiderJob.getStartTime()), spiderJob.getId());
+    } else {
+      Scheduler.Rate rate = Scheduler.parseRate(spiderJob.getRate());
+      scheduler.reschedule(new Date(spiderJob.getStartTime()), rate.value, rate.unit, spiderJob.getId());
     }
   }
 
@@ -100,6 +111,7 @@ public class SpiderJobScheduler implements Lifecycle {
       spider.setSetting(job.getSetting());
       spider.setSchema(job.getSchema());
       spider.setProcessorProvider(() -> processor);
+      spider.setNextTime(context.getNextFireTime());
       spider.start();
     }
   }

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.ComponentScans;
 @ComponentScans({
   @ComponentScan({"com.github.sun.console"}),
   @ComponentScan({"com.github.sun.spider"}),
-  @ComponentScan({"com.github.sun.picture"})
+  @ComponentScan({"com.github.sun.image"})
 })
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class ConsoleApp extends JerseyApplication {

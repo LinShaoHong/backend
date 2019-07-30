@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.function.Supplier;
 @Slf4j
 public class BasicSpider extends AbstractSpider {
   public static final int MAX_ERRORS_SIZE = 30;
+  private static final int MAX_LATEST_SIZE = 7;
 
   private Setting setting;
   private String source;
@@ -32,6 +34,7 @@ public class BasicSpider extends AbstractSpider {
   private Supplier<Processor> provider;
 
   private int total;
+  private Date nextTime;
   private Date startTime;
   private Date finishTime;
   private Thread monitor;
@@ -39,9 +42,11 @@ public class BasicSpider extends AbstractSpider {
   private ExecutorService executor;
   private AtomicInteger finished = new AtomicInteger(0);
   private List<Throwable> errors = new CopyOnWriteArrayList<>();
+  private List<Progress> latest = new CopyOnWriteArrayList<>();
   private ConcurrentLinkedQueue<Node> queue = new ConcurrentLinkedQueue<>();
   private CopyOnWriteArrayList<Consumer> consumers = new CopyOnWriteArrayList<>();
   private AtomicBoolean isRunning = new AtomicBoolean(false);
+  private AtomicBoolean isStopped = new AtomicBoolean(false);
 
   private void init() {
     if (setting == null) {
@@ -60,6 +65,7 @@ public class BasicSpider extends AbstractSpider {
     this.startTime = null;
     this.finishTime = null;
     this.total = 0;
+    this.isStopped.set(false);
     this.finished.set(0);
     this.queue.clear();
     this.errors.clear();
@@ -69,18 +75,14 @@ public class BasicSpider extends AbstractSpider {
         if (producer.interrupted() && consumers.stream().allMatch(Consumer::interrupted)) {
           break;
         } else if (System.currentTimeMillis() - startTime.getTime() >= setting.getExecuteTime()) {
-          stop();
           break;
         } else {
           sleep(setting.getMonitorInterval());
         }
       }
-      if (!executor.isShutdown()) {
-        executor.shutdown();
+      if (!isStopped.get()) {
+        stop();
       }
-      finishTime = new Date();
-      isRunning.set(false);
-      consumers.clear();
     });
   }
 
@@ -142,15 +144,21 @@ public class BasicSpider extends AbstractSpider {
 
   @Override
   public void stop() {
-    producer.interrupt();
-    consumers.stream().filter(c -> !c.interrupted()).forEach(Consumer::interrupt);
-    executor.shutdown();
-    isRunning.set(false);
+    if (isRunning.get()) {
+      producer.interrupt();
+      consumers.stream().filter(c -> !c.interrupted()).forEach(Consumer::interrupt);
+      consumers.clear();
+      executor.shutdown();
+      isRunning.set(false);
+      isStopped.set(true);
+      finishTime = new Date();
+      pushProgress();
+    }
   }
 
   @Override
   public boolean isRunning() {
-    return !producer.interrupted() || consumers.stream().anyMatch(c -> !c.interrupted());
+    return isRunning.get();
   }
 
   @Override
@@ -176,6 +184,13 @@ public class BasicSpider extends AbstractSpider {
       errors.remove(0);
     }
     errors.add(ex);
+  }
+
+  private void pushProgress() {
+    if (latest.size() >= MAX_LATEST_SIZE) {
+      latest.remove(0);
+    }
+    latest.add(progress());
   }
 
   private class Producer implements Runnable {
@@ -333,10 +348,30 @@ public class BasicSpider extends AbstractSpider {
       .total(total)
       .isRunning(isRunning())
       .finished(finished.get())
+      .errors(new ArrayList<>(errors))
       .startTime(startTime == null ? "" : formatter.format(startTime))
       .endTime(finishTime == null ? "" : formatter.format(finishTime))
-      .usedTime(startTime == null ? "" : formatTime(System.currentTimeMillis() - startTime.getTime()))
+      .usedTime(startTime == null ? "" : formatTime((finishTime == null ? System.currentTimeMillis() : finishTime.getTime()) - startTime.getTime()))
       .build();
+  }
+
+  @Override
+  public List<Progress> latestProgress() {
+    if (!isRunning() && !latest.isEmpty()) {
+      latest.remove(latest.size() - 1);
+      latest.add(progress());
+    }
+    return new ArrayList<>(latest);
+  }
+
+  @Override
+  public Date nextTime() {
+    return nextTime;
+  }
+
+  @Override
+  public Date setNextTime(Date next) {
+    return this.nextTime = next;
   }
 
   private void sleep(long millis) {
@@ -347,7 +382,7 @@ public class BasicSpider extends AbstractSpider {
     }
   }
 
-  private String formatTime(long millis) {
+  public static String formatTime(long millis) {
     millis = millis / 1000;
     StringBuilder sb = new StringBuilder();
     long days = millis / (3600 * 24);
