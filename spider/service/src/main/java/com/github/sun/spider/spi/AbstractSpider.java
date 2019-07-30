@@ -377,7 +377,7 @@ abstract class AbstractSpider implements Spider {
     return requests;
   }
 
-  private List<Integer> parseIndexes(JSON.Valuer valuer, int defaultSize) {
+  List<Integer> parseIndexes(JSON.Valuer valuer, int defaultSize) {
     JSON.Valuer is = valuer.get("indexes");
     if (is.hasValue()) {
       List<Integer> indexes = new ArrayList<>();

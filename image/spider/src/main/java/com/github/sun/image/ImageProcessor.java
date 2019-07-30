@@ -40,10 +40,11 @@ public class ImageProcessor implements Spider.Processor {
   @Override
   public void process(String source, List<JsonNode> values, Setting setting) {
     List<Img> pics = JSON.deserializeAsList(values, Img.class);
+    int c = code(source);
     pics.stream().filter(p -> p.getExt() != null).forEach(p -> {
       p.setSource(source);
       p.setHashCode(code(p));
-      String mainPath = PATH + "/" + source + "/" + p.getHashCode();
+      String mainPath = PATH + "/" + c + "/" + p.getHashCode();
       String detailsPath = mainPath + "/details";
       File detailsDir = new File(detailsPath);
       if (detailsDir.exists() || detailsDir.mkdirs()) {
@@ -193,7 +194,7 @@ public class ImageProcessor implements Spider.Processor {
 
   private static String getExtension(String url) {
     List<String> normals = Arrays.asList(".jpg", ".jpeg", ".png", ".gif");
-    int i = url.lastIndexOf("\\.");
+    int i = url.lastIndexOf(".");
     if (i > 0) {
       String ext = url.substring(i).toLowerCase();
       if (normals.contains(ext)) {

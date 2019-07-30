@@ -46,7 +46,6 @@ public class BasicSpider extends AbstractSpider {
   private ConcurrentLinkedQueue<Node> queue = new ConcurrentLinkedQueue<>();
   private CopyOnWriteArrayList<Consumer> consumers = new CopyOnWriteArrayList<>();
   private AtomicBoolean isRunning = new AtomicBoolean(false);
-  private AtomicBoolean isStopped = new AtomicBoolean(false);
 
   private void init() {
     if (setting == null) {
@@ -65,7 +64,6 @@ public class BasicSpider extends AbstractSpider {
     this.startTime = null;
     this.finishTime = null;
     this.total = 0;
-    this.isStopped.set(false);
     this.finished.set(0);
     this.queue.clear();
     this.errors.clear();
@@ -80,7 +78,7 @@ public class BasicSpider extends AbstractSpider {
           sleep(setting.getMonitorInterval());
         }
       }
-      if (!isStopped.get()) {
+      if (isRunning()) {
         stop();
       }
     });
@@ -150,7 +148,6 @@ public class BasicSpider extends AbstractSpider {
       consumers.clear();
       executor.shutdown();
       isRunning.set(false);
-      isStopped.set(true);
       finishTime = new Date();
       pushProgress();
     }
@@ -208,6 +205,8 @@ public class BasicSpider extends AbstractSpider {
     public void run() {
       running.set(true);
       try {
+        String type = process.get("type").asText();
+        String xpath = process.get("xpath").asText();
         String baseUrl = process.get("baseUrl").asText();
         String method = process.get("method").asText("GET");
         Category category = parseCategory(process);
@@ -225,58 +224,83 @@ public class BasicSpider extends AbstractSpider {
               log.warn(ex.getMessage(), ex.getCause());
               return;
             }
-            List<String> uris = category == null ?
-              Collections.singletonList(baseUrl) : categoryUrl(root, category);
-            for (String uri : uris) {
-              if (paging == null) {
-                total = uris.size();
-                if (running.get()) {
-                  queue.add(uri.equals(baseUrl) ? root : get(req.set(uri)));
+            try {
+              List<String> uris = category == null ?
+                Collections.singletonList(baseUrl) : categoryUrl(root, category);
+              for (String uri : uris) {
+                if (interrupted()) {
+                  break;
                 }
-              } else {
-                try {
+                if (paging == null) {
+                  Node node = uri.equals(baseUrl) ? root : get(req.set(uri));
+                  total += getEntityNum(type, xpath, node);
+                  queue.add(node);
+                } else {
                   Paging vp = uri.equals(baseUrl) ? paging : parsePaging(get(req.set(uri)), process);
-                  total = vp.end - vp.start;
-                  total = total < 0 ? 0 : total;
-                  total = total * uris.size();
-                  Iterators.slice(vp.start, vp.end).forEach(page -> {
+                  for (int page = vp.start; page < vp.end; page++) {
+                    if (interrupted()) {
+                      break;
+                    }
                     String url = pagingUrl(uri, page, vp);
                     Node node;
                     node = get(req.set(url));
-                    if (running.get()) {
-                      queue.add(node);
-                    }
+                    total += getEntityNum(type, xpath, node);
+                    queue.add(node);
                     sleep(setting.getTaskInterval());
-                  });
-                } catch (SpiderException ex) {
-                  pushError(ex);
-                  // skip
-                  log.warn(ex.getMessage(), ex.getCause());
+                  }
                 }
               }
+            } catch (SpiderException ex) {
+              pushError(ex);
+              // skip
+              log.warn(ex.getMessage(), ex.getCause());
             }
             break;
           case "POST":
-            uris = category == null ?
-              Collections.singletonList(baseUrl) : categoryUrl(get(baseUrl), category);
-            uris.forEach(uri -> parseRequest(uri, process).forEach(r -> {
-              try {
-                if (running.get()) {
-                  queue.add(get(r));
+            try {
+              List<String> uris = category == null ?
+                Collections.singletonList(baseUrl) : categoryUrl(get(baseUrl), category);
+              for (String uri : uris) {
+                if (interrupted()) {
+                  break;
                 }
-                sleep(setting.getTaskInterval());
-              } catch (SpiderException ex) {
-                pushError(ex);
-                // skip
-                log.warn(ex.getMessage(), ex.getCause());
+                for (Request r : parseRequest(uri, process)) {
+                  if (interrupted()) {
+                    break;
+                  }
+                  Node node = get(r);
+                  total += getEntityNum(type, xpath, node);
+                  queue.add(node);
+                  sleep(setting.getTaskInterval());
+                }
               }
-            }));
+            } catch (SpiderException ex) {
+              pushError(ex);
+              // skip
+              log.warn(ex.getMessage(), ex.getCause());
+            }
             break;
           default:
             throw new SpiderException("Unknown method: " + method);
         }
       } finally {
         running.set(false);
+      }
+    }
+
+    private int getEntityNum(String type, String xpath, Node node) {
+      switch (type) {
+        case "single":
+          return 1;
+        case "list":
+          if (xpath == null) {
+            throw new SpiderException("list type process require xpath");
+          }
+          List<Node> nodes = XPaths.of(node, xpath).asArray();
+          List<Integer> indexes = parseIndexes(process, nodes.size());
+          return indexes.size();
+        default:
+          return 0;
       }
     }
   }
