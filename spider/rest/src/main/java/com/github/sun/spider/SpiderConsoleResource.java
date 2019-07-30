@@ -128,6 +128,10 @@ public class SpiderConsoleResource extends AbstractResource {
     if (job.isPublish()) {
       scheduler.update(job);
     }
+    Spider spider = scheduler.getSpider(id);
+    if (spider != null) {
+      spider.setSetting(req.getSetting());
+    }
     try {
       mapper.update(job);
     } catch (Throwable ex) {
