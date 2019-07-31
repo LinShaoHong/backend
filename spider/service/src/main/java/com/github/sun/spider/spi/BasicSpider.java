@@ -358,7 +358,7 @@ public class BasicSpider extends AbstractSpider {
         }
         if (node != null) {
           try {
-            JsonNode value = parse(node, process);
+            JsonNode value = crawl(node, process);
             List<JsonNode> nodes = Iterators.asList(value);
             if (!nodes.isEmpty()) {
               processor.process(source, nodes, setting);
