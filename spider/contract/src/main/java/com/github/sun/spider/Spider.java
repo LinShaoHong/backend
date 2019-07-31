@@ -66,6 +66,12 @@ public interface Spider {
    */
   List<Throwable> errors();
 
+  void addListener(Listener listener);
+
+  interface Listener {
+    void onUpdate(Setting setting);
+  }
+
   /**
    * @return 当前采集进度
    */

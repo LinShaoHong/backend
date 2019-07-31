@@ -32,6 +32,7 @@ public class BasicSpider extends AbstractSpider {
   private JsonNode schema;
   private JSON.Valuer process;
   private Supplier<Processor> provider;
+  private Listener listener;
 
   private int total;
   private Date startTime;
@@ -92,8 +93,11 @@ public class BasicSpider extends AbstractSpider {
 
   @Override
   public void setSetting(Setting setting) {
+    Setting old = this.setting == null ? null : this.setting.clone();
     this.setting = setting;
     this.setting.reCorrect();
+    addListener(new ListenerImpl(old));
+    this.listener.onUpdate(this.setting);
   }
 
   @Override
@@ -119,6 +123,36 @@ public class BasicSpider extends AbstractSpider {
   @Override
   public List<Throwable> errors() {
     return errors;
+  }
+
+  @Override
+  public void addListener(Listener listener) {
+    this.listener = listener;
+  }
+
+  private class ListenerImpl implements Listener {
+    private final Setting old;
+
+    private ListenerImpl(Setting old) {
+      this.old = old;
+    }
+
+    @Override
+    public void onUpdate(Setting setting) {
+      if (old != null && isRunning()) {
+        int added = setting.getParallelism() - old.getParallelism();
+        if (added != 0) {
+          boolean add = added > 0;
+          Iterators.slice(Math.abs(added)).forEach(v -> {
+            if (add) {
+              add();
+            } else {
+              remove();
+            }
+          });
+        }
+      }
+    }
   }
 
   @Override
@@ -233,7 +267,7 @@ public class BasicSpider extends AbstractSpider {
                 }
                 if (paging == null) {
                   Node node = uri.equals(baseUrl) ? root : get(req.set(uri));
-                  total += getEntityNum(type, xpath, node);
+                  total += getEntityNum(type, xpath, node, process);
                   queue.add(node);
                 } else {
                   Paging vp = uri.equals(baseUrl) ? paging : parsePaging(get(req.set(uri)), process);
@@ -244,7 +278,7 @@ public class BasicSpider extends AbstractSpider {
                     String url = pagingUrl(uri, page, vp);
                     Node node;
                     node = get(req.set(url));
-                    total += getEntityNum(type, xpath, node);
+                    total += getEntityNum(type, xpath, node, process);
                     queue.add(node);
                     sleep(setting.getTaskInterval());
                   }
@@ -269,7 +303,7 @@ public class BasicSpider extends AbstractSpider {
                     break;
                   }
                   Node node = get(r);
-                  total += getEntityNum(type, xpath, node);
+                  total += getEntityNum(type, xpath, node, process);
                   queue.add(node);
                   sleep(setting.getTaskInterval());
                 }
@@ -285,22 +319,6 @@ public class BasicSpider extends AbstractSpider {
         }
       } finally {
         running.set(false);
-      }
-    }
-
-    private int getEntityNum(String type, String xpath, Node node) {
-      switch (type) {
-        case "single":
-          return 1;
-        case "list":
-          if (xpath == null) {
-            throw new SpiderException("list type process require xpath");
-          }
-          List<Node> nodes = XPaths.of(node, xpath).asArray();
-          List<Integer> indexes = parseIndexes(process, nodes.size());
-          return indexes.size();
-        default:
-          return 0;
       }
     }
   }
@@ -397,25 +415,34 @@ public class BasicSpider extends AbstractSpider {
   }
 
   public static String formatTime(long millis) {
-    millis = millis / 1000;
     StringBuilder sb = new StringBuilder();
-    long days = millis / (3600 * 24);
+    long days = millis / (3600 * 24 * 1000);
     if (days > 0) {
-      sb.append(days).append("天");
-      millis = millis % (3600 * 24);
+      sb.append(days).append(" 天");
+      millis = millis % (3600 * 24 * 1000);
     }
-    long hours = millis / 3600;
+    long hours = millis / (3600 * 1000);
     if (hours > 0) {
-      sb.append(hours).append("时");
-      millis = millis % 3600;
+      if (sb.length() > 0) {
+        sb.append(" ");
+      }
+      sb.append(hours).append(" 时");
+      millis = millis % (3600 * 1000);
     }
-    long minutes = millis / 60;
+    long minutes = millis / (60 * 1000);
     if (minutes > 0) {
-      sb.append(minutes).append("分");
-      millis = minutes % 60;
+      if (sb.length() > 0) {
+        sb.append(" ");
+      }
+      sb.append(minutes).append(" 分");
+      millis = millis % (60 * 1000);
     }
-    if (millis > 0) {
-      sb.append(millis).append("秒");
+    long seconds = millis / 1000;
+    if (seconds > 0) {
+      if (sb.length() > 0) {
+        sb.append(" ");
+      }
+      sb.append(seconds).append(" 秒");
     }
     return sb.toString();
   }

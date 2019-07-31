@@ -153,11 +153,15 @@ public class SpiderConsoleResource extends AbstractResource {
       .schema(req.getSchema())
       .build();
     if (job.isPublish()) {
-      scheduler.update(job);
-    }
-    Spider spider = scheduler.getSpider(id);
-    if (spider != null) {
-      spider.setSetting(req.getSetting());
+      if (job.needReschedule(exist)) {
+        scheduler.update(job);
+      }
+      Spider spider = scheduler.getSpider(id);
+      if (spider != null) {
+        spider.setSetting(req.getSetting());
+      }
+    } else if (exist.isPublish()) {
+      scheduler.pause(id);
     }
     try {
       mapper.update(job);
@@ -242,11 +246,8 @@ public class SpiderConsoleResource extends AbstractResource {
   @Path("/progress/{id}")
   public SingleResponse<ProgressRes> getProgress(@PathParam("id") String id) {
     Spider spider = scheduler.getSpider(id);
-    if (spider == null) {
-      return responseOf(ProgressRes.builder().errors(Collections.emptySet()).build());
-    }
     Date nextTime = scheduler.getNextTime(id);
-    return responseOf(ProgressRes.from(nextTime, spider.progress()));
+    return responseOf(ProgressRes.from(nextTime, spider == null ? null : spider.progress()));
   }
 
   @Data
@@ -274,17 +275,24 @@ public class SpiderConsoleResource extends AbstractResource {
         long remains = next.getTime() - System.currentTimeMillis();
         remainTime = BasicSpider.formatTime(remains);
       }
-      return ProgressRes.builder()
-        .parallelism(p.getParallelism())
-        .total(p.getTotal())
-        .isRunning(p.isRunning())
-        .finished(p.getFinished())
-        .startTime(p.getStartTime())
-        .endTime(p.getEndTime())
-        .usedTime(p.getUsedTime())
-        .remainTime(remainTime)
-        .errors(p.getErrors().stream().map(Throws::stackTraceOf).collect(Collectors.toSet()))
-        .build();
+      if (p == null) {
+        return ProgressRes.builder()
+          .remainTime(remainTime)
+          .errors(Collections.emptySet())
+          .build();
+      } else {
+        return ProgressRes.builder()
+          .parallelism(p.getParallelism())
+          .total(p.getTotal())
+          .isRunning(p.isRunning())
+          .finished(p.getFinished())
+          .startTime(p.getStartTime())
+          .endTime(p.getEndTime())
+          .usedTime(p.getUsedTime())
+          .remainTime(remainTime)
+          .errors(p.getErrors().stream().map(Throws::stackTraceOf).collect(Collectors.toSet()))
+          .build();
+      }
     }
   }
 

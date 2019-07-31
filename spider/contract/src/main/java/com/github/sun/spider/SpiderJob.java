@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.util.Date;
+import java.util.Objects;
 
 @Data
 @Builder
@@ -45,6 +46,11 @@ public class SpiderJob {
   private Date createTime;
   @Transient
   private Date updateTime;
+
+  boolean needReschedule(SpiderJob updated) {
+    return !Objects.equals(this.startTime, updated.getStartTime()) ||
+      !Objects.equals(this.rate, updated.getRate());
+  }
 
   public static class SettingHandler extends JsonHandler<Setting> {
   }

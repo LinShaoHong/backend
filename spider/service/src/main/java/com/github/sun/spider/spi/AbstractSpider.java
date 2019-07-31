@@ -248,6 +248,22 @@ abstract class AbstractSpider implements Spider {
     }
   }
 
+  int getEntityNum(String type, String xpath, Node node, JSON.Valuer process) {
+    switch (type) {
+      case "single":
+        return 1;
+      case "list":
+        if (xpath == null) {
+          throw new SpiderException("list type process require xpath");
+        }
+        List<Node> nodes = XPaths.of(node, xpath).asArray();
+        List<Integer> indexes = parseIndexes(process, nodes.size());
+        return indexes.size();
+      default:
+        return 0;
+    }
+  }
+
   List<String> categoryUrl(Node node, Category category) {
     List<String> total = new ArrayList<>();
     XPaths.of(node, category.xpath.path.value).asArray()

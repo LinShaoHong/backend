@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Setting {
+public class Setting implements Cloneable {
   /**
    * 采集线程相关参数
    */
@@ -46,6 +46,15 @@ public class Setting {
     }
     if (this.monitorInterval == 0) {
       this.monitorInterval = 60 * 1000;
+    }
+  }
+
+  @Override
+  public Setting clone() {
+    try {
+      return (Setting) super.clone();
+    } catch (CloneNotSupportedException ex) {
+      throw new RuntimeException(ex);
     }
   }
 }
