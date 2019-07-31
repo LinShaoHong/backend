@@ -3,6 +3,7 @@ package com.github.sun.spider;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.boot.Injector;
+import com.github.sun.foundation.boot.exception.NotFoundException;
 import com.github.sun.foundation.boot.utility.Throws;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
@@ -61,7 +62,7 @@ public class SpiderConsoleResource extends AbstractResource {
   public SingleResponse<SpiderJobRes> getById(@PathParam("id") String id) {
     SpiderJob job = mapper.findById(id);
     if (job == null) {
-      throw new NotFoundException();
+      throw new NotFoundException("资源未找到");
     }
     return responseOf(from(job));
   }
@@ -143,7 +144,7 @@ public class SpiderConsoleResource extends AbstractResource {
                      @NotNull JobRequest req) {
     SpiderJob exist = mapper.findById(id);
     if (exist == null) {
-      throw new NotFoundException();
+      throw new NotFoundException("资源未找到");
     }
     SpiderJob job = SpiderJob.builder()
       .id(id)
@@ -199,7 +200,7 @@ public class SpiderConsoleResource extends AbstractResource {
   public void publish(@PathParam("id") String id) {
     SpiderJob spiderJob = mapper.findById(id);
     if (spiderJob == null) {
-      throw new NotFoundException();
+      throw new NotFoundException("资源未找到");
     }
     if (!spiderJob.isPublish()) {
       spiderJob.setPublish(true);
@@ -217,7 +218,7 @@ public class SpiderConsoleResource extends AbstractResource {
   public void unPublish(@PathParam("id") String id) {
     SpiderJob spiderJob = mapper.findById(id);
     if (spiderJob == null) {
-      throw new NotFoundException();
+      throw new NotFoundException("资源未找到");
     }
     if (spiderJob.isPublish()) {
       spiderJob.setPublish(false);
