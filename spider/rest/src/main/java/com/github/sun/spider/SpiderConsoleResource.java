@@ -70,11 +70,8 @@ public class SpiderConsoleResource extends AbstractResource {
   private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   private SpiderJobRes from(SpiderJob job) {
-    String nextTime = null;
-    Spider spider = scheduler.getSpider(job.getId());
-    if (spider != null && spider.nextTime() != null) {
-      nextTime = format.format(spider.nextTime());
-    }
+    Date date = scheduler.getNextTime(job.getId());
+    String nextTime = date == null ? null : format.format(date);
     return new SpiderJobRes(job, nextTime);
   }
 
@@ -248,7 +245,7 @@ public class SpiderConsoleResource extends AbstractResource {
     if (spider == null) {
       return responseOf(ProgressRes.builder().errors(Collections.emptySet()).build());
     }
-    Date nextTime = spider.nextTime();
+    Date nextTime = scheduler.getNextTime(id);
     return responseOf(ProgressRes.from(nextTime, spider.progress()));
   }
 

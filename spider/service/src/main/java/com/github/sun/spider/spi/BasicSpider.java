@@ -34,7 +34,6 @@ public class BasicSpider extends AbstractSpider {
   private Supplier<Processor> provider;
 
   private int total;
-  private Date nextTime;
   private Date startTime;
   private Date finishTime;
   private Thread monitor;
@@ -387,16 +386,6 @@ public class BasicSpider extends AbstractSpider {
       latest.add(progress());
     }
     return new ArrayList<>(latest);
-  }
-
-  @Override
-  public Date nextTime() {
-    return nextTime;
-  }
-
-  @Override
-  public Date setNextTime(Date next) {
-    return this.nextTime = next;
   }
 
   private void sleep(long millis) {

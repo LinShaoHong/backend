@@ -8,9 +8,7 @@ import com.github.sun.foundation.quartz.Scheduler;
 import com.github.sun.spider.Spider;
 import com.github.sun.spider.SpiderJob;
 import com.github.sun.spider.mapper.SpiderJobMapper;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
+import org.quartz.*;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -24,6 +22,8 @@ public class SpiderJobScheduler implements Lifecycle {
 
   @Resource
   private Scheduler scheduler;
+  @Resource
+  private org.quartz.Scheduler quartz;
   @Resource
   private SpiderJobMapper mapper;
 
@@ -58,8 +58,12 @@ public class SpiderJobScheduler implements Lifecycle {
     }
   }
 
-  public boolean has(String taskId) {
-    return scheduler.has(taskId);
+  public boolean has(String jobId) {
+    try {
+      return quartz.getJobDetail(new JobKey(jobId)) != null;
+    } catch (SchedulerException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
   public void update(SpiderJob spiderJob) {
@@ -71,25 +75,42 @@ public class SpiderJobScheduler implements Lifecycle {
     }
   }
 
-  public void delete(String taskId) {
-    Spider spider = cache.get(taskId);
+  public void delete(String jobId) {
+    Spider spider = cache.get(jobId);
     if (spider != null) {
       spider.stop();
-      cache.remove(taskId);
+      cache.remove(jobId);
     }
-    scheduler.delete(taskId);
+    try {
+      quartz.deleteJob(new JobKey(jobId));
+    } catch (SchedulerException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
-  public void pause(String taskId) {
-    Spider spider = cache.get(taskId);
+  public void pause(String jobId) {
+    Spider spider = cache.get(jobId);
     if (spider != null) {
       spider.stop();
     }
-    scheduler.pause(taskId);
+    try {
+      quartz.pauseJob(new JobKey(jobId));
+    } catch (SchedulerException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
-  public Spider getSpider(String taskId) {
-    return cache.get(taskId);
+  public Date getNextTime(String jobId) {
+    try {
+      Trigger trigger = quartz.getTrigger(new TriggerKey(jobId));
+      return trigger == null ? null : trigger.getNextFireTime();
+    } catch (SchedulerException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  public Spider getSpider(String jobId) {
+    return cache.get(jobId);
   }
 
   @Override
@@ -111,7 +132,6 @@ public class SpiderJobScheduler implements Lifecycle {
       spider.setSetting(job.getSetting());
       spider.setSchema(job.getSchema());
       spider.setProcessorProvider(() -> processor);
-      spider.setNextTime(context.getNextFireTime());
       spider.start();
     }
   }
