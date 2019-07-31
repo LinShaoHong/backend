@@ -47,8 +47,5 @@ public class Setting {
     if (this.monitorInterval == 0) {
       this.monitorInterval = 60 * 1000;
     }
-    if (this.executeTime == 0) {
-      this.executeTime = Long.MAX_VALUE;
-    }
   }
 }

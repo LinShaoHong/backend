@@ -1,5 +1,6 @@
 package com.github.sun.spider;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.boot.Injector;
 import com.github.sun.foundation.boot.utility.Throws;
@@ -19,6 +20,7 @@ import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -42,20 +44,47 @@ public class SpiderConsoleResource extends AbstractResource {
   }
 
   @GET
-  public ListResponse<SpiderJob> get(@QueryParam("group") String group) {
+  public ListResponse<SpiderJobRes> get(@QueryParam("group") String group) {
     if (group == null) {
-      return responseOf(mapper.findAll());
+      return responseOf(mapper.findAll().stream()
+        .map(this::from).collect(Collectors.toList()));
     } else {
       SqlBuilder sb = factory.create();
       SqlBuilder.Template template = sb.from(SpiderJob.class).where(sb.field("group").eq(group)).template();
-      return responseOf(mapper.findByTemplate(template));
+      return responseOf(mapper.findByTemplate(template).stream()
+        .map(this::from).collect(Collectors.toList()));
     }
   }
 
   @GET
   @Path("/{id}")
-  public SingleResponse<SpiderJob> getById(@PathParam("id") String id) {
-    return responseOf(mapper.findById(id));
+  public SingleResponse<SpiderJobRes> getById(@PathParam("id") String id) {
+    SpiderJob job = mapper.findById(id);
+    if (job == null) {
+      throw new NotFoundException();
+    }
+    return responseOf(from(job));
+  }
+
+  private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+  private SpiderJobRes from(SpiderJob job) {
+    String nextTime = null;
+    Spider spider = scheduler.getSpider(job.getId());
+    if (spider != null && spider.nextTime() != null) {
+      nextTime = format.format(spider.nextTime());
+    }
+    return new SpiderJobRes(job, nextTime);
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class SpiderJobRes {
+    @JsonUnwrapped
+    private SpiderJob spiderJob;
+    private String nextTime;
   }
 
   @GET

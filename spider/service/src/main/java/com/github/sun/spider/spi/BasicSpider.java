@@ -72,7 +72,8 @@ public class BasicSpider extends AbstractSpider {
       for (; ; ) {
         if (producer.interrupted() && consumers.stream().allMatch(Consumer::interrupted)) {
           break;
-        } else if (System.currentTimeMillis() - startTime.getTime() >= setting.getExecuteTime()) {
+        } else if (setting.getExecuteTime() > 0
+          && (System.currentTimeMillis() - startTime.getTime() >= setting.getExecuteTime())) {
           break;
         } else {
           sleep(setting.getMonitorInterval());
@@ -147,9 +148,9 @@ public class BasicSpider extends AbstractSpider {
       consumers.stream().filter(c -> !c.interrupted()).forEach(Consumer::interrupt);
       consumers.clear();
       executor.shutdown();
-      isRunning.set(false);
       finishTime = new Date();
       pushProgress();
+      isRunning.set(false);
     }
   }
 
