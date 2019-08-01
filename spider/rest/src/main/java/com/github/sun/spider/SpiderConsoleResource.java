@@ -123,6 +123,7 @@ public class SpiderConsoleResource extends AbstractResource {
       .rate(req.getRate())
       .setting(req.getSetting())
       .schema(req.getSchema())
+      .checkpoint(req.checkpoint)
       .build();
     if (job.isPublish()) {
       scheduler.add(job);
@@ -151,6 +152,7 @@ public class SpiderConsoleResource extends AbstractResource {
       .publish(exist.isPublish())
       .setting(req.getSetting())
       .schema(req.getSchema())
+      .checkpoint(req.checkpoint)
       .build();
     if (job.isPublish()) {
       if (job.needReschedule(exist)) {
@@ -185,6 +187,7 @@ public class SpiderConsoleResource extends AbstractResource {
     private String rate;
     @NotNull(message = "require setting")
     private Setting setting;
+    private Spider.Checkpoint checkpoint;
     @NotNull(message = "require schema")
     private JsonNode schema;
   }
@@ -262,7 +265,8 @@ public class SpiderConsoleResource extends AbstractResource {
   public SingleResponse<ProgressRes> getProgress(@PathParam("id") String id) {
     Spider spider = scheduler.getSpider(id);
     Date nextTime = scheduler.getNextTime(id);
-    return responseOf(ProgressRes.from(nextTime, spider == null ? null : spider.checkpoint(),
+    return responseOf(ProgressRes.from(nextTime,
+      spider == null ? null : spider.checkpoint(),
       spider == null ? null : spider.checkPointing(),
       spider == null ? null : spider.progress()));
   }
@@ -297,6 +301,8 @@ public class SpiderConsoleResource extends AbstractResource {
       if (p == null) {
         return ProgressRes.builder()
           .remainTime(remainTime)
+          .checkpoint(checkpoint == null ? new Spider.Checkpoint(null, null) : checkpoint)
+          .checkPointing(checkPointing == null ? new Spider.Checkpoint(null, null) : checkPointing)
           .errors(Collections.emptySet())
           .build();
       } else {

@@ -295,11 +295,15 @@ public class BasicSpider extends AbstractSpider {
               List<String> uris = category == null ?
                 Collections.singletonList(baseUrl) : categoryUrl(root, category);
               int index = 0;
+              boolean canSkipped = true;
               for (String uri : uris) {
                 if (interrupted()) {
                   break;
                 }
-                if (skip(uri, category != null)) {
+                if (category != null && canSkipped) {
+                  if (!skip(uri)) {
+                    canSkipped = false;
+                  }
                   continue;
                 }
                 if (paging == null) {
@@ -335,11 +339,15 @@ public class BasicSpider extends AbstractSpider {
               int index = 0;
               List<String> uris = category == null ?
                 Collections.singletonList(baseUrl) : categoryUrl(get(baseUrl), category);
+              boolean canSkipped = true;
               for (String uri : uris) {
                 if (interrupted()) {
                   break;
                 }
-                if (skip(uri, category != null)) {
+                if (category != null && canSkipped) {
+                  if (!skip(uri)) {
+                    canSkipped = false;
+                  }
                   continue;
                 }
                 for (Request r : parseRequest(uri, process)) {
@@ -370,17 +378,15 @@ public class BasicSpider extends AbstractSpider {
   private boolean skip(int pageNum) {
     if (this.checkpoint != null) {
       Integer page = this.checkpoint.getPageNum();
-      return page != null && pageNum < page;
+      return page != null && pageNum <= page;
     }
     return false;
   }
 
-  private boolean skip(String uri, boolean category) {
+  private boolean skip(String uri) {
     if (this.checkpoint != null) {
-      if (category) {
-        String categoryUrl = this.checkpoint.getCategoryUrl();
-        return !uri.equals(categoryUrl);
-      }
+      String categoryUrl = this.checkpoint.getCategoryUrl();
+      return !uri.equals(categoryUrl);
     }
     return false;
   }
@@ -425,8 +431,8 @@ public class BasicSpider extends AbstractSpider {
             if (!nodes.isEmpty()) {
               processor.process(source, nodes, setting);
             }
-            finished.addAndGet(nodes.size());
             synchronized (BasicSpider.class) {
+              finished.addAndGet(nodes.size());
               if (BasicSpider.this.latestConsumed == null ||
                 BasicSpider.this.latestConsumed.index < holder.index) {
                 BasicSpider.this.latestConsumed = holder;
