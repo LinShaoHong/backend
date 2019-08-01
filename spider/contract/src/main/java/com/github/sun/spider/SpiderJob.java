@@ -42,6 +42,8 @@ public class SpiderJob {
   private Setting setting;
   @Handler(JsonHandler.JsonNodeHandler.class)
   private JsonNode schema;
+  @Handler(CheckpointHandler.class)
+  private Spider.Checkpoint checkpoint;
   @Transient
   private Date createTime;
   @Transient
@@ -53,5 +55,8 @@ public class SpiderJob {
   }
 
   public static class SettingHandler extends JsonHandler<Setting> {
+  }
+
+  public static class CheckpointHandler extends JsonHandler<Spider.Checkpoint> {
   }
 }

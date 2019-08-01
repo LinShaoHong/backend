@@ -2,8 +2,10 @@ package com.github.sun.spider;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -70,6 +72,29 @@ public interface Spider {
 
   interface Listener {
     void onUpdate(Setting setting);
+  }
+
+  Checkpoint checkPointing();
+
+  Checkpoint checkpoint();
+
+  void setCheckpoint(Checkpoint checkpoint);
+
+  void clearCheckpoint();
+
+  void setCheckpointHandler(CheckpointHandler handler);
+
+  interface CheckpointHandler {
+    void apply(Checkpoint checkpoint);
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  class Checkpoint {
+    private String categoryUrl;
+    private Integer pageNum;
   }
 
   /**

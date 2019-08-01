@@ -196,6 +196,21 @@ public class SpiderConsoleResource extends AbstractResource {
     mapper.deleteById(id);
   }
 
+  @DELETE
+  @Path("/checkpoint/{id}")
+  public void clearCheckpoint(@PathParam("id") String id) {
+    SqlBuilder sb = factory.create();
+    SqlBuilder.Template template = sb.from(SpiderJob.class)
+      .update()
+      .set("checkpoint", null)
+      .template();
+    mapper.updateByTemplate(template);
+    Spider spider = scheduler.getSpider(id);
+    if (spider != null && !spider.isRunning()) {
+      spider.setCheckpoint(null);
+    }
+  }
+
   @PUT
   @Path("/publish/{id}")
   public void publish(@PathParam("id") String id) {
@@ -236,7 +251,7 @@ public class SpiderConsoleResource extends AbstractResource {
       return responseOf(Collections.emptyList());
     }
     List<ProgressRes> latest = spider.latestProgress().stream()
-      .map(ProgressRes::from)
+      .map(p -> ProgressRes.from(spider.checkpoint(), spider.checkPointing(), p))
       .collect(Collectors.toList());
     Collections.reverse(latest);
     return responseOf(latest);
@@ -247,7 +262,9 @@ public class SpiderConsoleResource extends AbstractResource {
   public SingleResponse<ProgressRes> getProgress(@PathParam("id") String id) {
     Spider spider = scheduler.getSpider(id);
     Date nextTime = scheduler.getNextTime(id);
-    return responseOf(ProgressRes.from(nextTime, spider == null ? null : spider.progress()));
+    return responseOf(ProgressRes.from(nextTime, spider == null ? null : spider.checkpoint(),
+      spider == null ? null : spider.checkPointing(),
+      spider == null ? null : spider.progress()));
   }
 
   @Data
@@ -263,13 +280,15 @@ public class SpiderConsoleResource extends AbstractResource {
     private String startTime;
     private boolean isRunning;
     private String remainTime;
+    private Spider.Checkpoint checkpoint;
+    private Spider.Checkpoint checkPointing;
     private Set<String> errors;
 
-    private static ProgressRes from(Spider.Progress p) {
-      return from(null, p);
+    private static ProgressRes from(Spider.Checkpoint checkpoint, Spider.Checkpoint checkPointing, Spider.Progress p) {
+      return from(null, checkpoint, checkPointing, p);
     }
 
-    private static ProgressRes from(Date next, Spider.Progress p) {
+    private static ProgressRes from(Date next, Spider.Checkpoint checkpoint, Spider.Checkpoint checkPointing, Spider.Progress p) {
       String remainTime = null;
       if (next != null) {
         long remains = next.getTime() - System.currentTimeMillis();
@@ -290,6 +309,8 @@ public class SpiderConsoleResource extends AbstractResource {
           .endTime(p.getEndTime())
           .usedTime(p.getUsedTime())
           .remainTime(remainTime)
+          .checkpoint(checkpoint == null ? new Spider.Checkpoint(null, null) : checkpoint)
+          .checkPointing(checkPointing == null ? new Spider.Checkpoint(null, null) : checkPointing)
           .errors(p.getErrors().stream().map(Throws::stackTraceOf).collect(Collectors.toSet()))
           .build();
       }

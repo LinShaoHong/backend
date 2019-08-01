@@ -37,13 +37,16 @@ public class BasicSpider extends AbstractSpider {
   private int total;
   private Date startTime;
   private Date finishTime;
+  private Checkpoint checkpoint;
+  private NodeHolder latestConsumed;
+  private CheckpointHandler checkpointHandler;
   private Thread monitor;
   private Producer producer;
   private ExecutorService executor;
   private AtomicInteger finished = new AtomicInteger(0);
   private List<Throwable> errors = new CopyOnWriteArrayList<>();
   private List<Progress> latest = new CopyOnWriteArrayList<>();
-  private ConcurrentLinkedQueue<Node> queue = new ConcurrentLinkedQueue<>();
+  private ConcurrentLinkedQueue<NodeHolder> queue = new ConcurrentLinkedQueue<>();
   private CopyOnWriteArrayList<Consumer> consumers = new CopyOnWriteArrayList<>();
   private AtomicBoolean isRunning = new AtomicBoolean(false);
 
@@ -63,6 +66,7 @@ public class BasicSpider extends AbstractSpider {
     this.executor = Executors.newFixedThreadPool(setting.getPoolSize());
     this.startTime = null;
     this.finishTime = null;
+    this.latestConsumed = null;
     this.total = 0;
     this.finished.set(0);
     this.queue.clear();
@@ -130,6 +134,31 @@ public class BasicSpider extends AbstractSpider {
     this.listener = listener;
   }
 
+  @Override
+  public Checkpoint checkPointing() {
+    return latestConsumed == null ? null : latestConsumed.checkpoint;
+  }
+
+  @Override
+  public Checkpoint checkpoint() {
+    return this.checkpoint;
+  }
+
+  @Override
+  public void setCheckpoint(Checkpoint checkpoint) {
+    this.checkpoint = checkpoint;
+  }
+
+  @Override
+  public void clearCheckpoint() {
+    this.checkpoint = null;
+  }
+
+  @Override
+  public void setCheckpointHandler(CheckpointHandler handler) {
+    this.checkpointHandler = handler;
+  }
+
   private class ListenerImpl implements Listener {
     private final Setting old;
 
@@ -183,6 +212,10 @@ public class BasicSpider extends AbstractSpider {
       executor.shutdown();
       finishTime = new Date();
       pushProgress();
+      checkpoint = latestConsumed == null ? null : latestConsumed.checkpoint;
+      if (checkpointHandler != null && checkpoint != null) {
+        checkpointHandler.apply(checkpoint);
+      }
       isRunning.set(false);
     }
   }
@@ -261,25 +294,32 @@ public class BasicSpider extends AbstractSpider {
             try {
               List<String> uris = category == null ?
                 Collections.singletonList(baseUrl) : categoryUrl(root, category);
+              int index = 0;
               for (String uri : uris) {
                 if (interrupted()) {
                   break;
                 }
+                if (skip(uri, category != null)) {
+                  continue;
+                }
                 if (paging == null) {
                   Node node = uri.equals(baseUrl) ? root : get(req.set(uri));
                   total += getEntityNum(type, xpath, node, process);
-                  queue.add(node);
+                  queue.add(NodeHolder.from(index++, node, category == null ? null : uri));
                 } else {
                   Paging vp = uri.equals(baseUrl) ? paging : parsePaging(get(req.set(uri)), process);
                   for (int page = vp.start; page < vp.end; page++) {
                     if (interrupted()) {
                       break;
                     }
+                    if (skip(page)) {
+                      continue;
+                    }
                     String url = pagingUrl(uri, page, vp);
                     Node node;
                     node = get(req.set(url));
                     total += getEntityNum(type, xpath, node, process);
-                    queue.add(node);
+                    queue.add(NodeHolder.from(index++, node, category == null ? null : uri, page));
                     sleep(setting.getTaskInterval());
                   }
                 }
@@ -292,11 +332,15 @@ public class BasicSpider extends AbstractSpider {
             break;
           case "POST":
             try {
+              int index = 0;
               List<String> uris = category == null ?
                 Collections.singletonList(baseUrl) : categoryUrl(get(baseUrl), category);
               for (String uri : uris) {
                 if (interrupted()) {
                   break;
+                }
+                if (skip(uri, category != null)) {
+                  continue;
                 }
                 for (Request r : parseRequest(uri, process)) {
                   if (interrupted()) {
@@ -304,7 +348,7 @@ public class BasicSpider extends AbstractSpider {
                   }
                   Node node = get(r);
                   total += getEntityNum(type, xpath, node, process);
-                  queue.add(node);
+                  queue.add(NodeHolder.from(index, node, category == null ? null : uri, null));
                   sleep(setting.getTaskInterval());
                 }
               }
@@ -321,6 +365,24 @@ public class BasicSpider extends AbstractSpider {
         running.set(false);
       }
     }
+  }
+
+  private boolean skip(int pageNum) {
+    if (this.checkpoint != null) {
+      Integer page = this.checkpoint.getPageNum();
+      return page != null && pageNum < page;
+    }
+    return false;
+  }
+
+  private boolean skip(String uri, boolean category) {
+    if (this.checkpoint != null) {
+      if (category) {
+        String categoryUrl = this.checkpoint.getCategoryUrl();
+        return !uri.equals(categoryUrl);
+      }
+    }
+    return false;
   }
 
   private class Consumer implements Runnable {
@@ -346,8 +408,8 @@ public class BasicSpider extends AbstractSpider {
       }
       running.set(true);
       while (running.get()) {
-        Node node = queue.poll();
-        if (node == null && producer.interrupted()) {
+        NodeHolder holder = queue.poll();
+        if (holder == null && producer.interrupted()) {
           running.set(false);
           break;
         }
@@ -356,14 +418,20 @@ public class BasicSpider extends AbstractSpider {
           running.set(false);
           break;
         }
-        if (node != null) {
+        if (holder != null) {
           try {
-            JsonNode value = crawl(node, process);
+            JsonNode value = crawl(holder.node, process);
             List<JsonNode> nodes = Iterators.asList(value);
             if (!nodes.isEmpty()) {
               processor.process(source, nodes, setting);
             }
             finished.addAndGet(nodes.size());
+            synchronized (BasicSpider.class) {
+              if (BasicSpider.this.latestConsumed == null ||
+                BasicSpider.this.latestConsumed.index < holder.index) {
+                BasicSpider.this.latestConsumed = holder;
+              }
+            }
           } catch (SpiderException ex) {
             // skip
             pushError(ex);
@@ -377,6 +445,26 @@ public class BasicSpider extends AbstractSpider {
         }
         sleep(setting.getTaskInterval());
       }
+    }
+  }
+
+  private static class NodeHolder {
+    private final int index;
+    private final Node node;
+    private final Checkpoint checkpoint;
+
+    private NodeHolder(int index, Node node, Checkpoint checkpoint) {
+      this.index = index;
+      this.node = node;
+      this.checkpoint = checkpoint;
+    }
+
+    private static NodeHolder from(int index, Node node, String category) {
+      return from(index, node, category, null);
+    }
+
+    private static NodeHolder from(int index, Node node, String category, Integer pageNum) {
+      return new NodeHolder(index, node, new Checkpoint(category, pageNum));
     }
   }
 

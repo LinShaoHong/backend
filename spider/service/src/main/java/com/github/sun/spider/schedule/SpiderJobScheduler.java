@@ -131,6 +131,11 @@ public class SpiderJobScheduler implements Lifecycle {
       Spider spider = cache.get(id, () -> factory.create(job.getSetting(), job.getSchema(), processor));
       spider.setSetting(job.getSetting());
       spider.setSchema(job.getSchema());
+      spider.setCheckpoint(job.getCheckpoint());
+      spider.setCheckpointHandler(checkpoint -> {
+        job.setCheckpoint(checkpoint);
+        mapper.update(job);
+      });
       spider.setProcessorProvider(() -> processor);
       spider.start();
     }
