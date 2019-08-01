@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public interface Spider {
@@ -79,8 +80,6 @@ public interface Spider {
   Checkpoint checkpoint();
 
   void setCheckpoint(Checkpoint checkpoint);
-
-  void clearCheckpoint();
 
   void setCheckpointHandler(CheckpointHandler handler);
 
@@ -160,7 +159,7 @@ public interface Spider {
   interface Processor {
     String SUFFIX = ":SPIDER:PROCESSOR";
 
-    void process(String source, List<JsonNode> values, Setting setting);
+    int process(String source, List<JsonNode> values, Setting setting, Consumer<Throwable> func);
   }
 
   interface Factory {

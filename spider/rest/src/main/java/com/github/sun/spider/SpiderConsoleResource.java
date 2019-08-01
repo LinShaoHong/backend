@@ -375,9 +375,10 @@ public class SpiderConsoleResource extends AbstractResource {
       this.spider = new BasicSpider();
       this.spider.setSetting(req.getSetting());
       this.spider.setSchema(req.getSchema());
-      this.spider.setProcessorProvider(() -> (source, nodes, setting) -> {
+      this.spider.setProcessorProvider(() -> (source, nodes, setting, func) -> {
         values.addAll(nodes);
         stop();
+        return nodes.size();
       });
     }
 

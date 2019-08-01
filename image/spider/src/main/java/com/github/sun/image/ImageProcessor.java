@@ -25,6 +25,8 @@ import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,9 +40,10 @@ public class ImageProcessor implements Spider.Processor {
   private ImgService service;
 
   @Override
-  public void process(String source, List<JsonNode> values, Setting setting) {
+  public int process(String source, List<JsonNode> values, Setting setting, Consumer<Throwable> func) {
     List<Img> pics = JSON.deserializeAsList(values, Img.class);
     int c = code(source);
+    AtomicInteger counter = new AtomicInteger(0);
     pics.stream().filter(p -> p.getExt() != null).forEach(p -> {
       p.setSource(source);
       p.setHashCode(code(p));
@@ -66,8 +69,8 @@ public class ImageProcessor implements Spider.Processor {
                   d.setPath(dfPath);
                 }
               } catch (Exception ex) {
+                func.accept(ex);
                 log.warn("failed write image detail.", ex);
-                // do nothing
               }
             });
         } catch (Exception ex) {
@@ -79,14 +82,19 @@ public class ImageProcessor implements Spider.Processor {
             if (!p.getDetails().isEmpty()) {
               try {
                 service.save(p);
+                counter.incrementAndGet();
               } catch (Throwable ex) {
+                func.accept(ex);
                 log.error("failed to save images to db.", ex);
               }
             }
+          } else {
+            func.accept(e);
           }
         }
       }
     });
+    return counter.get();
   }
 
   private int code(String s) {

@@ -150,11 +150,6 @@ public class BasicSpider extends AbstractSpider {
   }
 
   @Override
-  public void clearCheckpoint() {
-    this.checkpoint = null;
-  }
-
-  @Override
   public void setCheckpointHandler(CheckpointHandler handler) {
     this.checkpointHandler = handler;
   }
@@ -429,10 +424,12 @@ public class BasicSpider extends AbstractSpider {
             JsonNode value = crawl(holder.node, process);
             List<JsonNode> nodes = Iterators.asList(value);
             if (!nodes.isEmpty()) {
-              processor.process(source, nodes, setting);
+              int count = processor.process(source, nodes, setting, BasicSpider.this::pushError);
+              synchronized (BasicSpider.class) {
+                finished.addAndGet(count);
+              }
             }
             synchronized (BasicSpider.class) {
-              finished.addAndGet(nodes.size());
               if (BasicSpider.this.latestConsumed == null ||
                 BasicSpider.this.latestConsumed.index < holder.index) {
                 BasicSpider.this.latestConsumed = holder;

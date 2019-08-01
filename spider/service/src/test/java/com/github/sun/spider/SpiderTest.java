@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class SpiderTest {
   @Test
@@ -49,8 +50,9 @@ public class SpiderTest {
 
   private class ProcessorImpl implements Spider.Processor {
     @Override
-    public void process(String source, List<JsonNode> values, Setting setting) {
+    public int process(String source, List<JsonNode> values, Setting setting, Consumer<Throwable> func) {
       System.out.println(JSON.serialize(values));
+      return values.size();
     }
   }
 
