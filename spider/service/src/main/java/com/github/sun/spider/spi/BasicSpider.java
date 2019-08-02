@@ -509,32 +509,24 @@ public class BasicSpider extends AbstractSpider {
     StringBuilder sb = new StringBuilder();
     long days = millis / (3600 * 24 * 1000);
     if (days > 0) {
-      sb.append(days).append(" 天");
+      sb.append(days).append(" 天 ");
       millis = millis % (3600 * 24 * 1000);
     }
     long hours = millis / (3600 * 1000);
     if (hours > 0) {
-      if (sb.length() > 0) {
-        sb.append(" ");
-      }
-      sb.append(hours).append(" 时");
+      sb.append(hours).append(" 时 ");
       millis = millis % (3600 * 1000);
     }
     long minutes = millis / (60 * 1000);
     if (minutes > 0) {
-      if (sb.length() > 0) {
-        sb.append(" ");
-      }
-      sb.append(minutes).append(" 分");
+      sb.append(minutes).append(" 分 ");
       millis = millis % (60 * 1000);
     }
     long seconds = millis / 1000;
     if (seconds > 0) {
-      if (sb.length() > 0) {
-        sb.append(" ");
-      }
-      sb.append(seconds).append(" 秒");
+      sb.append(seconds).append(" 秒 ");
     }
+    sb.setLength(sb.length() - 1);
     return sb.toString();
   }
 
