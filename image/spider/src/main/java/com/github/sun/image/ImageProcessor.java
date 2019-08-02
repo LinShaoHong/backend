@@ -79,12 +79,13 @@ public class ImageProcessor implements Spider.Processor {
         } finally {
           if (e == null) {
             p.getDetails().removeIf(d -> d.getPath() == null);
+            counter.incrementAndGet();
             if (!p.getDetails().isEmpty()) {
               try {
                 service.save(p);
-                counter.incrementAndGet();
               } catch (Throwable ex) {
                 func.accept(ex);
+                counter.decrementAndGet();
                 log.error("failed to save images to db.", ex);
               }
             }
