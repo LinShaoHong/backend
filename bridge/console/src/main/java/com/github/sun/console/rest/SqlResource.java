@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.Date;
 
 @Path("/api/consoles/sql")
-@Component
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class SqlResource extends AbstractResource {

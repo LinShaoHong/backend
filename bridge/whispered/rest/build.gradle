@@ -1,6 +1,5 @@
 dependencies {
-  compile project(":$rootName-image-contract")
-  compile project(":$rootName-layout-contract")
+  compile project(":$rootName-image-rest")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")
