@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Category {
   private String type;
+  private String subType;
   private List<Item> items;
 
   @Data

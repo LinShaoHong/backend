@@ -1,11 +1,9 @@
 package com.github.sun.image;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.sun.foundation.boot.utility.JSON;
-import com.github.sun.foundation.boot.utility.Retry;
-import com.github.sun.foundation.boot.utility.SSL;
-import com.github.sun.foundation.boot.utility.Strings;
+import com.github.sun.foundation.boot.utility.*;
 import com.github.sun.image.config.ImgTransactional;
+import com.github.sun.image.mapper.ImageCategoryMapper;
 import com.github.sun.image.mapper.ImageDetailsMapper;
 import com.github.sun.image.mapper.ImageMapper;
 import com.github.sun.spider.Setting;
@@ -28,26 +26,22 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service("IMAGE" + Spider.Processor.SUFFIX)
 public class ImageProcessor implements Spider.Processor {
-  private static final String USER_AGENT =
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36";
-  private static final String PATH = "/opt/static/images";
-
   @Autowired
   private ImgService service;
 
   @Override
   public int process(String source, List<JsonNode> values, Setting setting, Consumer<Throwable> func) {
     List<Img> pics = JSON.deserializeAsList(values, Img.class);
-    int c = code(source);
     AtomicInteger counter = new AtomicInteger(0);
     pics.stream().filter(p -> p.getExt() != null).forEach(p -> {
       p.setSource(source);
-      p.setHashCode(code(p));
-      String mainPath = PATH + "/" + c + "/" + p.getHashCode();
+      p.setHashCode(code(p.getTitle()));
+      String mainPath = Constants.PATH + "/" + p.getHashCode();
       String detailsPath = mainPath + "/details";
       File detailsDir = new File(detailsPath);
       if (detailsDir.exists() || detailsDir.mkdirs()) {
@@ -60,7 +54,7 @@ public class ImageProcessor implements Spider.Processor {
           p.getDetails().stream().filter(d -> d.getExt() != null)
             .forEach(d -> {
               try {
-                d.setHashCode(code(p, d));
+                d.setHashCode(code(d.getOriginalUrl()));
                 String dfPath = detailsPath + "/" + d.getHashCode() + d.getExt();
                 File file = new File(dfPath);
                 if (!file.exists()) {
@@ -102,31 +96,29 @@ public class ImageProcessor implements Spider.Processor {
     return Math.abs(Strings.hash(s).hashCode());
   }
 
-  private int code(Img p, Detail d) {
-    return code(p.getSource() + ":" + d.getOriginalUrl());
-  }
-
-  private int code(Img p) {
-    return code(p.getSource() + ":" + p.getOriginalUrl());
-  }
-
   @Service
   public static class ImgService {
     @Resource
     private ImageMapper mapper;
     @Resource
     private ImageDetailsMapper detailsMapper;
+    @Resource
+    private ImageCategoryMapper categoryMapper;
 
     @ImgTransactional
     public void save(Img p) {
       String id = String.valueOf(p.getHashCode());
+      String categorySpell = p.getCategory();
+      if (categorySpell != null && !categorySpell.isEmpty()) {
+        categorySpell = Stream.of(categorySpell.split("\\|")).map(Pinyins::spell).collect(Collectors.joining("|"));
+      }
       Image image = Image.builder()
         .id(id)
         .category(p.getCategory())
+        .categorySpell(categorySpell)
         .title(p.getTitle())
         .source(p.getSource())
         .type(p.getType())
-        .tags(p.getTags())
         .localPath(p.getPath())
         .originUrl(p.getOriginalUrl())
         .build();
@@ -143,6 +135,7 @@ public class ImageProcessor implements Spider.Processor {
       Image exist = mapper.findById(id);
       if (exist == null) {
         mapper.insert(image);
+        updateCategory(image);
       } else {
         mapper.update(image);
       }
@@ -158,7 +151,31 @@ public class ImageProcessor implements Spider.Processor {
         detailsMapper.insertAll(details);
       }
     }
+
+    private void updateCategory(Image image) {
+      String tags = image.getCategory();
+      if (tags != null && !tags.isEmpty()) {
+        List<Image.Category> categories = Arrays.stream(tags.split("\\|"))
+          .distinct()
+          .map(tag -> {
+            String type = image.getType();
+            String name = Pinyins.spell(tag);
+            return Image.Category.builder()
+              .id(type + ":" + name)
+              .type(type)
+              .label(tag)
+              .name(name)
+              .count(1)
+              .build();
+          })
+          .collect(Collectors.toList());
+        categories.forEach(categoryMapper::insertOrUpdate);
+      }
+    }
   }
+
+  private static final String USER_AGENT =
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36";
 
   private InputStream open(String url, Setting setting) throws Exception {
     return Retry.execute(setting.getRetryCount(), setting.getRetryDelays(), () -> {
@@ -181,7 +198,6 @@ public class ImageProcessor implements Spider.Processor {
     private String title;
     private String originalUrl;
     private String path;
-    private String tags;
     private int hashCode;
     private List<Detail> details;
 

@@ -3,7 +3,10 @@ package com.github.sun.spider.spi;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.sun.foundation.boot.utility.*;
+import com.github.sun.foundation.boot.utility.Cache;
+import com.github.sun.foundation.boot.utility.Iterators;
+import com.github.sun.foundation.boot.utility.JSON;
+import com.github.sun.foundation.boot.utility.Retry;
 import com.github.sun.spider.Fetcher;
 import com.github.sun.spider.Spider;
 import org.apache.commons.text.StringEscapeUtils;
@@ -13,8 +16,7 @@ import org.htmlcleaner.HtmlCleaner;
 import org.w3c.dom.Node;
 
 import java.util.*;
-
-import static com.github.sun.foundation.boot.utility.Tuple.Tuple2;
+import java.util.stream.Collectors;
 
 abstract class AbstractSpider extends SchemaParser implements Spider {
   private static final HtmlCleaner hc = new HtmlCleaner();
@@ -22,26 +24,26 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
   private Cache<JSON.Valuer, List<Field>> fieldsCache = new Cache<>();
 
   JsonNode crawl(Node node, JSON.Valuer process) {
-    Map<Path, List<Tuple2<Field, XPaths>>> parentPaths = new HashMap<>();
+    Map<Path, Map<Field, List<XPaths>>> parentPaths = new HashMap<>();
     JsonNode value = crawl(0, null, node, process, parentPaths);
     parentPaths.forEach((path, xps) -> {
       List<String> paths = paths(path);
       JSON.Valuer valuer = JSON.newValuer(value, paths.toArray(new String[0]));
       if (valuer.raw().isArray()) {
-        int i = 0;
-        for (JSON.Valuer v : valuer.asArray()) {
-          Tuple2<Field, XPaths> xp = xps.get(i++);
-          put(xp._1, xp._2, (ObjectNode) v.raw());
-        }
+        xps.forEach((field, values) -> {
+          int i = 0;
+          for (JSON.Valuer v : valuer.asArray()) {
+            put(field, values.get(i++), (ObjectNode) v.raw());
+          }
+        });
       } else if (!xps.isEmpty()) {
-        Tuple2<Field, XPaths> xp = xps.get(0);
-        put(xp._1, xp._2, (ObjectNode) valuer.raw());
+        xps.forEach((field, values) -> put(field, values.get(0), (ObjectNode) valuer.raw()));
       }
     });
     return value;
   }
 
-  private JsonNode crawl(int index, Path path, Node node, JSON.Valuer process, Map<Path, List<Tuple2<Field, XPaths>>> parentPaths) {
+  private JsonNode crawl(int index, Path path, Node node, JSON.Valuer process, Map<Path, Map<Field, List<XPaths>>> parentPaths) {
     String type = process.get("type").asText();
     String xpath = process.get("xpath").asText(null);
     List<Field> fields = fieldsCache.get(process, () -> parseFields(process));
@@ -66,16 +68,24 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
     }
   }
 
-  private JsonNode crawl(int index, int subIndex, Path path, Node parent, Node node, List<Field> fields, Map<Path, List<Tuple2<Field, XPaths>>> parentPaths) {
+  private JsonNode crawl(int index, int subIndex, Path path, Node parent, Node node, List<Field> fields, Map<Path, Map<Field, List<XPaths>>> parentPaths) {
     ObjectNode value = JSON.getMapper().createObjectNode();
-    for (Field field : fields) {
-      XPaths xPaths = field.value.hasValue() ? null : XPaths.of(field.subXpath ? node : parent, field.xpath.path.value);
-      if (xPaths != null && field.parent && path != null) {
-        List<Tuple2<Field, XPaths>> xps = parentPaths.computeIfAbsent(path.parent, r -> new ArrayList<>());
-        if (xps.size() <= index) {
-          xps.add(Tuple.of(field, xPaths));
-        }
-      } else {
+    if (path != null) {
+      Map<Field, List<XPaths>> xps = parentPaths.computeIfAbsent(path.parent, r -> new HashMap<>());
+      List<Field> withParentFields = fields.stream().filter(field -> field.parent).collect(Collectors.toList());
+      if (!withParentFields.isEmpty()) {
+        withParentFields.forEach(field -> {
+          List<XPaths> tps = xps.computeIfAbsent(field, r -> new ArrayList<>());
+          XPaths xPaths = field.value.hasValue() ? null : XPaths.of(field.subXpath ? node : parent, field.xpath.path.value);
+          if (tps.size() <= index) {
+            tps.add(xPaths);
+          }
+        });
+      }
+    }
+    fields.stream().filter(field -> !field.parent)
+      .forEach(field -> {
+        XPaths xPaths = field.value.hasValue() ? null : XPaths.of(field.subXpath ? node : parent, field.xpath.path.value);
         switch (field.type) {
           case "text":
           case "int":
@@ -144,8 +154,7 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
           default:
             throw new SpiderException("unknown field type of " + field.name + " with '" + field.name + "'");
         }
-      }
-    }
+      });
     return value;
   }
 

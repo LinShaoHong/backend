@@ -31,14 +31,6 @@
         "value": "meizi"
       },
       {
-        "name": "category",
-        "type": "text",
-        "xpath": {
-          "path": "./span/a/text()",
-          "script": "if($value.indexOf('丝') > -1 || $value.indexOf('袜') > -1 || $value.indexOf('腿') > -1) {'siwa';} else if($value.indexOf('青春') > -1 || $value.indexOf('清纯') > -1) {'young';} else if($value.indexOf('萝莉') > -1) {'luoli';} else {'other';}"
-        }
-      },
-      {
         "name": "title",
         "type": "text",
         "xpath": "./span/a/text()",
@@ -70,7 +62,7 @@
               "xpath": "//div[@id='content']/a/img/@src"
             },
             {
-              "name": "tags",
+              "name": "category",
               "type": "text",
               "parent": true,
               "xpath": "string-join(//div[@class='tags']/a/text(), '|')"

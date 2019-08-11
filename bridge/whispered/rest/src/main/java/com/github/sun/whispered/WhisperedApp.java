@@ -10,6 +10,7 @@ import org.springframework.context.annotation.ComponentScans;
 
 @ComponentScans({
   @ComponentScan({"com.github.sun.image"}),
+  @ComponentScan({"com.github.sun.layout"}),
   @ComponentScan({"com.github.sun.whispered"})
 })
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})

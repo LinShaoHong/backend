@@ -24,7 +24,7 @@ public class Image {
   private String source;
   private String type;
   private String category;
-  private String tags;
+  private String categorySpell;
   private String localPath;
   private String originUrl;
   private long likes;
@@ -47,6 +47,26 @@ public class Image {
     private String source;
     private String localPath;
     private String originUrl;
+    @Transient
+    private Date createTime;
+    @Transient
+    private Date updateTime;
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @NamingStrategy
+  @Table(name = "image_category")
+  public static class Category {
+    @Id
+    private String id;
+    private String type;
+    private String label;
+    private String name;
+    private int count;
+    private String parentId;
     @Transient
     private Date createTime;
     @Transient

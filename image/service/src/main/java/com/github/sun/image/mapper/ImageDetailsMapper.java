@@ -8,6 +8,6 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 public interface ImageDetailsMapper extends CompositeMapper<Image.Detail> {
-  @Select("SELECT * FROM image_details WHERE `imgId` = #{imgId}")
+  @Select("SELECT * FROM `image_details` WHERE `imgId` = #{imgId}")
   List<Image.Detail> findByImgId(@Param("imgId") String imgId);
 }
