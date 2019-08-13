@@ -27,7 +27,7 @@ public class ImageCategory implements CategoryProvider {
   public List<Category> provide() {
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(Image.Category.class)
-      .where(sb.field("count").ge(3))
+      .where(sb.field("count").ge(20))
       .desc("count")
       .asc(sb.field("LENGTH").call(sb.field("name")))
       .template();

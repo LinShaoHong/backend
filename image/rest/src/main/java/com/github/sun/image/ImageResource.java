@@ -5,6 +5,7 @@ import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.image.mapper.ImageDetailsMapper;
 import com.github.sun.image.mapper.ImageMapper;
+import com.hankcs.hanlp.HanLP;
 import lombok.Builder;
 import lombok.Data;
 
@@ -133,5 +134,29 @@ public class ImageResource extends AbstractResource {
       return responseOf(images.stream().map(ImageResp::from).collect(Collectors.toList()));
     }
     return responseOf(Collections.emptyList());
+  }
+
+  @GET
+  @Path("/search")
+  public ListResponse<ImageResp> search(@NotNull @QueryParam("q") String q) {
+    if (q.trim().isEmpty()) {
+      return responseOf(Collections.emptyList());
+    }
+    List<String> keyWords = HanLP.extractKeyword(q, 10);
+    if (keyWords.isEmpty()) {
+      keyWords.add(q);
+    }
+    SqlBuilder sb = factory.create();
+    Expression conn = EMPTY;
+    for (String word : keyWords) {
+      Expression e = sb.field("title").contains(word);
+      conn = conn == EMPTY ? e : conn.or(e);
+    }
+    SqlBuilder.Template template = sb.from(Image.class)
+      .where(conn)
+      .desc("visits")
+      .template();
+    List<Image> images = mapper.findByTemplate(template);
+    return responseOf(images.stream().map(ImageResp::from).collect(Collectors.toList()));
   }
 }
