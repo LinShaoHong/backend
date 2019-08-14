@@ -138,9 +138,12 @@ public class ImageResource extends AbstractResource {
 
   @GET
   @Path("/search")
-  public ListResponse<ImageResp> search(@NotNull @QueryParam("q") String q) {
+  public SingleResponse<SearchResp> search(@NotNull @QueryParam("q") String q) {
     if (q.trim().isEmpty()) {
-      return responseOf(Collections.emptyList());
+      return responseOf(SearchResp.builder()
+        .images(Collections.emptyList())
+        .keyWords(Collections.emptyList())
+        .build());
     }
     List<String> keyWords = HanLP.extractKeyword(q, 10);
     if (keyWords.isEmpty()) {
@@ -157,6 +160,16 @@ public class ImageResource extends AbstractResource {
       .desc("visits")
       .template();
     List<Image> images = mapper.findByTemplate(template);
-    return responseOf(images.stream().map(ImageResp::from).collect(Collectors.toList()));
+    return responseOf(SearchResp.builder()
+      .images(images.stream().map(ImageResp::from).collect(Collectors.toList()))
+      .keyWords(keyWords)
+      .build());
+  }
+
+  @Data
+  @Builder
+  public static class SearchResp {
+    private List<ImageResp> images;
+    private List<String> keyWords;
   }
 }
