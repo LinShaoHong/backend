@@ -43,6 +43,7 @@ public class ImageCategory implements CategoryProvider {
         .map(c -> Category.Item.builder()
           .label(c.getLabel())
           .name(c.getName())
+          .count(c.getCount())
           .build())
         .collect(Collectors.toList()))
       .build()).collect(Collectors.toList());

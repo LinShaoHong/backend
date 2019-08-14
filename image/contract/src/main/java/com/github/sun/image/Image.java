@@ -65,7 +65,7 @@ public class Image {
     private String type;
     private String label;
     private String name;
-    private int count;
+    private long count;
     private String parentId;
     @Transient
     private Date createTime;

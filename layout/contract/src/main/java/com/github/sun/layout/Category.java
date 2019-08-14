@@ -24,5 +24,6 @@ public class Category {
   public static class Item {
     private String label;
     private String name;
+    private long count;
   }
 }
