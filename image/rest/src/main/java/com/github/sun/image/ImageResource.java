@@ -102,12 +102,13 @@ public class ImageResource extends AbstractResource {
 
   @PUT
   @Path("/like/{imgId}")
-  public void like(@PathParam("imgId") String imgId) {
+  public void like(@PathParam("imgId") String imgId,
+                   @QueryParam("like") boolean like) {
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(Image.class)
       .where(sb.field("id").eq(imgId))
       .update()
-      .set("likes", sb.field("likes").plus(1))
+      .set("likes", like ? sb.field("likes").plus(1) : sb.field("likes").sub(1))
       .template();
     mapper.updateByTemplate(template);
   }
