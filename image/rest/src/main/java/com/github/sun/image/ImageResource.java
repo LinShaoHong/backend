@@ -42,7 +42,8 @@ public class ImageResource extends AbstractResource {
   public PageResponse<ImageResp> getPage(@QueryParam("start") int start,
                                          @QueryParam("count") int count,
                                          @NotNull @QueryParam("type") String type,
-                                         @QueryParam("category") String category) {
+                                         @QueryParam("category") String category,
+                                         @DefaultValue("updateTime") @QueryParam("rank") String rank) {
     SqlBuilder sb = factory.create();
     Expression condition = sb.field("type").eq(type)
       .and(nonNull(category).then(sb.field("categorySpell").contains(category)));
@@ -50,9 +51,9 @@ public class ImageResource extends AbstractResource {
       .where(condition).count().template();
     int total = mapper.countByTemplate(template);
     sb.clear();
-    template = sb.from(Image.class)
+    template = sb.from("image")
       .where(condition)
-      .desc("visits")
+      .desc(rank)
       .limit(start, count)
       .template();
     List<Image> images = mapper.findByTemplate(template);

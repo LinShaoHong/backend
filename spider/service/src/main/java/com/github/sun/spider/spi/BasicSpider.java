@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,18 +36,18 @@ public class BasicSpider extends AbstractSpider {
   private int total;
   private Date startTime;
   private Date finishTime;
-  private Checkpoint checkpoint;
-  private NodeHolder latestConsumed;
-  private CheckpointHandler checkpointHandler;
   private Thread monitor;
-  private Producer producer;
   private ExecutorService executor;
+  private volatile Checkpoint checkpoint;
+  private volatile NodeHolder latestConsumed;
+  private volatile Producer producer;
+  private volatile CheckpointHandler checkpointHandler;
+  private volatile List<Throwable> errors = new ArrayList<>();
+  private volatile List<Progress> latest = new ArrayList<>();
+  private volatile List<Consumer> consumers = new ArrayList<>();
   private AtomicInteger finished = new AtomicInteger(0);
-  private List<Throwable> errors = new CopyOnWriteArrayList<>();
-  private List<Progress> latest = new CopyOnWriteArrayList<>();
-  private ConcurrentLinkedQueue<NodeHolder> queue = new ConcurrentLinkedQueue<>();
-  private CopyOnWriteArrayList<Consumer> consumers = new CopyOnWriteArrayList<>();
   private AtomicBoolean isRunning = new AtomicBoolean(false);
+  private ConcurrentLinkedQueue<NodeHolder> queue = new ConcurrentLinkedQueue<>();
 
   private void init() {
     if (setting == null) {
@@ -211,7 +210,7 @@ public class BasicSpider extends AbstractSpider {
       if (checkpointHandler != null && checkpoint != null) {
         checkpointHandler.apply(checkpoint);
       }
-      isRunning.set(false);
+      isRunning.compareAndSet(true, false);
     }
   }
 
@@ -238,7 +237,7 @@ public class BasicSpider extends AbstractSpider {
     }
   }
 
-  private void pushError(Throwable ex) {
+  private synchronized void pushError(Throwable ex) {
     if (errors.size() >= MAX_ERRORS_SIZE) {
       errors.remove(0);
     }
@@ -256,7 +255,7 @@ public class BasicSpider extends AbstractSpider {
     private AtomicBoolean running = new AtomicBoolean(false);
 
     private void interrupt() {
-      running.set(false);
+      running.compareAndSet(true, false);
     }
 
     private boolean interrupted() {
@@ -390,7 +389,7 @@ public class BasicSpider extends AbstractSpider {
     private AtomicBoolean running = new AtomicBoolean(false);
 
     private void interrupt() {
-      running.set(false);
+      running.compareAndSet(true, false);
     }
 
     private boolean interrupted() {
@@ -425,11 +424,9 @@ public class BasicSpider extends AbstractSpider {
             List<JsonNode> nodes = Iterators.asList(value);
             if (!nodes.isEmpty()) {
               int count = processor.process(source, nodes, setting, BasicSpider.this::pushError);
-              synchronized (BasicSpider.class) {
-                finished.addAndGet(count);
-              }
+              finished.addAndGet(count);
             }
-            synchronized (BasicSpider.class) {
+            synchronized (BasicSpider.this) {
               if (BasicSpider.this.latestConsumed == null ||
                 BasicSpider.this.latestConsumed.index < holder.index) {
                 BasicSpider.this.latestConsumed = holder;
