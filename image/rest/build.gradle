@@ -2,7 +2,7 @@ dependencies {
   compile project(":$rootName-rest")
   compile project(":$rootName-image-service")
 
-  compile "com.hankcs:hanlp:$vers.hanlp"
+  implementation "com.hankcs:hanlp:$vers.hanlp"
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")
