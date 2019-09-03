@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: Whispered-Server
+  datasource:
+    image:
+      url: "jdbc:mysql://host.docker.internal:3306/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false"
+      username: "root"
+      password: "root"
+
+server:
+  port: 1379

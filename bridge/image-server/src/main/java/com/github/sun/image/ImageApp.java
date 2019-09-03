@@ -1,4 +1,4 @@
-package com.github.sun.console;
+package com.github.sun.image;
 
 import com.github.sun.foundation.rest.JerseyApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,17 +9,15 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScans;
 
 @ComponentScans({
-  @ComponentScan({"com.github.sun.console"}),
-  @ComponentScan({"com.github.sun.spider"}),
-  @ComponentScan({"com.github.sun.image"})
+  @ComponentScan({"com.github.sun.layout"})
 })
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-public class ConsoleApp extends JerseyApplication {
-  public ConsoleApp(ApplicationContext context) {
+public class ImageApp extends JerseyApplication {
+  public ImageApp(ApplicationContext context) {
     super(context);
   }
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(ConsoleApp.class).run(args);
+    new SpringApplicationBuilder(ImageApp.class).run(args);
   }
 }

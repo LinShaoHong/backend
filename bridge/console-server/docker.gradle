@@ -1,0 +1,23 @@
+import org.gradle.util.VersionNumber
+
+apply plugin: "com.google.cloud.tools.jib"
+
+def mainApp = "com.github.sun.console.ConsoleApp"
+def user = System.properties['aliyunImageRepoUser']
+def pwd = System.properties['aliyubImageRepoPass']
+
+jib {
+  from {
+    image = "registry.cn-hangzhou.aliyuncs.com/junshuo/openjdk-8"
+  }
+  to {
+    image = "registry.cn-hangzhou.aliyuncs.com/linsh_sun/sun_console:" + VersionNumber.parse((String) project.version).baseVersion
+    auth {
+      username = user
+      password = pwd
+    }
+  }
+  container {
+    mainClass = mainApp
+  }
+}

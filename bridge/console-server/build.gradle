@@ -1,6 +1,5 @@
 dependencies {
   compile project(":$rootName-spider-rest")
 }
-
-apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")
+apply from: project.file("./docker.gradle")
 apply from: rootProject.file("buildscript/gradle/sub_springjersey.gradle")

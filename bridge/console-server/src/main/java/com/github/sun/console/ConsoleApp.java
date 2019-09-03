@@ -1,4 +1,4 @@
-package com.github.sun.whispered;
+package com.github.sun.console;
 
 import com.github.sun.foundation.rest.JerseyApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,17 +9,16 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScans;
 
 @ComponentScans({
-  @ComponentScan({"com.github.sun.image"}),
-  @ComponentScan({"com.github.sun.layout"}),
-  @ComponentScan({"com.github.sun.whispered"})
+  @ComponentScan({"com.github.sun.spider"}),
+  @ComponentScan({"com.github.sun.image"})
 })
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-public class WhisperedApp extends JerseyApplication {
-  public WhisperedApp(ApplicationContext context) {
+public class ConsoleApp extends JerseyApplication {
+  public ConsoleApp(ApplicationContext context) {
     super(context);
   }
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(WhisperedApp.class).run(args);
+    new SpringApplicationBuilder(ConsoleApp.class).run(args);
   }
 }
