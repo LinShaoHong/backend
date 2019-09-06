@@ -8,7 +8,7 @@ def pwd = System.properties['aliyubImageRepoPass']
 
 jib {
   from {
-    image = "registry.cn-hangzhou.aliyuncs.com/junshuo/openjdk-8"
+    image = "registry.cn-hangzhou.aliyuncs.com/linsh_components/oracle-jre:8"
   }
   to {
     image = "registry.cn-hangzhou.aliyuncs.com/linsh_sun/sun_image:" + VersionNumber.parse((String) project.version).baseVersion
