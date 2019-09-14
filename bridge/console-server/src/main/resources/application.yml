@@ -3,17 +3,17 @@ spring:
     name: Console-Server
   datasource:
     admin:
-      url: "jdbc:mysql://host.docker.internal:3306/%s?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false"
-      username: "root"
-      password: "root"
+      url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/%s?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false
+      username: root
+      password: ${MYSQL_ROOT_PASSWORD:root}
     spider:
-      url: "jdbc:mysql://host.docker.internal:3306/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false"
-      username: "root"
-      password: "root"
+      url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false
+      username: ${MYSQL_USER_OF_SUN:root}
+      password: ${MYSQL_PASSWORD_OF_SUN:root}
     image:
-      url: "jdbc:mysql://host.docker.internal:3306/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false"
-      username: "root"
-      password: "root"
+      url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false
+      username: ${MYSQL_USER_OF_SUN:root}
+      password: ${MYSQL_PASSWORD_OF_SUN:root}
 
 server:
   port: 9729

@@ -3,8 +3,6 @@ import org.gradle.util.VersionNumber
 apply plugin: "com.google.cloud.tools.jib"
 
 def mainApp = "com.github.sun.image.ImageApp"
-def user = System.properties['aliyunImageRepoUser']
-def pwd = System.properties['aliyubImageRepoPass']
 
 jib {
   from {
@@ -13,8 +11,8 @@ jib {
   to {
     image = "registry.cn-hangzhou.aliyuncs.com/linsh_sun/sun_image:" + VersionNumber.parse((String) project.version).baseVersion
     auth {
-      username = user
-      password = pwd
+      username = System.properties['aliyunImageRepoUser']
+      password = System.properties['aliyubImageRepoPass']
     }
   }
   container {
