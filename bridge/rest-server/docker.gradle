@@ -2,14 +2,14 @@ import org.gradle.util.VersionNumber
 
 apply plugin: "com.google.cloud.tools.jib"
 
-def mainApp = "com.github.sun.console.ConsoleApp"
+def mainApp = "com.github.sun.App"
 
 jib {
   from {
     image = "registry.cn-hangzhou.aliyuncs.com/linsh_components/oracle-jre:8"
   }
   to {
-    image = "registry.cn-hangzhou.aliyuncs.com/linsh_sun/sun_console:" + VersionNumber.parse((String) project.version).baseVersion
+    image = "registry.cn-hangzhou.aliyuncs.com/linsh_sun/rest-server:" + VersionNumber.parse((String) project.version).baseVersion
     auth {
       username = System.properties['aliyunImageRepoUser']
       password = System.properties['aliyubImageRepoPass']

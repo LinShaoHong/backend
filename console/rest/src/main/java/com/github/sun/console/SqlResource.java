@@ -1,4 +1,4 @@
-package com.github.sun.console.rest;
+package com.github.sun.console;
 
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.rest.AbstractResource;
@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
@@ -18,8 +17,8 @@ import java.io.StringWriter;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 @Path("/api/consoles/sql")
 @Consumes(MediaType.APPLICATION_JSON)

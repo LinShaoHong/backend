@@ -1,6 +1,7 @@
 dependencies {
   compile project(":$rootName-image-rest")
   compile project(":$rootName-layout-rest")
+  compile project(":$rootName-console-rest")
 }
 
 apply from: project.file("./docker.gradle")

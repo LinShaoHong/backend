@@ -1,6 +1,6 @@
 spring:
   application:
-    name: Console-Server
+    name: Rest-Server
   datasource:
     admin:
       url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/%s?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false
