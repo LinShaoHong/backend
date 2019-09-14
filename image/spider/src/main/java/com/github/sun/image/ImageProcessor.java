@@ -41,7 +41,7 @@ public class ImageProcessor implements Spider.Processor {
     pics.stream().filter(p -> p.getExt() != null).forEach(p -> {
       p.setSource(source);
       p.setHashCode(code(p.getTitle()));
-      String mainPath = Constants.PATH + "/" + p.getHashCode();
+      String mainPath = Constants.PATH + "/" + p.getType() + "/" + p.getHashCode();
       String detailsPath = mainPath + "/details";
       File detailsDir = new File(detailsPath);
       if (detailsDir.exists() || detailsDir.mkdirs()) {
