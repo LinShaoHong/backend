@@ -3,6 +3,7 @@ package com.github.sun.layout;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,8 +14,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
-  private static final Cache<String, List<Category>> cache = Caffeine.newBuilder()
-    .expireAfterWrite(5, TimeUnit.DAYS)
+  @Value("${category.cache.expire}")
+  private int expire;
+
+  private final Cache<String, List<Category>> cache = Caffeine.newBuilder()
+    .expireAfterWrite(expire, TimeUnit.SECONDS)
     .maximumSize(100)
     .build();
 
@@ -27,7 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
       CategoryProvider provider = providers.get(type);
       if (provider != null) {
         List<Category> list = cache.get(type, t -> provider.provide());
-        if (list != null) {
+        if (list != null && !list.isEmpty()) {
           return list.stream();
         }
       }

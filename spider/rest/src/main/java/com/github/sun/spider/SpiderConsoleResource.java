@@ -152,7 +152,7 @@ public class SpiderConsoleResource extends AbstractResource {
       .publish(exist.isPublish())
       .setting(req.getSetting())
       .schema(req.getSchema())
-      .checkpoint(req.checkpoint)
+      .checkpoint(req.getCheckpoint())
       .build();
     if (job.isPublish()) {
       if (job.needReschedule(exist)) {

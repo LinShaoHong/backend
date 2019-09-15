@@ -1,3 +1,5 @@
+server.port: 9729
+
 spring:
   application:
     name: Rest-Server
@@ -15,5 +17,4 @@ spring:
       username: ${MYSQL_USER_OF_SUN:root}
       password: ${MYSQL_PASSWORD_OF_SUN:root}
 
-server:
-  port: 9729
+category.cache.expire: ${CATEGORY_CACHE_EXPIRE:10}

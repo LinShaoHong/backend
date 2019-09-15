@@ -46,10 +46,10 @@ abstract class SchemaParser {
       boolean exclusive = paging.get("exclusive").asBoolean(false);
       int max = exclusive ? total : total + 1;
       int end = paging.get("end").asInt(max);
-      end = end > max ? max : end;
+      end = Math.min(end, max);
       int first = exclusive ? 0 : 1;
       int start = paging.get("start").asInt(first);
-      start = start < first ? first : start;
+      start = Math.max(start, first);
       boolean includeFirst = paging.get("includeFirst").asBoolean(true);
       JSON.Valuer param = paging.get("param");
       return new Paging(first, start, end, includeFirst, param);
