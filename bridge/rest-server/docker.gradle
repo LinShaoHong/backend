@@ -1,21 +1,20 @@
-import org.gradle.util.VersionNumber
-
 apply plugin: "com.google.cloud.tools.jib"
 
-def mainApp = "com.github.sun.App"
+import org.gradle.util.VersionNumber
+def version = VersionNumber.parse((String) project.version).baseVersion
 
 jib {
   from {
     image = "registry.cn-hangzhou.aliyuncs.com/linsh_components/oracle-jre:8"
   }
   to {
-    image = "registry.cn-hangzhou.aliyuncs.com/linsh_sun/rest-server:" + VersionNumber.parse((String) project.version).baseVersion
+    image = "registry.cn-hangzhou.aliyuncs.com/linsh_sun/rest-server:" + version
     auth {
       username = System.properties['aliyunImageRepoUser']
       password = System.properties['aliyubImageRepoPass']
     }
   }
   container {
-    mainClass = mainApp
+    mainClass = "com.github.sun.App"
   }
 }
