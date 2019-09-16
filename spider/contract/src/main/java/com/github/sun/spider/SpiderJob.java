@@ -49,7 +49,7 @@ public class SpiderJob {
   @Transient
   private Date updateTime;
 
-  boolean needReschedule(SpiderJob updated) {
+  public boolean needReschedule(SpiderJob updated) {
     return !Objects.equals(this.startTime, updated.getStartTime()) ||
       !Objects.equals(this.rate, updated.getRate());
   }

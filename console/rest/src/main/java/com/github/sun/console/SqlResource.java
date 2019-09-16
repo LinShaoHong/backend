@@ -2,9 +2,7 @@ package com.github.sun.console;
 
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.rest.AbstractResource;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
@@ -129,9 +127,7 @@ public class SqlResource extends AbstractResource {
   }
 
   @Data
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class QueryReq {
+  private static class QueryReq {
     @NotNull(message = "缺少数据库")
     private String database;
     @NotNull(message = "缺少SQL")
