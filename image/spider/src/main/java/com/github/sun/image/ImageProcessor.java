@@ -2,7 +2,6 @@ package com.github.sun.image;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.boot.utility.*;
-import com.github.sun.image.config.ImgTransactional;
 import com.github.sun.image.mapper.ImageCategoryMapper;
 import com.github.sun.image.mapper.ImageDetailsMapper;
 import com.github.sun.image.mapper.ImageMapper;
@@ -13,6 +12,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.net.ssl.HttpsURLConnection;
@@ -105,7 +105,7 @@ public class ImageProcessor implements Spider.Processor {
     @Resource
     private ImageCategoryMapper categoryMapper;
 
-    @ImgTransactional
+    @Transactional
     public void save(Img p) {
       String id = String.valueOf(p.getHashCode());
       String categorySpell = p.getCategory();
