@@ -1,9 +1,9 @@
 package com.github.sun.spider;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.sun.foundation.mybatis.handler.JsonHandler;
-import com.github.sun.foundation.sql.Handler;
-import com.github.sun.foundation.sql.NamingStrategy;
+import com.github.sun.foundation.modelling.Converter;
+import com.github.sun.foundation.modelling.JsonHandler;
+import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,11 +38,11 @@ public class SpiderJob {
   private boolean publish;
   private long startTime;
   private String rate;
-  @Handler(SettingHandler.class)
+  @Converter(SettingHandler.class)
   private Setting setting;
-  @Handler(JsonHandler.JsonNodeHandler.class)
+  @Converter(JsonHandler.JsonNodeHandler.class)
   private JsonNode schema;
-  @Handler(CheckpointHandler.class)
+  @Converter(CheckpointHandler.class)
   private Spider.Checkpoint checkpoint;
   @Transient
   private Date createTime;

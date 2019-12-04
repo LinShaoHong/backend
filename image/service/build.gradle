@@ -1,4 +1,5 @@
 dependencies {
+  compile project(":$rootName-mybatis")
   compile project(":$rootName-image-contract")
   compile project(":$rootName-layout-contract")
 }

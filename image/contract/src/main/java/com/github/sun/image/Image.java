@@ -1,6 +1,6 @@
 package com.github.sun.image;
 
-import com.github.sun.foundation.sql.NamingStrategy;
+import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
