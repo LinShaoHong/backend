@@ -240,7 +240,7 @@ abstract class SchemaParser {
   }
 
   // 只解析一级分类
-  class Category {
+  static class Category {
     final XPath xpath;
     final XPath subXpath;
     final List<Integer> indexes;
@@ -252,7 +252,7 @@ abstract class SchemaParser {
     }
   }
 
-  class Request {
+  static class Request {
     final String uri;
     final int timeout;
     final String method;
