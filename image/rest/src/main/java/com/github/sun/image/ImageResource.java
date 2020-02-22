@@ -6,6 +6,8 @@ import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.image.mapper.ImageDetailsMapper;
 import com.github.sun.image.mapper.ImageMapper;
 import com.hankcs.hanlp.HanLP;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.Builder;
 import lombok.Data;
 
@@ -21,9 +23,10 @@ import java.util.stream.Collectors;
 import static com.github.sun.foundation.expression.Expression.EMPTY;
 import static com.github.sun.foundation.expression.Expression.nonNull;
 
-@Path("/api/v1/images")
+@Path("/v1/images")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Api("image: Image Resource")
 public class ImageResource extends AbstractResource {
   private final ImageMapper mapper;
   private final ImageDetailsMapper detailsMapper;
@@ -39,6 +42,7 @@ public class ImageResource extends AbstractResource {
   }
 
   @GET
+  @ApiOperation("分页获取图片详情")
   public PageResponse<ImageResp> getPage(@QueryParam("start") int start,
                                          @QueryParam("count") int count,
                                          @NotNull @QueryParam("type") String type,
@@ -86,6 +90,7 @@ public class ImageResource extends AbstractResource {
 
   @GET
   @Path("/details/{imgId}")
+  @ApiOperation("获取指定主图的详情图id列表")
   public ListResponse<String> getDetails(@PathParam("imgId") String imgId) {
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(Image.class)
@@ -103,6 +108,7 @@ public class ImageResource extends AbstractResource {
 
   @PUT
   @Path("/like/{imgId}")
+  @ApiOperation("点赞")
   public void like(@PathParam("imgId") String imgId,
                    @QueryParam("like") boolean like) {
     SqlBuilder sb = factory.create();
@@ -116,6 +122,7 @@ public class ImageResource extends AbstractResource {
 
   @GET
   @Path("/recommendation/{imgId}")
+  @ApiOperation("获取推荐列表")
   public ListResponse<ImageResp> get(@PathParam("imgId") String imgId,
                                      @QueryParam("count") int count) {
     Image image = mapper.findById(imgId);
@@ -140,6 +147,7 @@ public class ImageResource extends AbstractResource {
 
   @GET
   @Path("/search")
+  @ApiOperation("搜索")
   public SingleResponse<SearchResp> search(@NotNull @QueryParam("q") String q) {
     if (q.trim().isEmpty()) {
       return responseOf(SearchResp.builder()
