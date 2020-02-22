@@ -6,6 +6,10 @@ def version = VersionNumber.parse((String) project.version).baseVersion
 jib {
   from {
     image = "registry.cn-hangzhou.aliyuncs.com/linsh_components/oracle-jre:8"
+    auth {
+      username = System.properties['aliyunImageRepoUser']
+      password = System.properties['aliyubImageRepoPass']
+    }
   }
   to {
     image = "registry.cn-hangzhou.aliyuncs.com/linsh_sun/rest-server:" + version
