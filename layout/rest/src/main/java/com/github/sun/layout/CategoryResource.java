@@ -1,6 +1,8 @@
 package com.github.sun.layout;
 
 import com.github.sun.foundation.rest.AbstractResource;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -12,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/v1/categories")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Api("layout: Category Resource")
 public class CategoryResource extends AbstractResource {
   private final CategoryService service;
 
@@ -21,6 +24,7 @@ public class CategoryResource extends AbstractResource {
   }
 
   @GET
+  @ApiOperation("获取目录列表")
   public ListResponse<Category> getAll() {
     return responseOf(service.getAll());
   }

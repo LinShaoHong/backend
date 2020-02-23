@@ -4,12 +4,12 @@ spring:
   application:
     name: Rest-Server
   datasource:
-    url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false
-    username: ${MYSQL_USER_OF_SUN:root}
-    password: ${MYSQL_PASSWORD_OF_SUN:root}
+    url: jdbc:mysql://${MYSQL_SERVER:49.232.14.106:3306}/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false
+    username: ${MYSQL_USER_OF_SUN:lins_sun}
+    password: ${MYSQL_PASSWORD_OF_SUN:GahV.iJRr]su86Gfpxsf}
     admin:
-      url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/%s?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false
+      url: jdbc:mysql://${MYSQL_SERVER:49.232.14.106:3306}/%s?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false
       username: root
-      password: ${MYSQL_ROOT_PASSWORD:root}
+      password: ${MYSQL_ROOT_PASSWORD:GbrM_qFX.w9cYXFLtKj9}
 
 category.cache.expire: ${CATEGORY_CACHE_EXPIRE:10}

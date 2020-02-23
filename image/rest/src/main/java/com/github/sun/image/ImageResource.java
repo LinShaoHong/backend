@@ -68,7 +68,7 @@ public class ImageResource extends AbstractResource {
 
   @Data
   @Builder
-  public static class ImageResp {
+  private static class ImageResp {
     private String id;
     private String title;
     private String src;
@@ -178,7 +178,7 @@ public class ImageResource extends AbstractResource {
 
   @Data
   @Builder
-  public static class SearchResp {
+  private static class SearchResp {
     private List<ImageResp> images;
     private List<String> keyWords;
   }

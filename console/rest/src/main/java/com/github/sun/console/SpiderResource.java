@@ -82,7 +82,7 @@ public class SpiderResource extends AbstractResource {
   @Builder
   @NoArgsConstructor
   @AllArgsConstructor
-  public static class SpiderJobRes {
+  private static class SpiderJobRes {
     @JsonUnwrapped
     private SpiderJob spiderJob;
     private String nextTime;
@@ -109,7 +109,7 @@ public class SpiderResource extends AbstractResource {
   @Builder
   @NoArgsConstructor
   @AllArgsConstructor
-  public static class GroupRes {
+  private static class GroupRes {
     public String label;
     public String value;
   }
@@ -181,7 +181,7 @@ public class SpiderResource extends AbstractResource {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  public static class JobRequest {
+  private static class JobRequest {
     @NotNull(message = "require group")
     private SpiderJob.Group group;
     @NotNull(message = "require startTime")
@@ -278,7 +278,7 @@ public class SpiderResource extends AbstractResource {
   @Builder
   @NoArgsConstructor
   @AllArgsConstructor
-  public static class ProgressRes {
+  private static class ProgressRes {
     private int total;
     private int finished;
     private String endTime;
@@ -413,7 +413,7 @@ public class SpiderResource extends AbstractResource {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  public static class TestRes {
+  private static class TestRes {
     private int code;
     private Set<String> errors;
     private List<JsonNode> values;
@@ -422,7 +422,7 @@ public class SpiderResource extends AbstractResource {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  public static class TestReq {
+  private static class TestReq {
     @NotNull(message = "require requestId")
     private String requestId;
     @NotNull(message = "require setting")
