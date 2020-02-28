@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,12 +20,8 @@ import java.util.Random;
 
 @Service
 public class AfterSaleService extends BasicService<String, AfterSale, AfterSaleMapper> {
-  private final OrderMapper orderMapper;
-
-  @Autowired
-  public AfterSaleService(OrderMapper orderMapper) {
-    this.orderMapper = orderMapper;
-  }
+  @Resource
+  private OrderMapper orderMapper;
 
   @Transactional
   public void apply(String userId, AfterSale afterSale) {

@@ -1,5 +1,6 @@
 package com.github.sun.mall.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,10 +39,11 @@ public class Goods {
   private String counterPrice;
   private String retailPrice;
   private String detail;
-  private boolean deleted;
   @Transient
+  @JsonIgnore
   private Date createTime;
   @Transient
+  @JsonIgnore
   private Date updateTime;
 
   @Data
@@ -56,10 +58,11 @@ public class Goods {
     private String goodsId;
     private String attribute;
     private String value;
-    private boolean deleted;
     @Transient
+    @JsonIgnore
     private Date createTime;
     @Transient
+    @JsonIgnore
     private Date updateTime;
   }
 
@@ -77,10 +80,11 @@ public class Goods {
     private String price;
     private int number;
     private String url;
-    private boolean deleted;
     @Transient
+    @JsonIgnore
     private Date createTime;
     @Transient
+    @JsonIgnore
     private Date updateTime;
   }
 
@@ -97,10 +101,11 @@ public class Goods {
     private String specification;
     private String value;
     private String picUrl;
-    private boolean deleted;
     @Transient
+    @JsonIgnore
     private Date createTime;
     @Transient
+    @JsonIgnore
     private Date updateTime;
   }
 }

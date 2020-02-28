@@ -1,5 +1,6 @@
 package com.github.sun.mall.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,9 +41,10 @@ public class Comment {
   @Min(value = 1, message = "星级小于1")
   @Max(value = 5, message = "星级大于5")
   private int star;
-  private boolean deleted;
   @Transient
+  @JsonIgnore
   private Date createTime;
   @Transient
+  @JsonIgnore
   private Date updateTime;
 }

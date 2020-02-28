@@ -1,5 +1,6 @@
 package com.github.sun.mall.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,9 +26,10 @@ public class Storage {
   private String type;
   private int size;
   private String url;
-  private boolean deleted;
   @Transient
+  @JsonIgnore
   private Date createTime;
   @Transient
+  @JsonIgnore
   private Date updateTime;
 }

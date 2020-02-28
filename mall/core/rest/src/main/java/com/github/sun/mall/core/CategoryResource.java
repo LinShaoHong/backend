@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/category")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall: Category Resource", tags = "类目服务")
+@Api(value = "mall-core: 类目服务")
 public class CategoryResource extends AbstractResource {
   private final Cache<String, List<SingleCategoryResp>> cache = Caffeine.newBuilder()
     .expireAfterWrite(5, TimeUnit.MINUTES)

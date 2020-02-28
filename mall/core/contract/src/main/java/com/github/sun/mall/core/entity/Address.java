@@ -1,5 +1,6 @@
 package com.github.sun.mall.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,9 +39,10 @@ public class Address {
   @Pattern(message = "手机号格式不正确", regexp = "^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(16[6])|(17[0,1,3,5-8])|(18[0-9])|(19[8,9]))\\d{8}$")
   private String tel;
   private boolean isDefault;
-  private boolean deleted;
   @Transient
+  @JsonIgnore
   private Date createTime;
   @Transient
+  @JsonIgnore
   private Date updateTime;
 }

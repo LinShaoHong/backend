@@ -22,8 +22,11 @@ public interface OrderMapper extends CompositeMapper<Order> {
 
   @Mapper
   interface Goods extends CompositeMapper<Order.Goods> {
+    @Select("SELECT * FROM mall_order_goods WHERE orderId IN(${orderIds})")
+    List<Order.Goods> findByOrderIdIn(@Flatten @Param("orderIds") Set<String> orderIds);
+
     @Select("SELECT * FROM mall_order_goods WHERE userId = #{userId} AND orderId = #{orderId}")
-    List<Order.Goods> findByUserIdAndOrderId(@Param("userId") String userId, @Flatten @Param("orderId") String orderId);
+    List<Order.Goods> findByUserIdAndOrderId(@Param("userId") String userId, @Param("orderId") String orderId);
 
     @Select("SELECT * FROM mall_order_goods WHERE userId = #{userId} AND orderId IN(${orderIds})")
     List<Order.Goods> findByUserIdAndOrderIdIn(@Param("userId") String userId, @Flatten @Param("orderIds") Set<String> orderIds);

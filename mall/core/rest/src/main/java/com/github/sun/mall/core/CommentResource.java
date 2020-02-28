@@ -24,10 +24,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Path("/v1/mall/collection")
+@Path("/v1/mall/comment")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall: Comment Resource", tags = "评论服务")
+@Api(value = "mall-core: 评论服务")
 public class CommentResource extends AbstractResource {
   private final CommentMapper mapper;
   private final UserMapper userMapper;

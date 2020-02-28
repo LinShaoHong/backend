@@ -1,5 +1,6 @@
 package com.github.sun.mall.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -62,10 +63,11 @@ public class Order {
   private long confirmTime;
   private int comments;
   private long endTime;
-  private boolean deleted;
   @Transient
+  @JsonIgnore
   private Date createTime;
   @Transient
+  @JsonIgnore
   private Date updateTime;
 
   public boolean isConfirm() {
@@ -96,10 +98,11 @@ public class Order {
     private List<String> specifications;
     private String picUrl;
     private int comment;
-    private boolean deleted;
     @Transient
+    @JsonIgnore
     private Date createTime;
     @Transient
+    @JsonIgnore
     private Date updateTime;
   }
 }

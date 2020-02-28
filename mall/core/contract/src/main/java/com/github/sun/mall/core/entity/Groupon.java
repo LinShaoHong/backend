@@ -1,5 +1,6 @@
 package com.github.sun.mall.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,10 @@ import java.util.Date;
 @NamingStrategy
 @Table(name = "mall_groupon")
 public class Groupon {
+  public enum Status {
+    NONE, ON, SUCCEED, FAIL
+  }
+
   @Id
   private String id;
   private String orderId;
@@ -25,13 +30,14 @@ public class Groupon {
   private String rulesId;
   private String userId;
   private String shareUrl;
-  private String creatorUserId;
-  private long creatorUserTime;
-  private int status;
-  private boolean deleted;
+  private String creatorId;
+  private long creatorTime;
+  private Status status;
   @Transient
+  @JsonIgnore
   private Date createTime;
   @Transient
+  @JsonIgnore
   private Date updateTime;
 
   @Data
@@ -41,6 +47,10 @@ public class Groupon {
   @NamingStrategy
   @Table(name = "mall_groupon_rules")
   public static class Rules {
+    public enum Status {
+      ON, DOWN_EXPIRE, DOWN_ADMIN
+    }
+
     @Id
     private String id;
     private String goodsId;
@@ -48,11 +58,12 @@ public class Groupon {
     private String discount;
     private int discountMember;
     private long expireTime;
-    private int status;
-    private boolean deleted;
+    private Status status;
     @Transient
+    @JsonIgnore
     private Date createTime;
     @Transient
+    @JsonIgnore
     private Date updateTime;
   }
 }

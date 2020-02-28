@@ -1,5 +1,6 @@
 package com.github.sun.mall.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -68,10 +69,11 @@ public class Coupon {
   private int days;
   private long startTime;
   private long endTime;
-  private boolean deleted;
   @Transient
+  @JsonIgnore
   private Date createTime;
   @Transient
+  @JsonIgnore
   private Date updateTime;
 
   @Data
@@ -89,10 +91,11 @@ public class Coupon {
     private long startTime;
     private long endTime;
     private String orderId;
-    private boolean deleted;
     @Transient
+    @JsonIgnore
     private Date createTime;
     @Transient
+    @JsonIgnore
     private Date updateTime;
   }
 }

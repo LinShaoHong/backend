@@ -9,16 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+
 @Service
 public class CartService extends BasicService<String, Cart, CartMapper> {
-  private final GoodsMapper goodsMapper;
-  private final GoodsMapper.Product goodsProductMapper;
-
-  @Autowired
-  public CartService(GoodsMapper goodsMapper, GoodsMapper.Product goodsProductMapper) {
-    this.goodsMapper = goodsMapper;
-    this.goodsProductMapper = goodsProductMapper;
-  }
+  @Resource
+  private GoodsMapper goodsMapper;
+  @Resource
+  private GoodsMapper.Product goodsProductMapper;
 
   @Transactional
   public String add(String userId, Cart cart, boolean quickBuy) {

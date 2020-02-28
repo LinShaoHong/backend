@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/v1/mall/address")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall: Address Resource", tags = "用户收货地址服务")
+@Api(value = "mall-core: 收货地址服务")
 public class AddressResource extends AbstractResource {
   private final AddressMapper mapper;
   private final AddressService service;

@@ -14,7 +14,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/v1/categories")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api("layout: Category Resource")
+@Api("layout: 布局服务")
 public class CategoryResource extends AbstractResource {
   private final CategoryService service;
 

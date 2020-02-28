@@ -21,7 +21,7 @@ import java.util.Collections;
 @Path("/v1/mall/feedback")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall: Feedback Resource", tags = "意见反馈服务")
+@Api(value = "mall-core: 意见反馈服务")
 public class FeedbackResource extends AbstractResource {
   private final FeedbackMapper mapper;
 

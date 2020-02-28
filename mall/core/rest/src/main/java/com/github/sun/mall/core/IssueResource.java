@@ -16,7 +16,7 @@ import java.util.List;
 @Path("/v1/mall/issue")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall: Issue Resource", tags = "问题服务")
+@Api(value = "mall-core: 问题服务")
 public class IssueResource extends AbstractResource {
   private final IssueMapper mapper;
   private final SqlBuilder.Factory factory;

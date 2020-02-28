@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/afterSale")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall: After-Sale Resource", tags = "售后服务")
+@Api(value = "mall-core: 售后服务")
 public class AfterSaleResource extends AbstractResource {
   private final AfterSaleMapper mapper;
   private final AfterSaleService service;

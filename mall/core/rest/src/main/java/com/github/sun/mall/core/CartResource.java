@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/cart")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall: Cart Resource", tags = "用户购物车服务")
+@Api(value = "mall-core: 购物车服务")
 public class CartResource extends AbstractResource {
   private final CartMapper mapper;
   private final CartService service;

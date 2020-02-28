@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/search")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall: Search history Resource", tags = "搜索历史服务")
+@Api(value = "mall-core: 搜索历史服务")
 public class SearchHistoryResource extends AbstractResource {
   private final SearchHistoryMapper mapper;
   private final KeywordMapper keywordMapper;

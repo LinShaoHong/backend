@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/collection")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall: Collection Resource", tags = "收藏服务")
+@Api(value = "mall-core: 收藏服务")
 public class CollectionResource extends AbstractResource {
   private final CollectionMapper mapper;
   private final GoodsMapper goodsMapper;

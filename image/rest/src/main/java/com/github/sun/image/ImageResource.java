@@ -25,7 +25,7 @@ import static com.github.sun.foundation.expression.Expression.nonNull;
 @Path("/v1/images")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api("image: Image Resource")
+@Api("image: 图片服务")
 public class ImageResource extends AbstractResource {
   private final ImageMapper mapper;
   private final ImageMapper.Detail detailsMapper;

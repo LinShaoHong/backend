@@ -96,11 +96,11 @@ public class ImageProcessor implements Spider.Processor {
 
   @Service
   public static class ImgService {
-    @Resource
+    @Autowired
     private ImageMapper mapper;
-    @Resource
+    @Autowired
     private ImageMapper.Detail detailsMapper;
-    @Resource
+    @Autowired
     private ImageMapper.Category categoryMapper;
 
     @Transactional

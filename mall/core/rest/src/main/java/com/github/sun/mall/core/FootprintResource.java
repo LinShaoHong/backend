@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/footprint")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall: Footprint Resource", tags = "访问足迹服务")
+@Api(value = "mall-core: 访问足迹服务")
 public class FootprintResource extends AbstractResource {
   private final FootprintMapper mapper;
   private final GoodsMapper goodsMapper;

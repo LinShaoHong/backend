@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/v1/mall/brand")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall: Brand Resource", tags = "品牌服务")
+@Api(value = "mall-core: 品牌服务")
 public class BrandResource extends AbstractResource {
   private final BrandMapper mapper;
   private final SqlBuilder.Factory factory;
