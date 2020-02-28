@@ -3,7 +3,7 @@ package com.github.sun.image.layout;
 import com.github.sun.foundation.boot.utility.Pinyins;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.image.Image;
-import com.github.sun.image.mapper.ImageCategoryMapper;
+import com.github.sun.image.mapper.ImageMapper;
 import com.github.sun.layout.Category;
 import com.github.sun.layout.CategoryProvider;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class ImageCategory implements CategoryProvider {
   private static final List<String> ignores = Arrays.asList("网", "馆", "社", "院", "荟");
 
   @Resource
-  private ImageCategoryMapper mapper;
+  private ImageMapper.Category mapper;
   @Resource(name = "mysql")
   private SqlBuilder.Factory factory;
 

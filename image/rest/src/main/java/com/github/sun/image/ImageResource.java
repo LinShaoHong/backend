@@ -3,7 +3,6 @@ package com.github.sun.image;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
-import com.github.sun.image.mapper.ImageDetailsMapper;
 import com.github.sun.image.mapper.ImageMapper;
 import com.hankcs.hanlp.HanLP;
 import io.swagger.annotations.Api;
@@ -29,12 +28,12 @@ import static com.github.sun.foundation.expression.Expression.nonNull;
 @Api("image: Image Resource")
 public class ImageResource extends AbstractResource {
   private final ImageMapper mapper;
-  private final ImageDetailsMapper detailsMapper;
+  private final ImageMapper.Detail detailsMapper;
   private final SqlBuilder.Factory factory;
 
   @Inject
   public ImageResource(ImageMapper mapper,
-                       ImageDetailsMapper detailsMapper,
+                       ImageMapper.Detail detailsMapper,
                        @Named("mysql") SqlBuilder.Factory factory) {
     this.mapper = mapper;
     this.detailsMapper = detailsMapper;

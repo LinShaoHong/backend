@@ -2,8 +2,6 @@ package com.github.sun.image;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.boot.utility.*;
-import com.github.sun.image.mapper.ImageCategoryMapper;
-import com.github.sun.image.mapper.ImageDetailsMapper;
 import com.github.sun.image.mapper.ImageMapper;
 import com.github.sun.spider.Setting;
 import com.github.sun.spider.Spider;
@@ -101,9 +99,9 @@ public class ImageProcessor implements Spider.Processor {
     @Resource
     private ImageMapper mapper;
     @Resource
-    private ImageDetailsMapper detailsMapper;
+    private ImageMapper.Detail detailsMapper;
     @Resource
-    private ImageCategoryMapper categoryMapper;
+    private ImageMapper.Category categoryMapper;
 
     @Transactional
     public void save(Img p) {
