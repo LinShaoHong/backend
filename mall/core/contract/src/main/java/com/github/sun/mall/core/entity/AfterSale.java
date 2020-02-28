@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_after_sale")
-public class AfterSale {
+public class AfterSale implements Entity<String> {
   public enum Type {
     GOODS_MISS,
     GOODS_NEEDLESS,

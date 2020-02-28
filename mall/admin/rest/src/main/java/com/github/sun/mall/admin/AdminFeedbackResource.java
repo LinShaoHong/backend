@@ -1,6 +1,8 @@
 package com.github.sun.mall.admin;
 
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.mall.core.FeedbackMapper;
+import com.github.sun.mall.core.entity.Feedback;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -26,22 +28,22 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/feedback")
 @Validated
-public class FeedbackResource extends AbstractResource {
-    private final Log logger = LogFactory.getLog(FeedbackResource.class);
+public class AdminFeedbackResource extends BasicCURDResource<Feedback, FeedbackMapper> {
+  private final Log logger = LogFactory.getLog(AdminFeedbackResource.class);
 
-    @Autowired
-    private LitemallFeedbackService feedbackService;
+  @Autowired
+  private LitemallFeedbackService feedbackService;
 
-    @RequiresPermissions("admin:feedback:list")
-    @RequiresPermissionsDesc(menu = {"用户管理", "意见反馈"}, button = "查询")
-    @GetMapping("/list")
-    public Object list(Integer userId, String username,
-                       @RequestParam(defaultValue = "1") Integer page,
-                       @RequestParam(defaultValue = "10") Integer limit,
-                       @Sort @RequestParam(defaultValue = "add_time") String sort,
-                       @Order @RequestParam(defaultValue = "desc") String order) {
-        List<LitemallFeedback> feedbackList = feedbackService.querySelective(userId, username, page, limit, sort,
-                order);
-        return ResponseUtil.okList(feedbackList);
-    }
+  @RequiresPermissions("admin:feedback:list")
+  @RequiresPermissionsDesc(menu = {"用户管理", "意见反馈"}, button = "查询")
+  @GetMapping("/list")
+  public Object list(Integer userId, String username,
+                     @RequestParam(defaultValue = "1") Integer page,
+                     @RequestParam(defaultValue = "10") Integer limit,
+                     @Sort @RequestParam(defaultValue = "add_time") String sort,
+                     @Order @RequestParam(defaultValue = "desc") String order) {
+    List<LitemallFeedback> feedbackList = feedbackService.querySelective(userId, username, page, limit, sort,
+      order);
+    return ResponseUtil.okList(feedbackList);
+  }
 }

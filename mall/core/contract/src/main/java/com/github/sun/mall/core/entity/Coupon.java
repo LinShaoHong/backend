@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_coupon")
-public class Coupon {
+public class Coupon implements Entity<String> {
   public static final Short TYPE_COMMON = 0;
   public static final Short TYPE_REGISTER = 1;
   public static final Short TYPE_CODE = 2;
@@ -82,7 +82,7 @@ public class Coupon {
   @AllArgsConstructor
   @NamingStrategy
   @Table(name = "mall_coupon_user")
-  public static class User {
+  public static class User implements Entity<String> {
     private String id;
     private String userId;
     private String couponId;

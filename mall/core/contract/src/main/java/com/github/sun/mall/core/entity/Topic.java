@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_topic")
-public class Topic {
+public class Topic implements Entity<String> {
   private String id;
   private String title;
   private String subtitle;

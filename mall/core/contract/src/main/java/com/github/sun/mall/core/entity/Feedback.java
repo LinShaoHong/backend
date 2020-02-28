@@ -21,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_feedback")
-public class Feedback {
+public class Feedback implements Entity<String> {
   @Id
   private String id;
   private String userId;

@@ -20,7 +20,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_address")
-public class Address {
+public class Address implements Entity<String> {
   @Id
   private String id;
   private String name;

@@ -22,7 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_comment")
-public class Comment {
+public class Comment implements Entity<String> {
   public enum Type {
     GOODS, TOPIC
   }

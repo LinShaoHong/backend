@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_goods")
-public class Goods {
+public class Goods implements Entity<String> {
   @Id
   private String id;
   private String sn;
@@ -52,7 +52,7 @@ public class Goods {
   @AllArgsConstructor
   @NamingStrategy
   @Table(name = "mall_goods_attribute")
-  public static class Attribute {
+  public static class Attribute implements Entity<String> {
     @Id
     private String id;
     private String goodsId;
@@ -72,7 +72,7 @@ public class Goods {
   @AllArgsConstructor
   @NamingStrategy
   @Table(name = "mall_goods_product")
-  public static class Product {
+  public static class Product implements Entity<String> {
     @Id
     private String id;
     private String goodsId;
@@ -94,7 +94,7 @@ public class Goods {
   @AllArgsConstructor
   @NamingStrategy
   @Table(name = "mall_goods_specification")
-  public static class Specification {
+  public static class Specification implements Entity<String> {
     @Id
     private String id;
     private String goodsId;

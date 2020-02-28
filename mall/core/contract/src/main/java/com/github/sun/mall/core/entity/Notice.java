@@ -18,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_notice")
-public class Notice {
+public class Notice implements Entity<String> {
   @Id
   private String id;
   private String title;
@@ -37,7 +37,7 @@ public class Notice {
   @AllArgsConstructor
   @NamingStrategy
   @Table(name = "mall_notice_admin")
-  public static class Admin {
+  public static class Admin implements Entity<String> {
     @Id
     private String id;
     private String noticeId;

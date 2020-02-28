@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
 @Data
@@ -18,13 +19,15 @@ import java.util.Date;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_ad")
-public class Advertise {
+public class Advertise implements Entity<String> {
   @Id
   private String id;
+  @NotEmpty(message = "缺少推广名称")
   private String name;
   private String link;
   private String url;
   private int position;
+  @NotEmpty(message = "缺少推广内容")
   private String content;
   private long startTime;
   private long endTime;

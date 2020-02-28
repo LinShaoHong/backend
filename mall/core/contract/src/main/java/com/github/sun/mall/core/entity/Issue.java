@@ -18,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_issue")
-public class Issue {
+public class Issue implements Entity<String> {
   @Id
   private String id;
   private String question;

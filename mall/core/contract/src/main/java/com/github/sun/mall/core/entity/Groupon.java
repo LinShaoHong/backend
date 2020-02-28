@@ -18,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_groupon")
-public class Groupon {
+public class Groupon implements Entity<String> {
   public enum Status {
     NONE, ON, SUCCEED, FAIL
   }
@@ -46,7 +46,7 @@ public class Groupon {
   @AllArgsConstructor
   @NamingStrategy
   @Table(name = "mall_groupon_rules")
-  public static class Rules {
+  public static class Rules implements Entity<String> {
     public enum Status {
       ON, DOWN_EXPIRE, DOWN_ADMIN
     }

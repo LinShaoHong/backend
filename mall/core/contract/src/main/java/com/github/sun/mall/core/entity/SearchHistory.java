@@ -18,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_search_history")
-public class SearchHistory {
+public class SearchHistory implements Entity<String> {
   @Id
   private String id;
   private String userId;

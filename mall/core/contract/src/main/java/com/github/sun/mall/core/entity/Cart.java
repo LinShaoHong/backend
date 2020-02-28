@@ -21,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_cart")
-public class Cart {
+public class Cart implements Entity<String> {
   @Id
   private String id;
   private String userId;

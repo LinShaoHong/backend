@@ -18,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_permission")
-public class Permission {
+public class Permission implements Entity<String> {
   @Id
   private String id;
   private String roleId;

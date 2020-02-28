@@ -19,7 +19,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_admin")
-public class Admin {
+public class Admin implements Entity<String> {
   @Id
   private String id;
   private String username;

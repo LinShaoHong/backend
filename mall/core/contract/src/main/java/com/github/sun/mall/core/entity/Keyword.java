@@ -18,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_keyword")
-public class Keyword {
+public class Keyword implements Entity<String> {
   @Id
   private String id;
   private String keyword;

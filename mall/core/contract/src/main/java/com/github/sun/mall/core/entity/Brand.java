@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
 @Data
@@ -18,13 +19,16 @@ import java.util.Date;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_brand")
-public class Brand {
+public class Brand implements Entity<String> {
   @Id
   private String id;
+  @NotEmpty(message = "缺少品牌名称")
   private String name;
+  @NotEmpty(message = "缺少品牌描述")
   private String desc;
   private String picUrl;
   private int sortOrder;
+  @NotEmpty(message = "缺少浮动价格")
   private String floorPrice;
   @Transient
   @JsonIgnore

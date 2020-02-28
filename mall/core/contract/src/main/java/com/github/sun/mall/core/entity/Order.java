@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_order")
-public class Order {
+public class Order implements Entity<String> {
   public enum Status {
     CREATE,
     PAY,
@@ -84,7 +84,7 @@ public class Order {
   @AllArgsConstructor
   @NamingStrategy
   @Table(name = "mall_order_goods")
-  public static class Goods {
+  public static class Goods implements Entity<String> {
     @Id
     private String id;
     private String userId;

@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_region")
-public class Region {
+public class Region implements Entity<String> {
   @Id
   private String id;
   private String pid;
