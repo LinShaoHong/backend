@@ -20,7 +20,7 @@ import java.util.List;
 @Path("/v1/mall/mine")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall-core: 我的服务")
+@Api(value = "mall-core: 我的服务: mine")
 public class MineResource extends AbstractResource {
   private final OrderMapper orderMapper;
 

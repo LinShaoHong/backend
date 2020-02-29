@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/comment")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall-core: 评论服务")
+@Api(value = "mall-core: 评论服务: comment")
 public class CommentResource extends AbstractResource {
   private final CommentMapper mapper;
   private final UserMapper userMapper;
@@ -79,7 +79,7 @@ public class CommentResource extends AbstractResource {
   public SingleResponse<CountResp> count(@QueryParam("type") Comment.Type type,
                                          @NotNull(message = "缺少valueId") String valueId) {
     int allCount = mapper.countByTypeAndValueId(type, valueId);
-    int hasPicCount = mapper.countByTypeAndValueIdAndHasPic(type, valueId);
+    int hasPicCount = mapper.countByTypeAndValueIdAndHasPicture(type, valueId);
     return responseOf(CountResp.builder()
       .allCount(allCount)
       .hasPicCount(hasPicCount)

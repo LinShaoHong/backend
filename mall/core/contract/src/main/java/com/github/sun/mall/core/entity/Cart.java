@@ -1,6 +1,8 @@
 package com.github.sun.mall.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.sun.foundation.modelling.Converter;
+import com.github.sun.foundation.modelling.JsonHandler;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -31,9 +34,10 @@ public class Cart implements Entity<String> {
   private String goodsName;
   @NotNull(message = "缺少产品")
   private String productId;
-  private String price;
+  private BigDecimal price;
   @Min(value = 1, message = "数量最少是1个")
   private int number;
+  @Converter(JsonHandler.ListStringHandler.class)
   private List<String> specifications;
   private boolean checked;
   private String picUrl;

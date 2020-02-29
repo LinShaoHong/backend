@@ -17,8 +17,7 @@ import java.util.List;
 @Path("/v1/mall/admin/brand")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall-admin: 品牌管理")
-@Validated
+@Api(value = "mall-admin: 品牌管理: brand")
 public class AdminBrandResource extends BasicCURDResource<Brand, BrandMapper> {
   private final SqlBuilder.Factory factory;
 

@@ -17,7 +17,7 @@ import java.util.List;
 @Path("/v1/mall/admin/ad")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall-admin: 推广管理")
+@Api(value = "mall-admin: 推广管理: advertise")
 public class AdminAdvertiseResource extends BasicCURDResource<Advertise, AdvertiseMapper> {
   private final SqlBuilder.Factory factory;
 

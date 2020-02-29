@@ -18,7 +18,7 @@ public interface AddressMapper extends CompositeMapper<Address> {
   Address findByIdAndUserId(@Param("id") String id, @Param("userId") String userId);
 
   @Select("SELECT * FROM mall_address WHERE userId = #{userId} AND isDefault = TRUE")
-  Address findDefault(@Param("userId") String userId);
+  Address findByUserIdAndIsDefault(@Param("userId") String userId);
 
   @Update("UPDATE mall_address SET isDefault = FALSE WHERE userId = #{userId} AND isDefault = TRUE")
   void resetDefault(@Param("userId") String userId);

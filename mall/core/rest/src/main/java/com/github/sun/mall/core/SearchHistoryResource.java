@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/search")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall-core: 搜索历史服务")
+@Api(value = "mall-core: 搜索历史服务: search")
 public class SearchHistoryResource extends AbstractResource {
   private final SearchHistoryMapper mapper;
   private final KeywordMapper keywordMapper;
@@ -63,7 +63,7 @@ public class SearchHistoryResource extends AbstractResource {
   @ApiOperation(" 关键字提醒")
   public ListResponse<String> helper(@QueryParam("start") int start,
                                      @QueryParam("count") int count,
-                                     @NotEmpty(message = "缺少关键字") String keyword) {
+                                     @NotEmpty(message = "缺少关键字") @QueryParam("keyword") String keyword) {
     List<Keyword> keywords = keywordMapper.findHint(keyword, start, count);
     return responseOf(keywords.stream().map(Keyword::getKeyword).collect(Collectors.toList()));
   }

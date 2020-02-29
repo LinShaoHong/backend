@@ -1,5 +1,6 @@
 package com.github.sun.spider;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.modelling.Converter;
 import com.github.sun.foundation.modelling.JsonHandler;
@@ -45,8 +46,10 @@ public class SpiderJob {
   @Converter(CheckpointHandler.class)
   private Spider.Checkpoint checkpoint;
   @Transient
+  @JsonIgnore
   private Date createTime;
   @Transient
+  @JsonIgnore
   private Date updateTime;
 
   public boolean needReschedule(SpiderJob updated) {

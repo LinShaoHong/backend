@@ -1,101 +1,58 @@
 package com.github.sun.mall.admin;
 
-import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.foundation.expression.Expression;
+import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.mall.core.IssueMapper;
 import com.github.sun.mall.core.entity.Issue;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.linlinjava.litemall.admin.annotation.RequiresPermissionsDesc;
-import org.linlinjava.litemall.core.util.ResponseUtil;
-import org.linlinjava.litemall.core.validator.Order;
-import org.linlinjava.litemall.core.validator.Sort;
-import org.linlinjava.litemall.db.domain.LitemallIssue;
-import org.linlinjava.litemall.db.service.LitemallIssueService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
-import org.springframework.validation.annotation.Validated;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
-import javax.validation.constraints.NotNull;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.List;
 
-@RestController
-@RequestMapping("/admin/issue")
-@Validated
+@Path("/v1/mall/admin/issue")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Api(value = "mall-admin: 问题管理: issue")
 public class AdminIssueResource extends BasicCURDResource<Issue, IssueMapper> {
-  private final Log logger = LogFactory.getLog(AdminIssueResource.class);
+  private final IssueMapper mapper;
+  private final SqlBuilder.Factory factory;
 
-  @Autowired
-  private LitemallIssueService issueService;
-
-  @RequiresPermissions("admin:issue:list")
-  @RequiresPermissionsDesc(menu = {"商场管理", "通用问题"}, button = "查询")
-  @GetMapping("/list")
-  public Object list(String question,
-                     @RequestParam(defaultValue = "1") Integer page,
-                     @RequestParam(defaultValue = "10") Integer limit,
-                     @Sort @RequestParam(defaultValue = "add_time") String sort,
-                     @Order @RequestParam(defaultValue = "desc") String order) {
-    List<LitemallIssue> issueList = issueService.querySelective(question, page, limit, sort, order);
-    return ResponseUtil.okList(issueList);
+  @Inject
+  public AdminIssueResource(IssueMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
+    this.mapper = mapper;
+    this.factory = factory;
   }
 
-  private Object validate(LitemallIssue issue) {
-    String question = issue.getQuestion();
-    if (StringUtils.isEmpty(question)) {
-      return ResponseUtil.badArgument();
+  @GET
+  @ApiOperation("分页获取问题列表")
+  public PageResponse<Issue> list(@QueryParam("question") String question,
+                                  @QueryParam("username") String username,
+                                  @QueryParam("start") int start,
+                                  @QueryParam("count") int count,
+                                  @QueryParam("sort") @DefaultValue("createTime") String sort,
+                                  @QueryParam("asc") boolean asc) {
+    SqlBuilder sb = factory.create();
+    Expression condition = Expression.nonNull(question).then(sb.field("userId").contains(question));
+    int total = mapper.countByTemplate(sb.from(Issue.class).where(condition).count().template());
+    if (start < total) {
+      SqlBuilder.Template template = sb.from(Issue.class)
+        .where(condition)
+        .orderBy(sort, asc)
+        .limit(start, count)
+        .template();
+      final List<Issue> list = mapper.findByTemplate(template);
+      return responseOf(total, list);
     }
-    String answer = issue.getAnswer();
-    if (StringUtils.isEmpty(answer)) {
-      return ResponseUtil.badArgument();
-    }
-    return null;
+    return responseOf(total, Collections.emptyList());
   }
 
-  @RequiresPermissions("admin:issue:create")
-  @RequiresPermissionsDesc(menu = {"商场管理", "通用问题"}, button = "添加")
-  @PostMapping("/create")
-  public Object create(@RequestBody LitemallIssue issue) {
-    Object error = validate(issue);
-    if (error != null) {
-      return error;
-    }
-    issueService.add(issue);
-    return ResponseUtil.ok(issue);
+  @Override
+  protected String name() {
+    return "问题";
   }
-
-  @RequiresPermissions("admin:issue:read")
-  @GetMapping("/read")
-  public Object read(@NotNull Integer id) {
-    LitemallIssue issue = issueService.findById(id);
-    return ResponseUtil.ok(issue);
-  }
-
-  @RequiresPermissions("admin:issue:update")
-  @RequiresPermissionsDesc(menu = {"商场管理", "通用问题"}, button = "编辑")
-  @PostMapping("/update")
-  public Object update(@RequestBody LitemallIssue issue) {
-    Object error = validate(issue);
-    if (error != null) {
-      return error;
-    }
-    if (issueService.updateById(issue) == 0) {
-      return ResponseUtil.updatedDataFailed();
-    }
-
-    return ResponseUtil.ok(issue);
-  }
-
-  @RequiresPermissions("admin:issue:delete")
-  @RequiresPermissionsDesc(menu = {"商场管理", "通用问题"}, button = "删除")
-  @PostMapping("/delete")
-  public Object delete(@RequestBody LitemallIssue issue) {
-    Integer id = issue.getId();
-    if (id == null) {
-      return ResponseUtil.badArgument();
-    }
-    issueService.deleteById(id);
-    return ResponseUtil.ok();
-  }
-
 }

@@ -33,7 +33,7 @@ public class User implements Entity<String> {
   private String avatar;
   private String wxOpenId;
   private String sessionKey;
-  private Byte status;
+  private int status;
   @Transient
   @JsonIgnore
   private Date createTime;

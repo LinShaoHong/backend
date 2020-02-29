@@ -19,11 +19,15 @@ import java.util.Date;
 @NamingStrategy
 @Table(name = "mall_collection")
 public class Collection implements Entity<String> {
+  public enum Type {
+    GOODS, TOPIC
+  }
+
   @Id
   private String id;
   private String userId;
   private String valueId;
-  private int type;
+  private Type type;
   @Transient
   @JsonIgnore
   private Date createTime;

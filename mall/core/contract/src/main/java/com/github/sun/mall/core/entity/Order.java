@@ -1,6 +1,8 @@
 package com.github.sun.mall.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.sun.foundation.modelling.Converter;
+import com.github.sun.foundation.modelling.JsonHandler;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +12,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -44,18 +47,18 @@ public class Order implements Entity<String> {
   private String mobile;
   private String address;
   private String message;
-  private String goodsPrice;
-  private String freightPrice;
-  private String couponPrice;
-  private String integralPrice;
-  private String grouponPrice;
-  private String orderPrice;
-  private String actualPrice;
+  private BigDecimal goodsPrice;
+  private BigDecimal freightPrice;
+  private BigDecimal couponPrice;
+  private BigDecimal integralPrice;
+  private BigDecimal grouponPrice;
+  private BigDecimal orderPrice;
+  private BigDecimal actualPrice;
   private String payId;
   private long payTime;
   private String shipSn;
   private String shipChannel;
-  private LocalDateTime shipTime;
+  private long shipTime;
   private String refundAmount;
   private String refundType;
   private String refundContent;
@@ -93,8 +96,9 @@ public class Order implements Entity<String> {
     private String goodsName;
     private String goodsSn;
     private String productId;
-    private Short number;
-    private String price;
+    private int number;
+    private BigDecimal price;
+    @Converter(JsonHandler.ListStringHandler.class)
     private List<String> specifications;
     private String picUrl;
     private int comment;

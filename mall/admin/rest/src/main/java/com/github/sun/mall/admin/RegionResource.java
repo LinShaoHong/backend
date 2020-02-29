@@ -1,88 +1,83 @@
 package com.github.sun.mall.admin;
 
 import com.github.sun.foundation.rest.AbstractResource;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.linlinjava.litemall.admin.vo.RegionVo;
-import org.linlinjava.litemall.core.util.ResponseUtil;
-import org.linlinjava.litemall.db.domain.LitemallRegion;
-import org.linlinjava.litemall.db.service.LitemallRegionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.github.sun.mall.core.RegionMapper;
+import com.github.sun.mall.core.entity.Region;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.Builder;
+import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RestController
-@RequestMapping("/admin/region")
-@Validated
+@Path("/v1/mall/admin/region")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Api(value = "mall-admin: 区域管理: region")
 public class RegionResource extends AbstractResource {
-    private final Log logger = LogFactory.getLog(RegionResource.class);
+  private final RegionMapper mapper;
 
-    @Autowired
-    private LitemallRegionService regionService;
+  @Inject
+  public RegionResource(RegionMapper mapper) {
+    this.mapper = mapper;
+  }
 
-    @GetMapping("/clist")
-    public Object clist(@NotNull Integer id) {
-        List<LitemallRegion> regionList = regionService.queryByPid(id);
-        return ResponseUtil.okList(regionList);
+  @GET
+  @ApiOperation("获取区域树")
+  public ListResponse<Tree> getAll() {
+    List<Region> list = mapper.findAll();
+    Map<Integer, List<Region>> map = list.stream().collect(Collectors.groupingBy(Region::getPid));
+    List<Tree> provinces = list.stream().filter(v -> v.getType() == 1)
+      .map(v -> Tree.builder()
+        .id(v.getId())
+        .name(v.getName())
+        .code(v.getCode())
+        .type(v.getType())
+        .build())
+      .collect(Collectors.toList());
+    return responseOf(makeTree(map, provinces));
+  }
+
+  private List<Tree> makeTree(Map<Integer, List<Region>> map, List<Tree> roots) {
+    class Util {
+      private Tree makeTree(Tree node) {
+        List<Tree> arr = map.getOrDefault(node.getId(), Collections.emptyList()).stream()
+          .map(v -> Tree.builder()
+            .id(v.getId())
+            .name(v.getName())
+            .code(v.getCode())
+            .type(v.getType())
+            .build())
+          .collect(Collectors.toList());
+        List<Tree> children = arr.stream().map(this::makeTree).collect(Collectors.toList());
+        node.setChildren(children);
+        return node;
+      }
     }
+    Util u = new Util();
+    return roots.stream().map(u::makeTree).collect(Collectors.toList());
+  }
 
-    @GetMapping("/list")
-    public Object list() {
-        List<RegionVo> regionVoList = new ArrayList<>();
+  @Data
+  @Builder
+  private static class Tree {
+    private int id;
+    private String name;
+    private int code;
+    private int type;
+    private List<Tree> children;
+  }
 
-        List<LitemallRegion> litemallRegions = regionService.getAll();
-        Map<Byte, List<LitemallRegion>> collect = litemallRegions.stream().collect(Collectors.groupingBy(LitemallRegion::getType));
-        byte provinceType = 1;
-        List<LitemallRegion> provinceList = collect.get(provinceType);
-        byte cityType = 2;
-        List<LitemallRegion> city = collect.get(cityType);
-        Map<Integer, List<LitemallRegion>> cityListMap = city.stream().collect(Collectors.groupingBy(LitemallRegion::getPid));
-        byte areaType = 3;
-        List<LitemallRegion> areas = collect.get(areaType);
-        Map<Integer, List<LitemallRegion>> areaListMap = areas.stream().collect(Collectors.groupingBy(LitemallRegion::getPid));
-
-        for (LitemallRegion province : provinceList) {
-            RegionVo provinceVO = new RegionVo();
-            provinceVO.setId(province.getId());
-            provinceVO.setName(province.getName());
-            provinceVO.setCode(province.getCode());
-            provinceVO.setType(province.getType());
-
-            List<LitemallRegion> cityList = cityListMap.get(province.getId());
-            List<RegionVo> cityVOList = new ArrayList<>();
-            for (LitemallRegion cityVo : cityList) {
-                RegionVo cityVO = new RegionVo();
-                cityVO.setId(cityVo.getId());
-                cityVO.setName(cityVo.getName());
-                cityVO.setCode(cityVo.getCode());
-                cityVO.setType(cityVo.getType());
-
-                List<LitemallRegion> areaList = areaListMap.get(cityVo.getId());
-                List<RegionVo> areaVOList = new ArrayList<>();
-                for (LitemallRegion area : areaList) {
-                    RegionVo areaVO = new RegionVo();
-                    areaVO.setId(area.getId());
-                    areaVO.setName(area.getName());
-                    areaVO.setCode(area.getCode());
-                    areaVO.setType(area.getType());
-                    areaVOList.add(areaVO);
-                }
-
-                cityVO.setChildren(areaVOList);
-                cityVOList.add(cityVO);
-            }
-            provinceVO.setChildren(cityVOList);
-            regionVoList.add(provinceVO);
-        }
-
-        return ResponseUtil.okList(regionVoList);
-    }
+  @GET
+  @Path("/${id}")
+  @ApiOperation("获取子区域列表")
+  public ListResponse<Region> children(@PathParam("id") String id) {
+    return responseOf(mapper.findByPid(id));
+  }
 }

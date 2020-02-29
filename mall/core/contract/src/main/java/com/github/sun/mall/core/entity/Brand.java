@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -29,7 +30,7 @@ public class Brand implements Entity<String> {
   private String picUrl;
   private int sortOrder;
   @NotEmpty(message = "缺少浮动价格")
-  private String floorPrice;
+  private BigDecimal floorPrice;
   @Transient
   @JsonIgnore
   private Date createTime;

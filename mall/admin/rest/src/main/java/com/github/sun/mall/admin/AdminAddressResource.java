@@ -1,6 +1,7 @@
 package com.github.sun.mall.admin;
 
 import com.github.sun.foundation.expression.Expression;
+import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.mall.core.AddressMapper;
 import com.github.sun.mall.core.entity.Address;
@@ -17,12 +18,14 @@ import java.util.List;
 @Path("/v1/mall/admin/address")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall-admin: 收货地址管理")
-public class AdminAddressResource extends BasicCURDResource<Address, AddressMapper> {
+@Api(value = "mall-admin: 收货地址管理: address")
+public class AdminAddressResource extends AbstractResource {
+  private final AddressMapper mapper;
   private final SqlBuilder.Factory factory;
 
   @Inject
-  public AdminAddressResource(@Named("mysql") SqlBuilder.Factory factory) {
+  public AdminAddressResource(AddressMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
+    this.mapper = mapper;
     this.factory = factory;
   }
 
@@ -49,9 +52,5 @@ public class AdminAddressResource extends BasicCURDResource<Address, AddressMapp
     }
     return responseOf(total, Collections.emptyList());
   }
-
-  @Override
-  protected String name() {
-    return "收货地址";
-  }
 }
+

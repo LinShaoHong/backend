@@ -1,127 +1,58 @@
 package com.github.sun.mall.admin;
 
+import com.github.sun.foundation.expression.Expression;
+import com.github.sun.foundation.sql.SqlBuilder;
+import com.github.sun.mall.core.GoodsMapper;
 import com.github.sun.mall.core.TopicMapper;
 import com.github.sun.mall.core.entity.Topic;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.linlinjava.litemall.admin.annotation.RequiresPermissionsDesc;
-import org.linlinjava.litemall.core.util.JacksonUtil;
-import org.linlinjava.litemall.core.util.ResponseUtil;
-import org.linlinjava.litemall.core.validator.Order;
-import org.linlinjava.litemall.core.validator.Sort;
-import org.linlinjava.litemall.db.domain.LitemallGoods;
-import org.linlinjava.litemall.db.domain.LitemallTopic;
-import org.linlinjava.litemall.db.service.LitemallGoodsService;
-import org.linlinjava.litemall.db.service.LitemallTopicService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
-import org.springframework.validation.annotation.Validated;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-@RestController
-@RequestMapping("/admin/topic")
-@Validated
+@Path("/v1/mall/admin/topic")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Api(value = "mall-admin: 专题管理: topic")
 public class AdminTopicResource extends BasicCURDResource<Topic, TopicMapper> {
-  private final Log logger = LogFactory.getLog(AdminTopicResource.class);
+  private final SqlBuilder.Factory factory;
 
-  @Autowired
-  private LitemallTopicService topicService;
-  @Autowired
-  private LitemallGoodsService goodsService;
-
-  @RequiresPermissions("admin:topic:list")
-  @RequiresPermissionsDesc(menu = {"推广管理", "专题管理"}, button = "查询")
-  @GetMapping("/list")
-  public Object list(String title, String subtitle,
-                     @RequestParam(defaultValue = "1") Integer page,
-                     @RequestParam(defaultValue = "10") Integer limit,
-                     @Sort(accepts = {"id", "add_time", "price"}) @RequestParam(defaultValue = "add_time") String sort,
-                     @Order @RequestParam(defaultValue = "desc") String order) {
-    List<LitemallTopic> topicList = topicService.querySelective(title, subtitle, page, limit, sort, order);
-    return ResponseUtil.okList(topicList);
+  @Inject
+  public AdminTopicResource(@Named("mysql") SqlBuilder.Factory factory) {
+    this.factory = factory;
   }
 
-  private Object validate(LitemallTopic topic) {
-    String title = topic.getTitle();
-    if (StringUtils.isEmpty(title)) {
-      return ResponseUtil.badArgument();
+  @GET
+  @ApiOperation("分页获取专题列表")
+  public PageResponse<Topic> list(@QueryParam("title") String title,
+                                  @QueryParam("subtitle") String subtitle,
+                                  @QueryParam("start") int start,
+                                  @QueryParam("count") int count,
+                                  @QueryParam("sort") @DefaultValue("createTime") String sort,
+                                  @QueryParam("asc") boolean asc) {
+    SqlBuilder sb = factory.create();
+    Expression condition = Expression.nonNull(title).then(sb.field("keyword").contains(title))
+      .and(subtitle == null ? null : sb.field("subtitle").contains(subtitle));
+    int total = mapper.countByTemplate(sb.from(Topic.class).where(condition).count().template());
+    if (start < total) {
+      SqlBuilder.Template template = sb.from(Topic.class)
+        .where(condition)
+        .orderBy(sort, asc)
+        .limit(start, count)
+        .template();
+      final List<Topic> list = mapper.findByTemplate(template);
+      return responseOf(total, list);
     }
-    String content = topic.getContent();
-    if (StringUtils.isEmpty(content)) {
-      return ResponseUtil.badArgument();
-    }
-    BigDecimal price = topic.getPrice();
-    if (price == null) {
-      return ResponseUtil.badArgument();
-    }
-    return null;
+    return responseOf(total, Collections.emptyList());
   }
 
-  @RequiresPermissions("admin:topic:create")
-  @RequiresPermissionsDesc(menu = {"推广管理", "专题管理"}, button = "添加")
-  @PostMapping("/create")
-  public Object create(@RequestBody LitemallTopic topic) {
-    Object error = validate(topic);
-    if (error != null) {
-      return error;
-    }
-    topicService.add(topic);
-    return ResponseUtil.ok(topic);
-  }
-
-  @RequiresPermissions("admin:topic:read")
-  @RequiresPermissionsDesc(menu = {"推广管理", "专题管理"}, button = "详情")
-  @GetMapping("/read")
-  public Object read(@NotNull Integer id) {
-    LitemallTopic topic = topicService.findById(id);
-    Integer[] goodsIds = topic.getGoods();
-    List<LitemallGoods> goodsList = null;
-    if (goodsIds == null || goodsIds.length == 0) {
-      goodsList = new ArrayList<>();
-    } else {
-      goodsList = goodsService.queryByIds(goodsIds);
-    }
-    Map<String, Object> data = new HashMap<>(2);
-    data.put("topic", topic);
-    data.put("goodsList", goodsList);
-    return ResponseUtil.ok(data);
-  }
-
-  @RequiresPermissions("admin:topic:update")
-  @RequiresPermissionsDesc(menu = {"推广管理", "专题管理"}, button = "编辑")
-  @PostMapping("/update")
-  public Object update(@RequestBody LitemallTopic topic) {
-    Object error = validate(topic);
-    if (error != null) {
-      return error;
-    }
-    if (topicService.updateById(topic) == 0) {
-      return ResponseUtil.updatedDataFailed();
-    }
-    return ResponseUtil.ok(topic);
-  }
-
-  @RequiresPermissions("admin:topic:delete")
-  @RequiresPermissionsDesc(menu = {"推广管理", "专题管理"}, button = "删除")
-  @PostMapping("/delete")
-  public Object delete(@RequestBody LitemallTopic topic) {
-    topicService.deleteById(topic.getId());
-    return ResponseUtil.ok();
-  }
-
-  @RequiresPermissions("admin:topic:batch-delete")
-  @RequiresPermissionsDesc(menu = {"推广管理", "专题管理"}, button = "批量删除")
-  @PostMapping("/batch-delete")
-  public Object batchDelete(@RequestBody String body) {
-    List<Integer> ids = JacksonUtil.parseIntegerList(body, "ids");
-    topicService.deleteByIds(ids);
-    return ResponseUtil.ok();
+  @Override
+  protected String name() {
+    return "专题";
   }
 }

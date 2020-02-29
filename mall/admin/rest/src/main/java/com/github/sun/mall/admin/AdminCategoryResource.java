@@ -1,94 +1,68 @@
 package com.github.sun.mall.admin;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.github.sun.mall.core.CategoryMapper;
 import com.github.sun.mall.core.entity.Category;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.linlinjava.litemall.admin.vo.CategoryVo;
-import org.linlinjava.litemall.core.util.ResponseUtil;
-import org.linlinjava.litemall.db.domain.LitemallCategory;
-import org.springframework.util.StringUtils;
-import org.springframework.validation.annotation.Validated;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.Builder;
+import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-@RestController
-@RequestMapping("/admin/category")
-@Validated
+@Path("/v1/mall/admin/category")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Api(value = "mall-admin: 类目管理: category")
 public class AdminCategoryResource extends BasicCURDResource<Category, CategoryMapper> {
-  @GetMapping("/list")
-  public Object list() {
-    List<CategoryVo> categoryVoList = new ArrayList<>();
 
-    List<LitemallCategory> categoryList = categoryService.queryByPid(0);
-    for (LitemallCategory category : categoryList) {
-      CategoryVo categoryVO = new CategoryVo();
-      categoryVO.setId(category.getId());
-      categoryVO.setDesc(category.getDesc());
-      categoryVO.setIconUrl(category.getIconUrl());
-      categoryVO.setPicUrl(category.getPicUrl());
-      categoryVO.setKeywords(category.getKeywords());
-      categoryVO.setName(category.getName());
-      categoryVO.setLevel(category.getLevel());
-
-      List<CategoryVo> children = new ArrayList<>();
-      List<LitemallCategory> subCategoryList = categoryService.queryByPid(category.getId());
-      for (LitemallCategory subCategory : subCategoryList) {
-        CategoryVo subCategoryVo = new CategoryVo();
-        subCategoryVo.setId(subCategory.getId());
-        subCategoryVo.setDesc(subCategory.getDesc());
-        subCategoryVo.setIconUrl(subCategory.getIconUrl());
-        subCategoryVo.setPicUrl(subCategory.getPicUrl());
-        subCategoryVo.setKeywords(subCategory.getKeywords());
-        subCategoryVo.setName(subCategory.getName());
-        subCategoryVo.setLevel(subCategory.getLevel());
-
-        children.add(subCategoryVo);
-      }
-
-      categoryVO.setChildren(children);
-      categoryVoList.add(categoryVO);
-    }
-
-    return ResponseUtil.okList(categoryVoList);
+  @GET
+  @ApiOperation("获取所有类目")
+  public ListResponse<CategoryTreeResp> list() {
+    List<Category> categories = mapper.findAll();
+    Map<String, List<Category>> map = categories.stream().collect(Collectors.groupingBy(Category::getPid));
+    List<Category> roots = categories.stream().filter(v -> v.getLevel() == 1).collect(Collectors.toList());
+    return responseOf(roots.stream().map(root -> CategoryTreeResp.builder()
+      .category(root)
+      .children(map.getOrDefault(root.getId(), Collections.emptyList()))
+      .build()).collect(Collectors.toList()));
   }
 
-  private Object validate(LitemallCategory category) {
-    String name = category.getName();
-    if (StringUtils.isEmpty(name)) {
-      return ResponseUtil.badArgument();
-    }
-
-    String level = category.getLevel();
-    if (StringUtils.isEmpty(level)) {
-      return ResponseUtil.badArgument();
-    }
-    if (!level.equals("L1") && !level.equals("L2")) {
-      return ResponseUtil.badArgumentValue();
-    }
-
-    Integer pid = category.getPid();
-    if (level.equals("L2") && (pid == null)) {
-      return ResponseUtil.badArgument();
-    }
-
-    return null;
+  @Data
+  @Builder
+  private static class CategoryTreeResp {
+    @JsonUnwrapped
+    private Category category;
+    private List<Category> children;
   }
 
-  @RequiresPermissions("admin:category:list")
-  @GetMapping("/l1")
-  public Object catL1() {
-    // 所有一级分类目录
-    List<LitemallCategory> l1CatList = categoryService.queryL1();
-    List<Map<String, Object>> data = new ArrayList<>(l1CatList.size());
-    for (LitemallCategory category : l1CatList) {
-      Map<String, Object> d = new HashMap<>(2);
-      d.put("value", category.getId());
-      d.put("label", category.getName());
-      data.add(d);
-    }
-    return ResponseUtil.okList(data);
+  @GET
+  @Path("/l1")
+  @ApiOperation("获取所有一级类目")
+  public ListResponse<CategoryResp> getLevel1() {
+    return responseOf(mapper.findByLevel(1).stream().map(v -> CategoryResp.builder()
+      .value(v.getId())
+      .label(v.getName())
+      .build()).collect(Collectors.toList()));
+  }
+
+  @Data
+  @Builder
+  private static class CategoryResp {
+    private String value;
+    private String label;
+  }
+
+  @Override
+  protected String name() {
+    return "类目";
   }
 }

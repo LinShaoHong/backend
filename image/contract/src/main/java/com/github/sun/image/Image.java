@@ -1,5 +1,6 @@
 package com.github.sun.image;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,8 +49,10 @@ public class Image {
     private String localPath;
     private String originUrl;
     @Transient
+    @JsonIgnore
     private Date createTime;
     @Transient
+    @JsonIgnore
     private Date updateTime;
   }
 
@@ -68,8 +71,10 @@ public class Image {
     private long count;
     private String parentId;
     @Transient
+    @JsonIgnore
     private Date createTime;
     @Transient
+    @JsonIgnore
     private Date updateTime;
   }
 }

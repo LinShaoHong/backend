@@ -1,6 +1,8 @@
 package com.github.sun.mall.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.sun.foundation.modelling.Converter;
+import com.github.sun.foundation.modelling.JsonHandler;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +12,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 import java.util.List;
 
@@ -53,6 +56,7 @@ public class Coupon implements Entity<String> {
 
   @Id
   private String id;
+  @NotEmpty(message = "缺少优惠券名称")
   private String name;
   private String desc;
   private String tag;
@@ -63,6 +67,7 @@ public class Coupon implements Entity<String> {
   private Type type;
   private Status status;
   private GoodsType goodsType;
+  @Converter(JsonHandler.ListStringHandler.class)
   private List<String> goodsValue;
   private String code;
   private TimeType timeType;

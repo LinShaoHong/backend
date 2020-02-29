@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/cart")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall-core: 购物车服务")
+@Api(value = "mall-core: 购物车服务: cart")
 public class CartResource extends AbstractResource {
   private final CartMapper mapper;
   private final CartService service;
@@ -74,10 +74,10 @@ public class CartResource extends AbstractResource {
       BigDecimal checkedGoodsAmount = new BigDecimal(0.00);
       for (Cart cart : list) {
         goodsTotal += cart.getNumber();
-        goodsAmount = goodsAmount.add(new BigDecimal(cart.getPrice()).multiply(new BigDecimal(cart.getNumber())));
+        goodsAmount = goodsAmount.add(cart.getPrice().multiply(new BigDecimal(cart.getNumber())));
         if (cart.isChecked()) {
           checkedGoodsTotal += cart.getNumber();
-          checkedGoodsAmount = checkedGoodsAmount.add(new BigDecimal(cart.getPrice()).multiply(new BigDecimal(cart.getNumber())));
+          checkedGoodsAmount = checkedGoodsAmount.add(cart.getPrice().multiply(new BigDecimal(cart.getNumber())));
         }
       }
       return responseOf(CartResp.builder()
@@ -223,7 +223,7 @@ public class CartResource extends AbstractResource {
     // 收货地址
     Address address;
     if (addressId == null) {
-      address = addressMapper.findDefault(userId);
+      address = addressMapper.findByUserIdAndIsDefault(userId);
       if (address == null) {
         throw new NotFoundException("请先添加收货地址");
       }
@@ -257,9 +257,9 @@ public class CartResource extends AbstractResource {
     for (Cart cart : checkedGoodsList) {
       //  只有当团购规格商品ID符合才进行团购优惠
       if (grouponRules != null && grouponRules.getGoodsId().equals(cart.getGoodsId())) {
-        checkedGoodsPrice = checkedGoodsPrice.add(new BigDecimal(cart.getPrice()).subtract(grouponPrice).multiply(new BigDecimal(cart.getNumber())));
+        checkedGoodsPrice = checkedGoodsPrice.add(cart.getPrice().subtract(grouponPrice).multiply(new BigDecimal(cart.getNumber())));
       } else {
-        checkedGoodsPrice = checkedGoodsPrice.add(new BigDecimal(cart.getPrice()).multiply(new BigDecimal(cart.getNumber())));
+        checkedGoodsPrice = checkedGoodsPrice.add(cart.getPrice().multiply(new BigDecimal(cart.getNumber())));
       }
     }
 

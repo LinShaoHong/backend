@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/category")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall-core: 类目服务")
+@Api(value = "mall-core: 类目服务: category")
 public class CategoryResource extends AbstractResource {
   private final Cache<String, List<SingleCategoryResp>> cache = Caffeine.newBuilder()
     .expireAfterWrite(5, TimeUnit.MINUTES)
@@ -81,7 +81,7 @@ public class CategoryResource extends AbstractResource {
     // 当前一级分类目录对应的二级分类目录
     List<Category> currentSubCategory = null;
     if (null != currentCategory) {
-      currentSubCategory = mapper.findByParentId(currentCategory.getId());
+      currentSubCategory = mapper.findByPid(currentCategory.getId());
     }
     return responseOf(CategoryResp.builder()
       .categories(categories1)
@@ -107,7 +107,7 @@ public class CategoryResource extends AbstractResource {
     if (c == null) {
       throw new NotFoundException("Can not find category by id=" + id);
     }
-    List<Category> sub = mapper.findByParentId(c.getId());
+    List<Category> sub = mapper.findByPid(c.getId());
     return responseOf(SingleCategoryResp.builder()
       .currentCategory(c)
       .currentSubCategory(sub)

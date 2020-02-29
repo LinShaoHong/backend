@@ -1,6 +1,8 @@
 package com.github.sun.mall.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.sun.foundation.modelling.Converter;
+import com.github.sun.foundation.modelling.JsonHandler;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +29,7 @@ public class Admin implements Entity<String> {
   private String lastLoginIp;
   private long lastLoginTime;
   private String avatar;
+  @Converter(JsonHandler.SetStringHandler.class)
   private Set<String> roleIds;
   @Transient
   @JsonIgnore

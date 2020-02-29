@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
 @Data
@@ -21,6 +22,7 @@ import java.util.Date;
 public class Keyword implements Entity<String> {
   @Id
   private String id;
+  @NotEmpty(message = "缺少关键字")
   private String keyword;
   private String url;
   private boolean isHot;

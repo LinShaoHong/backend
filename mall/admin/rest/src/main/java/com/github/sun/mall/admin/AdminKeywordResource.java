@@ -1,97 +1,59 @@
 package com.github.sun.mall.admin;
 
-import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.foundation.expression.Expression;
+import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.mall.core.KeywordMapper;
 import com.github.sun.mall.core.entity.Keyword;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.linlinjava.litemall.admin.annotation.RequiresPermissionsDesc;
-import org.linlinjava.litemall.core.util.ResponseUtil;
-import org.linlinjava.litemall.core.validator.Order;
-import org.linlinjava.litemall.core.validator.Sort;
-import org.linlinjava.litemall.db.domain.LitemallKeyword;
-import org.linlinjava.litemall.db.service.LitemallKeywordService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
-import org.springframework.validation.annotation.Validated;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
-import javax.validation.constraints.NotNull;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.List;
 
-@RestController
-@RequestMapping("/admin/keyword")
-@Validated
+@Path("/v1/mall/admin/keyword")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Api(value = "mall-admin: 关键字管理: keyword")
 public class AdminKeywordResource extends BasicCURDResource<Keyword, KeywordMapper> {
-  private final Log logger = LogFactory.getLog(AdminKeywordResource.class);
+  private final KeywordMapper mapper;
+  private final SqlBuilder.Factory factory;
 
-  @Autowired
-  private LitemallKeywordService keywordService;
-
-  @RequiresPermissions("admin:keyword:list")
-  @RequiresPermissionsDesc(menu = {"商场管理", "关键词"}, button = "查询")
-  @GetMapping("/list")
-  public Object list(String keyword, String url,
-                     @RequestParam(defaultValue = "1") Integer page,
-                     @RequestParam(defaultValue = "10") Integer limit,
-                     @Sort @RequestParam(defaultValue = "add_time") String sort,
-                     @Order @RequestParam(defaultValue = "desc") String order) {
-    List<LitemallKeyword> keywordList = keywordService.querySelective(keyword, url, page, limit, sort, order);
-    return ResponseUtil.okList(keywordList);
+  @Inject
+  public AdminKeywordResource(KeywordMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
+    this.mapper = mapper;
+    this.factory = factory;
   }
 
-  private Object validate(LitemallKeyword keywords) {
-    String keyword = keywords.getKeyword();
-    if (StringUtils.isEmpty(keyword)) {
-      return ResponseUtil.badArgument();
+  @GET
+  @ApiOperation("分页获取关键字列表")
+  public PageResponse<Keyword> list(@QueryParam("keyword") String keyword,
+                                    @QueryParam("url") String url,
+                                    @QueryParam("start") int start,
+                                    @QueryParam("count") int count,
+                                    @QueryParam("sort") @DefaultValue("createTime") String sort,
+                                    @QueryParam("asc") boolean asc) {
+    SqlBuilder sb = factory.create();
+    Expression condition = Expression.nonNull(keyword).then(sb.field("keyword").contains(keyword))
+      .and(url == null ? null : sb.field("username").contains(url));
+    int total = mapper.countByTemplate(sb.from(Keyword.class).where(condition).count().template());
+    if (start < total) {
+      SqlBuilder.Template template = sb.from(Keyword.class)
+        .where(condition)
+        .orderBy(sort, asc)
+        .limit(start, count)
+        .template();
+      final List<Keyword> list = mapper.findByTemplate(template);
+      return responseOf(total, list);
     }
-    return null;
+    return responseOf(total, Collections.emptyList());
   }
 
-  @RequiresPermissions("admin:keyword:create")
-  @RequiresPermissionsDesc(menu = {"商场管理", "关键词"}, button = "添加")
-  @PostMapping("/create")
-  public Object create(@RequestBody LitemallKeyword keyword) {
-    Object error = validate(keyword);
-    if (error != null) {
-      return error;
-    }
-    keywordService.add(keyword);
-    return ResponseUtil.ok(keyword);
+  @Override
+  protected String name() {
+    return "关键字";
   }
-
-  @RequiresPermissions("admin:keyword:read")
-  @RequiresPermissionsDesc(menu = {"商场管理", "关键词"}, button = "详情")
-  @GetMapping("/read")
-  public Object read(@NotNull Integer id) {
-    LitemallKeyword keyword = keywordService.findById(id);
-    return ResponseUtil.ok(keyword);
-  }
-
-  @RequiresPermissions("admin:keyword:update")
-  @RequiresPermissionsDesc(menu = {"商场管理", "关键词"}, button = "编辑")
-  @PostMapping("/update")
-  public Object update(@RequestBody LitemallKeyword keyword) {
-    Object error = validate(keyword);
-    if (error != null) {
-      return error;
-    }
-    if (keywordService.updateById(keyword) == 0) {
-      return ResponseUtil.updatedDataFailed();
-    }
-    return ResponseUtil.ok(keyword);
-  }
-
-  @RequiresPermissions("admin:keyword:delete")
-  @RequiresPermissionsDesc(menu = {"商场管理", "关键词"}, button = "删除")
-  @PostMapping("/delete")
-  public Object delete(@RequestBody LitemallKeyword keyword) {
-    Integer id = keyword.getId();
-    if (id == null) {
-      return ResponseUtil.badArgument();
-    }
-    keywordService.deleteById(id);
-    return ResponseUtil.ok();
-  }
-
 }

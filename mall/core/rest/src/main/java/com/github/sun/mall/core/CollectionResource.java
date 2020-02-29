@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/collection")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall-core: 收藏服务")
+@Api(value = "mall-core: 收藏服务: collection")
 public class CollectionResource extends AbstractResource {
   private final CollectionMapper mapper;
   private final GoodsMapper goodsMapper;
@@ -94,7 +94,7 @@ public class CollectionResource extends AbstractResource {
   @ApiOperation("用户收藏添加或删除")
   public Response add(@Valid @NotNull(message = "缺少实体") Req req, @Context LoginUser user) {
     String userId = user.getId();
-    com.github.sun.mall.core.entity.Collection collection = mapper.findByUserIdAndTypeAndValueId(userId, req.getType(), req.getValueId());
+    Collection collection = mapper.findByUserIdAndTypeAndValueId(userId, req.getType(), req.getValueId());
     if (collection != null) {
       mapper.delete(collection);
     } else {
@@ -112,7 +112,7 @@ public class CollectionResource extends AbstractResource {
   @NoArgsConstructor
   @AllArgsConstructor
   private static class Req {
-    private int type;
+    private Collection.Type type;
     @NotNull(message = "缺少商品")
     private String valueId;
   }

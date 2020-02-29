@@ -10,6 +10,6 @@ import org.apache.ibatis.annotations.Select;
 public interface CollectionMapper extends CompositeMapper<Collection> {
   @Select("SELECT * FROM mall_collection WHERE userId = #{userId} AND type = #{type} AND valueId = #{valueId}")
   Collection findByUserIdAndTypeAndValueId(@Param("userId") String userId,
-                                           @Param("type") int type,
+                                           @Param("type") Collection.Type type,
                                            @Param("valueId") String valueId);
 }

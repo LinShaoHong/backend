@@ -1,53 +1,56 @@
 package com.github.sun.mall.admin;
 
+import com.github.sun.foundation.expression.Expression;
+import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.mall.core.CommentMapper;
 import com.github.sun.mall.core.entity.Comment;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.linlinjava.litemall.admin.annotation.RequiresPermissionsDesc;
-import org.linlinjava.litemall.core.util.ResponseUtil;
-import org.linlinjava.litemall.core.validator.Order;
-import org.linlinjava.litemall.core.validator.Sort;
-import org.linlinjava.litemall.db.domain.LitemallComment;
-import org.linlinjava.litemall.db.service.LitemallCommentService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.List;
 
-@RestController
-@RequestMapping("/admin/comment")
-@Validated
-public class AdminCommentResource extends BasicCURDResource<Comment, CommentMapper> {
-  {
-    private final Log logger = LogFactory.getLog(AdminCommentResource.class);
+@Path("/v1/mall/admin/comment")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Api(value = "mall-admin: 评价管理: comment")
+public class AdminCommentResource extends AbstractResource {
+  private final CommentMapper mapper;
+  private final SqlBuilder.Factory factory;
 
-    @Autowired
-    private LitemallCommentService commentService;
-
-    @RequiresPermissions("admin:comment:list")
-    @RequiresPermissionsDesc(menu = {"商品管理", "评论管理"}, button = "查询")
-    @GetMapping("/list")
-    public Object list (String userId, String valueId,
-    @RequestParam(defaultValue = "1") Integer page,
-    @RequestParam(defaultValue = "10") Integer limit,
-    @Sort @RequestParam(defaultValue = "add_time") String sort,
-    @Order @RequestParam(defaultValue = "desc") String order){
-    List<LitemallComment> commentList = commentService.querySelective(userId, valueId, page, limit, sort, order);
-    return ResponseUtil.okList(commentList);
+  @Inject
+  public AdminCommentResource(CommentMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
+    this.mapper = mapper;
+    this.factory = factory;
   }
 
-    @RequiresPermissions("admin:comment:delete")
-    @RequiresPermissionsDesc(menu = {"商品管理", "评论管理"}, button = "删除")
-    @PostMapping("/delete")
-    public Object delete (@RequestBody LitemallComment comment){
-    Integer id = comment.getId();
-    if (id == null) {
-      return ResponseUtil.badArgument();
+  @GET
+  @ApiOperation("分页获取评价列表")
+  public PageResponse<Comment> list(@QueryParam("userId") String userId,
+                                    @QueryParam("valueId") String valueId,
+                                    @QueryParam("start") int start,
+                                    @QueryParam("count") int count,
+                                    @QueryParam("sort") @DefaultValue("createTime") String sort,
+                                    @QueryParam("asc") boolean asc) {
+    SqlBuilder sb = factory.create();
+    Expression condition = Expression.nonNull(userId).then(sb.field("userId").eq(userId))
+      .and(valueId == null ? null : sb.field("valueId").contains(valueId).and(sb.field("type").eq(Comment.Type.GOODS.name())))
+      .and(sb.field("type").ne(Comment.Type.ORDER.name()));
+    int total = mapper.countByTemplate(sb.from(Comment.class).where(condition).count().template());
+    if (start < total) {
+      SqlBuilder.Template template = sb.from(Comment.class)
+        .where(condition)
+        .orderBy(sort, asc)
+        .limit(start, count)
+        .template();
+      final List<Comment> list = mapper.findByTemplate(template);
+      return responseOf(total, list);
     }
-    commentService.deleteById(id);
-    return ResponseUtil.ok();
-  }
+    return responseOf(total, Collections.emptyList());
   }
 }

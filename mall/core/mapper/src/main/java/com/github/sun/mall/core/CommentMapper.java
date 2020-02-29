@@ -12,5 +12,5 @@ public interface CommentMapper extends CompositeMapper<Comment> {
   int countByTypeAndValueId(@Param("type") Comment.Type type, @Param("valueId") String valueId);
 
   @Select("SELECT COUNT(0) FROM mall_comment WHERE type = #{type} AND valueId = #{valueId} AND hasPicture = TRUE")
-  int countByTypeAndValueIdAndHasPic(@Param("type") Comment.Type type, @Param("valueId") String valueId);
+  int countByTypeAndValueIdAndHasPicture(@Param("type") Comment.Type type, @Param("valueId") String valueId);
 }

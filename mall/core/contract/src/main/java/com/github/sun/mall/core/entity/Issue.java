@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
 @Data
@@ -21,7 +22,9 @@ import java.util.Date;
 public class Issue implements Entity<String> {
   @Id
   private String id;
+  @NotEmpty(message = "缺少问题")
   private String question;
+  @NotEmpty(message = "缺少回答")
   private String answer;
   @Transient
   @JsonIgnore

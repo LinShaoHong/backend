@@ -7,7 +7,6 @@ import com.github.sun.foundation.mybatis.BasicService;
 import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.mall.core.entity.AfterSale;
 import com.github.sun.mall.core.entity.Order;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +36,7 @@ public class AfterSaleService extends BasicService<String, AfterSale, AfterSaleM
     if (!order.isConfirm() && !order.isAutoConfirm()) {
       throw new BadRequestException("订单未完成，不能申请售后");
     }
-    BigDecimal amount = new BigDecimal(order.getActualPrice()).subtract(new BigDecimal(order.getFreightPrice()));
+    BigDecimal amount = order.getActualPrice().subtract(order.getFreightPrice());
     if (new BigDecimal(afterSale.getAmount()).compareTo(amount) > 0) {
       throw new BadRequestException("退款金额不正确");
     }
@@ -91,7 +90,7 @@ public class AfterSaleService extends BasicService<String, AfterSale, AfterSaleM
     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
     String now = df.format(LocalDate.now());
     String afterSaleSn = now + getRandomNum(6);
-    while (mapper.countByUserIdAndSn(userId, afterSaleSn) != 0) {
+    while (mapper.countByUserIdAndAfterSaleSn(userId, afterSaleSn) != 0) {
       afterSaleSn = now + getRandomNum(6);
     }
     return afterSaleSn;

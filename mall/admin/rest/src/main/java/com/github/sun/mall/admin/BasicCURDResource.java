@@ -11,6 +11,7 @@ import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
+import java.util.List;
 
 public abstract class BasicCURDResource<V extends Entity<String>, M extends CompositeMapper<V>> extends AbstractResource {
   @Resource
@@ -60,6 +61,14 @@ public abstract class BasicCURDResource<V extends Entity<String>, M extends Comp
       throw new NotFoundException("Can not find ad " + name() + " id=" + id);
     }
     mapper.deleteById(id);
+    return responseOf();
+  }
+
+  @DELETE
+  @Path("/[{ids}]")
+  @ApiOperation("批量删除")
+  public Response delete(@PathParam("ids") List<String> ids) {
+    mapper.deleteByIds(ids);
     return responseOf();
   }
 }

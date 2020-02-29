@@ -15,10 +15,10 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "mall_region")
-public class Region implements Entity<String> {
+public class Region implements Entity<Integer> {
   @Id
-  private String id;
-  private String pid;
+  private Integer id;
+  private Integer pid;
   private String name;
   private int type;
   private int code;

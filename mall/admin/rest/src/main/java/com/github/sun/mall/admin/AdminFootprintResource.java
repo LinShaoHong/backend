@@ -1,45 +1,55 @@
 package com.github.sun.mall.admin;
 
+import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.mall.core.FootprintMapper;
 import com.github.sun.mall.core.entity.Footprint;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.linlinjava.litemall.admin.annotation.RequiresPermissionsDesc;
-import org.linlinjava.litemall.core.util.ResponseUtil;
-import org.linlinjava.litemall.core.validator.Order;
-import org.linlinjava.litemall.core.validator.Sort;
-import org.linlinjava.litemall.db.domain.LitemallFootprint;
-import org.linlinjava.litemall.db.service.LitemallFootprintService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.List;
 
-@RestController
-@RequestMapping("/admin/footprint")
-@Validated
-public class AdminFootprintResource extends BasicCURDResource<Footprint, FootprintMapper> {
-  private final Log logger = LogFactory.getLog(AdminFootprintResource.class);
+@Path("/v1/mall/admin/footprint")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Api(value = "mall-admin: 历史足迹管理: footprint")
+public class AdminFootprintResource extends AbstractResource {
+  private final FootprintMapper mapper;
+  private final SqlBuilder.Factory factory;
 
-  @Autowired
-  private LitemallFootprintService footprintService;
+  @Inject
+  public AdminFootprintResource(FootprintMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
+    this.mapper = mapper;
+    this.factory = factory;
+  }
 
-  @RequiresPermissions("admin:footprint:list")
-  @RequiresPermissionsDesc(menu = {"用户管理", "用户足迹"}, button = "查询")
-  @GetMapping("/list")
-  public Object list(String userId, String goodsId,
-                     @RequestParam(defaultValue = "1") Integer page,
-                     @RequestParam(defaultValue = "10") Integer limit,
-                     @Sort @RequestParam(defaultValue = "add_time") String sort,
-                     @Order @RequestParam(defaultValue = "desc") String order) {
-    List<LitemallFootprint> footprintList = footprintService.querySelective(userId, goodsId, page, limit, sort,
-      order);
-    return ResponseUtil.okList(footprintList);
+  @GET
+  @ApiOperation("分页获取足迹列表")
+  public PageResponse<Footprint> paged(@QueryParam("userId") String userId,
+                                       @QueryParam("goodsId") String goodsId,
+                                       @QueryParam("start") int start,
+                                       @QueryParam("count") int count,
+                                       @QueryParam("sort") @DefaultValue("createTime") String sort,
+                                       @QueryParam("asc") boolean asc) {
+    SqlBuilder sb = factory.create();
+    Expression condition = Expression.nonNull(userId).then(sb.field("userId").eq(userId))
+      .and(goodsId == null ? null : sb.field("username").eq(goodsId));
+    int total = mapper.countByTemplate(sb.from(Footprint.class).where(condition).count().template());
+    if (start < total) {
+      SqlBuilder.Template template = sb.from(Footprint.class)
+        .where(condition)
+        .orderBy(sort, asc)
+        .limit(start, count)
+        .template();
+      final List<Footprint> list = mapper.findByTemplate(template);
+      return responseOf(total, list);
+    }
+    return responseOf(total, Collections.emptyList());
   }
 }

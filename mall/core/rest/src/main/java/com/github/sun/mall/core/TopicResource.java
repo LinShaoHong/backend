@@ -22,7 +22,7 @@ import java.util.List;
 @Path("/v1/mall/topic")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall-core: 专题服务")
+@Api(value = "mall-core: 专题服务: topic")
 public class TopicResource extends AbstractResource {
   private final TopicMapper mapper;
   private final GoodsMapper goodsMapper;

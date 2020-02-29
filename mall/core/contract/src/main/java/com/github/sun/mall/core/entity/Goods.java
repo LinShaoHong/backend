@@ -1,6 +1,8 @@
 package com.github.sun.mall.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.sun.foundation.modelling.Converter;
+import com.github.sun.foundation.modelling.JsonHandler;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +12,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -24,20 +27,21 @@ public class Goods implements Entity<String> {
   private String id;
   private String sn;
   private String name;
-  private Integer categoryId;
-  private Integer brandId;
+  private String categoryId;
+  private String brandId;
+  @Converter(JsonHandler.ListStringHandler.class)
   private List<String> gallery;
   private String keywords;
   private String brief;
   private boolean isOnSale;
-  private Short sortOrder;
+  private int sortOrder;
   private String picUrl;
   private String shareUrl;
   private boolean isNew;
   private boolean isHot;
   private String unit;
-  private String counterPrice;
-  private String retailPrice;
+  private BigDecimal counterPrice;
+  private BigDecimal retailPrice;
   private String detail;
   @Transient
   @JsonIgnore
@@ -76,8 +80,9 @@ public class Goods implements Entity<String> {
     @Id
     private String id;
     private String goodsId;
+    @Converter(JsonHandler.ListStringHandler.class)
     private List<String> specifications;
-    private String price;
+    private BigDecimal price;
     private int number;
     private String url;
     @Transient

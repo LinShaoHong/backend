@@ -1,6 +1,8 @@
 package com.github.sun.mall.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.sun.foundation.modelling.Converter;
+import com.github.sun.foundation.modelling.JsonHandler;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,6 +48,7 @@ public class AfterSale implements Entity<String> {
   private String reason;
   @NotNull(message = "缺少退款金额")
   private String amount;
+  @Converter(JsonHandler.ListStringHandler.class)
   private List<String> pictures;
   private String comment;
   private Status status;

@@ -1,6 +1,8 @@
 package com.github.sun.mall.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.sun.foundation.modelling.Converter;
+import com.github.sun.foundation.modelling.JsonHandler;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,7 +26,7 @@ import java.util.List;
 @Table(name = "mall_comment")
 public class Comment implements Entity<String> {
   public enum Type {
-    GOODS, TOPIC
+    GOODS, TOPIC, ORDER
   }
 
   @Id
@@ -37,6 +39,7 @@ public class Comment implements Entity<String> {
   private String adminContent;
   private String userId;
   private boolean hasPicture;
+  @Converter(JsonHandler.ListStringHandler.class)
   private List<String> picUrls;
   @Min(value = 1, message = "星级小于1")
   @Max(value = 5, message = "星级大于5")

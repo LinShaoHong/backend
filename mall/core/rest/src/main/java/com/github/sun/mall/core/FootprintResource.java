@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 @Path("/v1/mall/footprint")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "mall-core: 访问足迹服务")
+@Api(value = "mall-core: 访问足迹服务: footprint")
 public class FootprintResource extends AbstractResource {
   private final FootprintMapper mapper;
   private final GoodsMapper goodsMapper;
@@ -74,7 +75,7 @@ public class FootprintResource extends AbstractResource {
     private String name;
     private String brief;
     private String picUrl;
-    private String retailPrice;
+    private BigDecimal retailPrice;
   }
 
   @DELETE
