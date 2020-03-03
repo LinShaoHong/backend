@@ -29,7 +29,7 @@ public class AfterSaleService extends BasicService<String, AfterSale, AfterSaleM
       throw new NotFoundException("Can not find order by id=" + afterSale.getOrderId());
     }
     AfterSale.Status status = order.getAfterSaleStatus();
-    if (status == AfterSale.Status.ACCEPT || status == AfterSale.Status.REFUND) {
+    if (status == AfterSale.Status.ACCEPTED || status == AfterSale.Status.REFUND) {
       throw new BadRequestException("已申请售后");
     }
     // 订单必须完成才能进入售后流程。
@@ -37,17 +37,17 @@ public class AfterSaleService extends BasicService<String, AfterSale, AfterSaleM
       throw new BadRequestException("订单未完成，不能申请售后");
     }
     BigDecimal amount = order.getActualPrice().subtract(order.getFreightPrice());
-    if (new BigDecimal(afterSale.getAmount()).compareTo(amount) > 0) {
+    if (afterSale.getAmount().compareTo(amount) > 0) {
       throw new BadRequestException("退款金额不正确");
     }
     // 如果有旧的售后记录则删除（例如用户已取消，管理员拒绝）
     mapper.deleteByUserIdAndOrderId(userId, afterSale.getOrderId());
     afterSale.setId(IdGenerator.next());
     afterSale.setUserId(userId);
-    afterSale.setStatus(AfterSale.Status.REQUEST);
-    afterSale.setAfterSaleSn(generateAfterSaleSn(userId));
+    afterSale.setStatus(AfterSale.Status.APPLIED);
+    afterSale.setSn(generateAfterSaleSn(userId));
     mapper.insert(afterSale);
-    orderMapper.updateAfterSaleStatus(afterSale.getId(), AfterSale.Status.REQUEST);
+    orderMapper.updateAfterSaleStatus(afterSale.getId(), AfterSale.Status.APPLIED);
   }
 
   @Transactional
@@ -66,13 +66,13 @@ public class AfterSaleService extends BasicService<String, AfterSale, AfterSaleM
       throw new BadRequestException("不支持售后");
     }
     AfterSale.Status afterStatus = order.getAfterSaleStatus();
-    if (afterStatus != AfterSale.Status.REQUEST) {
+    if (afterStatus != AfterSale.Status.APPLIED) {
       throw new BadRequestException("不能取消售后");
     }
-    afterSale.setStatus(AfterSale.Status.CANCEL);
+    afterSale.setStatus(AfterSale.Status.CANCELED);
     mapper.update(afterSale);
     // 订单的afterSale_status和售后记录的status是一致的
-    orderMapper.updateAfterSaleStatus(orderId, AfterSale.Status.CANCEL);
+    orderMapper.updateAfterSaleStatus(orderId, AfterSale.Status.CANCELED);
   }
 
   private String getRandomNum(int num) {

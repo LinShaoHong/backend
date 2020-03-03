@@ -1,6 +1,7 @@
 package com.github.sun.mall.admin;
 
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.mall.admin.entity.Admin;
 import com.github.sun.mall.core.GoodsMapper;
 import com.github.sun.mall.core.OrderMapper;
 import com.github.sun.mall.core.UserMapper;
@@ -14,6 +15,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 @Path("/v1/mall/admin/dashboard")
@@ -27,7 +29,10 @@ public class DashboardResource extends AbstractResource {
   private final OrderMapper orderMapper;
 
   @Inject
-  public DashboardResource(UserMapper userMapper, GoodsMapper goodsMapper, GoodsMapper.Product productMapper, OrderMapper orderMapper) {
+  public DashboardResource(UserMapper userMapper,
+                           GoodsMapper goodsMapper,
+                           GoodsMapper.Product productMapper,
+                           OrderMapper orderMapper) {
     this.userMapper = userMapper;
     this.goodsMapper = goodsMapper;
     this.productMapper = productMapper;
@@ -36,7 +41,7 @@ public class DashboardResource extends AbstractResource {
 
   @GET
   @ApiOperation("获取首页信息")
-  public SingleResponse<Resp> info() {
+  public SingleResponse<Resp> info(@Context Admin admin) {
     int userTotal = userMapper.count();
     int goodsTotal = goodsMapper.count();
     int productTotal = productMapper.count();

@@ -2,8 +2,6 @@ dependencies {
   compile project(":$rootName-image-rest")
   compile project(":$rootName-layout-rest")
   compile project(":$rootName-console-rest")
-  compile project(":$rootName-mall-core-rest")
-  compile project(":$rootName-mall-admin-rest")
 }
 
 apply from: project.file("./docker.gradle")

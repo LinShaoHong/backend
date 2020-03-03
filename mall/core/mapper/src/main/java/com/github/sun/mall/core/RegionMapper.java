@@ -10,6 +10,6 @@ import java.util.List;
 
 @Mapper
 public interface RegionMapper extends CompositeMapper<Region> {
-  @Select("SELECT * FROM mall_region WHERE pid = #{pid}")
-  List<Region> findByPid(@Param("pid") String pid);
+  @Select("SELECT * FROM mall_region WHERE pId = #{pId}")
+  List<Region> findByPId(@Param("pId") String pId);
 }

@@ -3,6 +3,8 @@ package com.github.sun.mall.admin;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
+import com.github.sun.mall.admin.auth.Authentication;
+import com.github.sun.mall.admin.entity.Admin;
 import com.github.sun.mall.core.CommentMapper;
 import com.github.sun.mall.core.entity.Comment;
 import io.swagger.annotations.Api;
@@ -11,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
@@ -31,12 +34,14 @@ public class AdminCommentResource extends AbstractResource {
 
   @GET
   @ApiOperation("分页获取评价列表")
-  public PageResponse<Comment> list(@QueryParam("userId") String userId,
-                                    @QueryParam("valueId") String valueId,
-                                    @QueryParam("start") int start,
-                                    @QueryParam("count") int count,
-                                    @QueryParam("sort") @DefaultValue("createTime") String sort,
-                                    @QueryParam("asc") boolean asc) {
+  @Authentication(value = "admin:comment:query", tags = {"商品管理", "评价管理", "查询"})
+  public PageResponse<Comment> getAll(@QueryParam("userId") String userId,
+                                      @QueryParam("valueId") String valueId,
+                                      @QueryParam("start") int start,
+                                      @QueryParam("count") int count,
+                                      @QueryParam("sort") @DefaultValue("createTime") String sort,
+                                      @QueryParam("asc") boolean asc,
+                                      @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonNull(userId).then(sb.field("userId").eq(userId))
       .and(valueId == null ? null : sb.field("valueId").contains(valueId).and(sb.field("type").eq(Comment.Type.GOODS.name())))

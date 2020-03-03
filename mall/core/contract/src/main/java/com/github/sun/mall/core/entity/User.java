@@ -25,7 +25,7 @@ public class User implements Entity<String> {
   private String password;
   private int gender;
   private String birthday;
-  private long lastLoginTime;
+  private Date lastLoginTime;
   private String lastLoginIp;
   private int userLevel;
   private String nickname;

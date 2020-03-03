@@ -1,175 +1,151 @@
-//package com.github.sun.mall.admin;
+package com.github.sun.mall.admin;
+
+import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.mall.admin.entity.Admin;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.Data;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.github.sun.mall.admin.AdminSessionService.TOKEN_EXPIRED;
+import static com.github.sun.mall.admin.AdminSessionService.TOKEN_NAME;
+
+
+@Path("/v1/mall/admin/auth")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Api(value = "mall-admin: 登录管理: auth")
+public class AdminAuthResource extends AbstractResource {
+  private final AdminSessionService service;
+  private final ContainerRequestContext request;
+
+  @Inject
+  public AdminAuthResource(AdminSessionService service, ContainerRequestContext request) {
+    this.service = service;
+    this.request = request;
+  }
+
+  @POST
+  @Path("/login")
+  @ApiOperation("登录")
+  public javax.ws.rs.core.Response login(@Valid @NotNull(message = "require body") LoginReq req) {
+    String token = service.login(req.getUsername(), req.getPassword(), getIpAddr());
+    NewCookie cookie = new NewCookie(TOKEN_NAME, token, "/", null, NewCookie.DEFAULT_VERSION, null, TOKEN_EXPIRED, null, false, true);
+    return javax.ws.rs.core.Response
+      .ok()
+      .cookie(cookie)
+      .entity(responseOf(token))
+      .build();
+  }
+
+  @Data
+  private static class LoginReq {
+    @NotNull(message = "缺少用户")
+    private String username;
+    @NotNull(message = "缺少密码")
+    private String password;
+  }
+
+  private String getIpAddr() {
+    String ipAddress;
+    try {
+      ipAddress = request.getHeaderString("x-forwarded-for");
+      if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+        ipAddress = request.getHeaderString("Proxy-Client-IP");
+      }
+      if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+        ipAddress = request.getHeaderString("WL-Proxy-Client-IP");
+      }
+      // 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
+      if (ipAddress != null && ipAddress.length() > 15) { // "***.***.***.***".length()
+        if (ipAddress.indexOf(",") > 0) {
+          ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
+        }
+      }
+    } catch (Exception e) {
+      ipAddress = "";
+    }
+
+    return ipAddress;
+  }
+
+  @POST
+  @Path("/logout")
+  @ApiOperation("登出")
+  public Object logout(@Context Admin admin) {
+    NewCookie cookie = new NewCookie(TOKEN_NAME, "", "/", null, "", 0, false, true);
+    return javax.ws.rs.core.Response
+      .ok()
+      .cookie(cookie)
+      .build();
+  }
+
+  @GET
+  @Path("/info")
+  public Object info(@Context Admin admin) {
+    Map<String, Object> data = new HashMap<>();
+    data.put("name", admin.getUsername());
+    data.put("avatar", admin.getAvatar());
+    data.put("perms", Arrays.asList("*"));
+    data.put("roles", Arrays.asList("超级管理员"));
+    return responseOf(data);
+  }
 //
-//import com.github.sun.foundation.rest.AbstractResource;
-//import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.LogFactory;
-//import org.apache.shiro.SecurityUtils;
-//import org.apache.shiro.authc.AuthenticationException;
-//import org.apache.shiro.authc.LockedAccountException;
-//import org.apache.shiro.authc.UnknownAccountException;
-//import org.apache.shiro.authc.UsernamePasswordToken;
-//import org.apache.shiro.authz.annotation.RequiresAuthentication;
-//import org.apache.shiro.subject.Subject;
-//import org.linlinjava.litemall.admin.service.LogHelper;
-//import org.linlinjava.litemall.admin.util.Permission;
-//import org.linlinjava.litemall.admin.util.PermissionUtil;
-//import org.linlinjava.litemall.core.util.IpUtil;
-//import org.linlinjava.litemall.core.util.JacksonUtil;
-//import org.linlinjava.litemall.core.util.ResponseUtil;
-//import org.linlinjava.litemall.db.domain.LitemallAdmin;
-//import org.linlinjava.litemall.db.service.LitemallAdminService;
-//import org.linlinjava.litemall.db.service.LitemallPermissionService;
-//import org.linlinjava.litemall.db.service.LitemallRoleService;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.context.ApplicationContext;
-//import org.springframework.util.StringUtils;
-//import org.springframework.validation.annotation.Validated;
+//  @Autowired
+//  private ApplicationContext context;
+//  private HashMap<String, String> systemPermissionsMap = null;
 //
-//import javax.servlet.http.HttpServletRequest;
-//import java.time.LocalDateTime;
-//import java.util.*;
-//
-//import static org.linlinjava.litemall.admin.util.AdminResponseCode.ADMIN_INVALID_ACCOUNT;
-//
-//@RestController
-//@RequestMapping("/admin/auth")
-//@Validated
-//public class AuthResource extends AbstractResource {
-//    private final Log logger = LogFactory.getLog(AuthResource.class);
-//
-//    @Autowired
-//    private LitemallAdminService adminService;
-//    @Autowired
-//    private LitemallRoleService roleService;
-//    @Autowired
-//    private LitemallPermissionService permissionService;
-//    @Autowired
-//    private LogHelper logHelper;
-//
-//    /*
-//     *  { username : value, password : value }
-//     */
-//    @PostMapping("/login")
-//    public Object login(@RequestBody String body, HttpServletRequest request) {
-//        String username = JacksonUtil.parseString(body, "username");
-//        String password = JacksonUtil.parseString(body, "password");
-//
-//        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
-//            return ResponseUtil.badArgument();
-//        }
-//
-//        Subject currentUser = SecurityUtils.getSubject();
-//        try {
-//            currentUser.login(new UsernamePasswordToken(username, password));
-//        } catch (UnknownAccountException uae) {
-//            logHelper.logAuthFail("登录", "用户帐号或密码不正确");
-//            return ResponseUtil.fail(ADMIN_INVALID_ACCOUNT, "用户帐号或密码不正确");
-//        } catch (LockedAccountException lae) {
-//            logHelper.logAuthFail("登录", "用户帐号已锁定不可用");
-//            return ResponseUtil.fail(ADMIN_INVALID_ACCOUNT, "用户帐号已锁定不可用");
-//
-//        } catch (AuthenticationException ae) {
-//            logHelper.logAuthFail("登录", "认证失败");
-//            return ResponseUtil.fail(ADMIN_INVALID_ACCOUNT, "认证失败");
-//        }
-//
-//        currentUser = SecurityUtils.getSubject();
-//        LitemallAdmin admin = (LitemallAdmin) currentUser.getPrincipal();
-//        admin.setLastLoginIp(IpUtil.getIpAddr(request));
-//        admin.setLastLoginTime(LocalDateTime.now());
-//        adminService.updateById(admin);
-//
-//        logHelper.logAuthSucceed("登录");
-//
-//        // userInfo
-//        Map<String, Object> adminInfo = new HashMap<String, Object>();
-//        adminInfo.put("nickName", admin.getUsername());
-//        adminInfo.put("avatar", admin.getAvatar());
-//
-//        Map<Object, Object> result = new HashMap<Object, Object>();
-//        result.put("token", currentUser.getSession().getId());
-//        result.put("adminInfo", adminInfo);
-//        return ResponseUtil.ok(result);
+//  private Collection<String> toApi(Set<String> permissions) {
+//    if (systemPermissionsMap == null) {
+//      systemPermissionsMap = new HashMap<>();
+//      final String basicPackage = "org.linlinjava.litemall.admin";
+//      List<Permission> systemPermissions = PermissionUtil.listPermission(context, basicPackage);
+//      for (Permission permission : systemPermissions) {
+//        String perm = permission.getRequiresPermissions().value()[0];
+//        String api = permission.getApi();
+//        systemPermissionsMap.put(perm, api);
+//      }
 //    }
 //
-//    /*
-//     *
-//     */
-//    @RequiresAuthentication
-//    @PostMapping("/logout")
-//    public Object logout() {
-//        Subject currentUser = SecurityUtils.getSubject();
+//    Collection<String> apis = new HashSet<>();
+//    for (String perm : permissions) {
+//      String api = systemPermissionsMap.get(perm);
+//      apis.add(api);
 //
-//        logHelper.logAuthSucceed("退出");
-//        currentUser.logout();
-//        return ResponseUtil.ok();
-//    }
-//
-//
-//    @RequiresAuthentication
-//    @GetMapping("/info")
-//    public Object info() {
-//        Subject currentUser = SecurityUtils.getSubject();
-//        LitemallAdmin admin = (LitemallAdmin) currentUser.getPrincipal();
-//
-//        Map<String, Object> data = new HashMap<>();
-//        data.put("name", admin.getUsername());
-//        data.put("avatar", admin.getAvatar());
-//
-//        Integer[] roleIds = admin.getRoleIds();
-//        Set<String> roles = roleService.queryByIds(roleIds);
-//        Set<String> permissions = permissionService.queryByRoleIds(roleIds);
-//        data.put("roles", roles);
-//        // NOTE
-//        // 这里需要转换perms结构，因为对于前端而已API形式的权限更容易理解
-//        data.put("perms", toApi(permissions));
-//        return ResponseUtil.ok(data);
-//    }
-//
-//    @Autowired
-//    private ApplicationContext context;
-//    private HashMap<String, String> systemPermissionsMap = null;
-//
-//    private Collection<String> toApi(Set<String> permissions) {
-//        if (systemPermissionsMap == null) {
-//            systemPermissionsMap = new HashMap<>();
-//            final String basicPackage = "org.linlinjava.litemall.admin";
-//            List<Permission> systemPermissions = PermissionUtil.listPermission(context, basicPackage);
-//            for (Permission permission : systemPermissions) {
-//                String perm = permission.getRequiresPermissions().value()[0];
-//                String api = permission.getApi();
-//                systemPermissionsMap.put(perm, api);
-//            }
-//        }
-//
-//        Collection<String> apis = new HashSet<>();
-//        for (String perm : permissions) {
-//            String api = systemPermissionsMap.get(perm);
-//            apis.add(api);
-//
-//            if (perm.equals("*")) {
-//                apis.clear();
-//                apis.add("*");
-//                return apis;
-//                //                return systemPermissionsMap.values();
-//
-//            }
-//        }
+//      if (perm.equals("*")) {
+//        apis.clear();
+//        apis.add("*");
 //        return apis;
-//    }
+//        //                return systemPermissionsMap.values();
 //
-//    @GetMapping("/401")
-//    public Object page401() {
-//        return ResponseUtil.unlogin();
+//      }
 //    }
+//    return apis;
+//  }
 //
-//    @GetMapping("/index")
-//    public Object pageIndex() {
-//        return ResponseUtil.ok();
-//    }
+//  @GetMapping("/401")
+//  public Object page401() {
+//    return ResponseUtil.unlogin();
+//  }
 //
-//    @GetMapping("/403")
-//    public Object page403() {
-//        return ResponseUtil.unauthz();
-//    }
-//}
+//  @GetMapping("/index")
+//  public Object pageIndex() {
+//    return ResponseUtil.ok();
+//  }
+//
+//  @GetMapping("/403")
+//  public Object page403() {
+//    return ResponseUtil.unauthz();
+//  }
+}

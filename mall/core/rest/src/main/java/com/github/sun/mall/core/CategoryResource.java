@@ -42,7 +42,7 @@ public class CategoryResource extends AbstractResource {
     return responseOf(cache.get("CATEGORY", key -> {
       // 所有一级分类目录
       List<Category> list = mapper.findAll();
-      Map<String, List<Category>> map = list.stream().collect(Collectors.groupingBy(Category::getPid));
+      Map<String, List<Category>> map = list.stream().collect(Collectors.groupingBy(Category::getPId));
       return list.stream()
         .filter(v -> v.getLevel() == 1)
         .map(v -> {
@@ -81,7 +81,7 @@ public class CategoryResource extends AbstractResource {
     // 当前一级分类目录对应的二级分类目录
     List<Category> currentSubCategory = null;
     if (null != currentCategory) {
-      currentSubCategory = mapper.findByPid(currentCategory.getId());
+      currentSubCategory = mapper.findByPId(currentCategory.getId());
     }
     return responseOf(CategoryResp.builder()
       .categories(categories1)
@@ -107,7 +107,7 @@ public class CategoryResource extends AbstractResource {
     if (c == null) {
       throw new NotFoundException("Can not find category by id=" + id);
     }
-    List<Category> sub = mapper.findByPid(c.getId());
+    List<Category> sub = mapper.findByPId(c.getId());
     return responseOf(SingleCategoryResp.builder()
       .currentCategory(c)
       .currentSubCategory(sub)

@@ -3,15 +3,17 @@ package com.github.sun.mall.admin;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
+import com.github.sun.mall.admin.auth.Authentication;
+import com.github.sun.mall.admin.entity.Admin;
 import com.github.sun.mall.core.UserMapper;
 import com.github.sun.mall.core.entity.User;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.validation.annotation.Validated;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
@@ -32,12 +34,14 @@ public class AdminUserResource extends AbstractResource {
 
   @GET
   @ApiOperation("分页获取用户信息")
-  public PageResponse<User> list(@QueryParam("username") String username,
-                                 @QueryParam("mobile") String mobile,
-                                 @QueryParam("start") int start,
-                                 @QueryParam("count") int count,
-                                 @QueryParam("sort") @DefaultValue("createTime") String sort,
-                                 @QueryParam("asc") boolean asc) {
+  @Authentication(value = "admin:user:query", tags = {"用户管理", "会员管理", "查询"})
+  public PageResponse<User> paged(@QueryParam("username") String username,
+                                  @QueryParam("mobile") String mobile,
+                                  @QueryParam("start") int start,
+                                  @QueryParam("count") int count,
+                                  @QueryParam("sort") @DefaultValue("createTime") String sort,
+                                  @QueryParam("asc") boolean asc,
+                                  @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonNull(username).then(sb.field("username").contains(username))
       .and(mobile == null ? null : sb.field("mobile").eq(mobile));

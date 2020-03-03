@@ -13,6 +13,6 @@ public interface CategoryMapper extends CompositeMapper<Category> {
   @Select("SELECT * FROM mall_category WHERE level = #{level}")
   List<Category> findByLevel(@Param("level") int level);
 
-  @Select("SELECT * FROM mall_category WHERE pid = #{pid}")
-  List<Category> findByPid(@Param("pid") String pid);
+  @Select("SELECT * FROM mall_category WHERE pId = #{pId}")
+  List<Category> findByPId(@Param("pId") String pId);
 }

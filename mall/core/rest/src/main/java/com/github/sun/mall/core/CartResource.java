@@ -238,7 +238,7 @@ public class CartResource extends AbstractResource {
     BigDecimal grouponPrice = new BigDecimal(0.00);
     Groupon.Rules grouponRules = grouponRulesMapper.findById(grouponRulesId);
     if (grouponRules != null) {
-      grouponPrice = new BigDecimal(grouponRules.getDiscount());
+      grouponPrice = grouponRules.getDiscount();
     }
 
     // 商品价格
@@ -276,8 +276,8 @@ public class CartResource extends AbstractResource {
         continue;
       }
       tmpCouponLength++;
-      if (tmpCouponPrice.compareTo(new BigDecimal(coupon.getDiscount())) < 0) {
-        tmpCouponPrice = new BigDecimal(coupon.getDiscount());
+      if (tmpCouponPrice.compareTo(coupon.getDiscount()) < 0) {
+        tmpCouponPrice = coupon.getDiscount();
         tmpCouponId = coupon.getId();
       }
     }
@@ -303,7 +303,7 @@ public class CartResource extends AbstractResource {
         couponId = tmpCouponId;
         userCouponId = tmpUserCouponId;
       } else {
-        couponPrice = new BigDecimal(coupon.getDiscount());
+        couponPrice = coupon.getDiscount();
       }
     }
 

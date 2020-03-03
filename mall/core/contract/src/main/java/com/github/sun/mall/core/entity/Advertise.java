@@ -18,7 +18,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "mall_ad")
+@Table(name = "mall_advertise")
 public class Advertise implements Entity<String> {
   @Id
   private String id;
@@ -29,8 +29,8 @@ public class Advertise implements Entity<String> {
   private int position;
   @NotEmpty(message = "缺少推广内容")
   private String content;
-  private long startTime;
-  private long endTime;
+  private Date startTime;
+  private Date endTime;
   private boolean enabled;
   @Transient
   @JsonIgnore

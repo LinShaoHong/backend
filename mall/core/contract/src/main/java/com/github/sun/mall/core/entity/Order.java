@@ -13,7 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -55,17 +54,17 @@ public class Order implements Entity<String> {
   private BigDecimal orderPrice;
   private BigDecimal actualPrice;
   private String payId;
-  private long payTime;
+  private Date payTime;
   private String shipSn;
   private String shipChannel;
-  private long shipTime;
-  private String refundAmount;
+  private Date shipTime;
+  private BigDecimal refundAmount;
   private String refundType;
   private String refundContent;
-  private long refundTime;
-  private long confirmTime;
+  private Date refundTime;
+  private Date confirmTime;
   private int comments;
-  private long endTime;
+  private Date endTime;
   @Transient
   @JsonIgnore
   private Date createTime;

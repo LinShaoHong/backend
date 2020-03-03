@@ -3,6 +3,8 @@ package com.github.sun.mall.admin;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
+import com.github.sun.mall.admin.auth.Authentication;
+import com.github.sun.mall.admin.entity.Admin;
 import com.github.sun.mall.core.AddressMapper;
 import com.github.sun.mall.core.entity.Address;
 import io.swagger.annotations.Api;
@@ -11,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
@@ -31,12 +34,14 @@ public class AdminAddressResource extends AbstractResource {
 
   @GET
   @ApiOperation("分页获取地址列表")
+  @Authentication(value = "admin:address:query", tags = {"用户管理", "收货地址", "查询"})
   public PageResponse<Address> paged(@QueryParam("userId") String userId,
                                      @QueryParam("name") String name,
                                      @QueryParam("start") int start,
                                      @QueryParam("count") int count,
                                      @QueryParam("sort") @DefaultValue("createTime") String sort,
-                                     @QueryParam("asc") boolean asc) {
+                                     @QueryParam("asc") boolean asc,
+                                     @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonNull(userId).then(sb.field("userId").eq(userId))
       .and(name == null ? null : sb.field("name").contains(name));

@@ -3,6 +3,8 @@ package com.github.sun.mall.admin;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
+import com.github.sun.mall.admin.auth.Authentication;
+import com.github.sun.mall.admin.entity.Admin;
 import com.github.sun.mall.core.SearchHistoryMapper;
 import com.github.sun.mall.core.entity.Keyword;
 import com.github.sun.mall.core.entity.SearchHistory;
@@ -12,11 +14,12 @@ import io.swagger.annotations.ApiOperation;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
 
-@Path("/v1/mall/admin/search")
+@Path("/v1/mall/admin/searchHistory")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "mall-admin: 搜索历史管理: search")
@@ -32,12 +35,14 @@ public class AdminSearchHistoryResource extends AbstractResource {
 
   @GET
   @ApiOperation("分页获取搜索历史列表")
-  public PageResponse<SearchHistory> list(@QueryParam("userId") String userId,
-                                          @QueryParam("keyword") String keyword,
-                                          @QueryParam("start") int start,
-                                          @QueryParam("count") int count,
-                                          @QueryParam("sort") @DefaultValue("createTime") String sort,
-                                          @QueryParam("asc") boolean asc) {
+  @Authentication(value = "admin:searchHistory:query", tags = {"用户管理", "搜索历史", "查询"})
+  public PageResponse<SearchHistory> paged(@QueryParam("userId") String userId,
+                                           @QueryParam("keyword") String keyword,
+                                           @QueryParam("start") int start,
+                                           @QueryParam("count") int count,
+                                           @QueryParam("sort") @DefaultValue("createTime") String sort,
+                                           @QueryParam("asc") boolean asc,
+                                           @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonNull(userId).then(sb.field("userId").eq(userId))
       .and(keyword == null ? null : sb.field("keyword").contains(keyword));

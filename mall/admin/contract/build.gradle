@@ -1,5 +1,6 @@
 dependencies {
   compile project(":$rootName-modelling")
+  compile project(":$rootName-mall-core-contract")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -31,7 +32,7 @@ public class Groupon implements Entity<String> {
   private String userId;
   private String shareUrl;
   private String creatorId;
-  private long creatorTime;
+  private Date creatorTime;
   private Status status;
   @Transient
   @JsonIgnore
@@ -55,9 +56,9 @@ public class Groupon implements Entity<String> {
     private String id;
     private String goodsId;
     private String picUrl;
-    private String discount;
+    private BigDecimal discount;
     private int discountMember;
-    private long expireTime;
+    private Date expireTime;
     private Status status;
     @Transient
     @JsonIgnore

@@ -6,7 +6,6 @@ import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.mall.core.entity.AfterSale;
 import com.github.sun.mall.core.entity.Order;
-import com.github.sun.mall.core.entity.User;
 import com.github.sun.mall.core.resolver.LoginUser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -76,7 +75,7 @@ public class AfterSaleResource extends AbstractResource {
       List<AfterSale> list = mapper.findByTemplate(template);
       if (!list.isEmpty()) {
         Set<String> orderIds = list.stream().map(AfterSale::getOrderId).collect(Collectors.toSet());
-        Map<String, List<Order.Goods>> goods = orderGoodsMapper.findByUserIdAndOrderIdIn(user.getId(), orderIds)
+        Map<String, List<Order.Goods>> goods = orderGoodsMapper.findByOrderIdIn(orderIds)
           .stream()
           .collect(Collectors.groupingBy(Order.Goods::getOrderId));
         List<AfterSaleResp> values = list.stream()
@@ -113,7 +112,7 @@ public class AfterSaleResource extends AbstractResource {
     if (order == null) {
       throw new NotFoundException("Can not find order by id=" + orderId);
     }
-    List<Order.Goods> goodsList = orderGoodsMapper.findByUserIdAndOrderId(user.getId(), orderId);
+    List<Order.Goods> goodsList = orderGoodsMapper.findByOrderId(orderId);
     return responseOf(AfterSaleOrderResp.builder()
       .afterSale(afterSale)
       .order(order)

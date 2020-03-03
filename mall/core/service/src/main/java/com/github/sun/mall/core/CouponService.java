@@ -33,7 +33,7 @@ public class CouponService extends BasicService<String, Coupon, CouponMapper> {
     int days = coupon.getDays();
     Date now = new Date();
     if (timeType == Coupon.TimeType.TIME) {
-      if (now.before(new Date(coupon.getStartTime())) || now.after(new Date(coupon.getEndTime()))) {
+      if (now.before(coupon.getStartTime()) || now.after(coupon.getEndTime())) {
         return null;
       }
     } else if (timeType.equals(Coupon.TimeType.DAYS)) {
@@ -58,7 +58,7 @@ public class CouponService extends BasicService<String, Coupon, CouponMapper> {
       return null;
     }
     // 检测是否满足最低消费
-    if (checkedGoodsPrice.compareTo(new BigDecimal(coupon.getMin())) < 0) {
+    if (checkedGoodsPrice.compareTo(coupon.getMin()) < 0) {
       return null;
     }
     return coupon;

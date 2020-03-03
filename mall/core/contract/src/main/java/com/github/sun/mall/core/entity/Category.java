@@ -28,7 +28,7 @@ public class Category implements Entity<String> {
   private String name;
   private String keywords;
   private String desc;
-  private String pid;
+  private String pId;
   private String iconUrl;
   private String picUrl;
   @Min(value = 1, message = "层级最少为1")

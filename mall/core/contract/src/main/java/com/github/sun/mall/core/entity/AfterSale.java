@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -30,16 +31,17 @@ public class AfterSale implements Entity<String> {
   }
 
   public enum Status {
-    REQUEST,
-    ACCEPT,
+    ALLOW,
+    APPLIED,
+    ACCEPTED,
     REFUND,
     REJECT,
-    CANCEL
+    CANCELED
   }
 
   @Id
   private String id;
-  private String afterSaleSn;
+  private String sn;
   @NotNull(message = "缺少对应的订单")
   private String orderId;
   private String userId;
@@ -47,12 +49,12 @@ public class AfterSale implements Entity<String> {
   @NotNull(message = "缺少原因")
   private String reason;
   @NotNull(message = "缺少退款金额")
-  private String amount;
+  private BigDecimal amount;
   @Converter(JsonHandler.ListStringHandler.class)
   private List<String> pictures;
   private String comment;
   private Status status;
-  private long handleTime;
+  private Date handleTime;
   @Transient
   @JsonIgnore
   private Date createTime;

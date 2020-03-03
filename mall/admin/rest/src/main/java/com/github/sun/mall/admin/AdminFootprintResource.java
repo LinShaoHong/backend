@@ -3,6 +3,8 @@ package com.github.sun.mall.admin;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
+import com.github.sun.mall.admin.auth.Authentication;
+import com.github.sun.mall.admin.entity.Admin;
 import com.github.sun.mall.core.FootprintMapper;
 import com.github.sun.mall.core.entity.Footprint;
 import io.swagger.annotations.Api;
@@ -11,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
@@ -31,12 +34,14 @@ public class AdminFootprintResource extends AbstractResource {
 
   @GET
   @ApiOperation("分页获取足迹列表")
+  @Authentication(value = "admin:footprint:query", tags = {"用户管理", "用户足迹", "查询"})
   public PageResponse<Footprint> paged(@QueryParam("userId") String userId,
                                        @QueryParam("goodsId") String goodsId,
                                        @QueryParam("start") int start,
                                        @QueryParam("count") int count,
                                        @QueryParam("sort") @DefaultValue("createTime") String sort,
-                                       @QueryParam("asc") boolean asc) {
+                                       @QueryParam("asc") boolean asc,
+                                       @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonNull(userId).then(sb.field("userId").eq(userId))
       .and(goodsId == null ? null : sb.field("username").eq(goodsId));
