@@ -3,11 +3,12 @@ package com.github.sun.conf;
 import com.github.sun.foundation.mybatis.config.PersistenceConfiguration;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
@@ -17,8 +18,8 @@ import javax.sql.DataSource;
 public class DataSourceConfiguration extends PersistenceConfiguration {
   @Primary
   @Bean(name = SQL_SESSION_FACTORY_NAME)
-  public SqlSessionFactoryBean sqlSessionFactoryBean(Environment env) {
-    return super.sqlSessionFactoryBean(dataSource(env));
+  public SqlSessionFactoryBean sqlSessionFactoryBean(@Qualifier(DATASOURCE_NAME) DataSource dataSource) {
+    return super.sqlSessionFactoryBean(dataSource);
   }
 
   @Primary
@@ -29,8 +30,8 @@ public class DataSourceConfiguration extends PersistenceConfiguration {
 
   @Primary
   @Bean(name = TRANSACTION_MANAGER_NAME)
-  public DataSourceTransactionManager transactionManager(Environment env) {
-    return super.transactionManager(dataSource(env));
+  public PlatformTransactionManager transactionManager(@Qualifier(DATASOURCE_NAME) DataSource dataSource) {
+    return super.transactionManager(dataSource);
   }
 
   @Primary

@@ -2,6 +2,7 @@ package com.github.sun.mall.admin;
 
 import com.github.sun.foundation.boot.exception.AccessDeniedException;
 import com.github.sun.foundation.sql.IdGenerator;
+import com.github.sun.mall.admin.api.AdminNoticeService;
 import com.github.sun.mall.admin.entity.Admin;
 import com.github.sun.mall.admin.entity.Notice;
 import org.springframework.stereotype.Service;
@@ -9,13 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class AdminNoticeService {
+public class AdminNoticeServiceImpl implements AdminNoticeService {
   @Resource
   private NoticeMapper mapper;
   @Resource
@@ -23,6 +23,7 @@ public class AdminNoticeService {
   @Resource
   private NoticeMapper.Admin noticeAdminMapper;
 
+  @Override
   @Transactional
   public void create(Notice notice) {
     String id = IdGenerator.next();
@@ -38,6 +39,7 @@ public class AdminNoticeService {
     noticeAdminMapper.insertAll(list);
   }
 
+  @Override
   @Transactional
   public void update(Notice exist, Notice notice) {
     // 如果通知已经有人阅读过，则不支持编辑
@@ -48,16 +50,18 @@ public class AdminNoticeService {
     mapper.update(notice);
     // 2. 更新管理员通知记录
     if (!exist.getTitle().equals(notice.getTitle())) {
-      noticeAdminMapper.updateUpdateTimeByNoticeId(notice.getId(), new Date());
+      noticeAdminMapper.updateNoticeTitleByNoticeId(notice.getId(), notice.getTitle());
     }
   }
 
+  @Override
   @Transactional
   public void delete(String id) {
     mapper.deleteById(id);
     noticeAdminMapper.deleteByNoticeId(id);
   }
 
+  @Override
   @Transactional
   public void batchDelete(Set<String> ids) {
     mapper.deleteByIds(new ArrayList<>(ids));

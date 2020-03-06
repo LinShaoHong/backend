@@ -5,7 +5,6 @@ import com.github.sun.foundation.mybatis.BasicService;
 import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.mall.core.entity.Cart;
 import com.github.sun.mall.core.entity.Goods;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +14,6 @@ import javax.annotation.Resource;
 public class CartService extends BasicService<String, Cart, CartMapper> {
   @Resource
   private GoodsMapper goodsMapper;
-  @Resource
-  private GoodsMapper.Product goodsProductMapper;
 
   @Transactional
   public String add(String userId, Cart cart, boolean quickBuy) {
@@ -30,8 +27,8 @@ public class CartService extends BasicService<String, Cart, CartMapper> {
     }
     //判断购物车中是否存在此规格商品
     Cart exist = mapper.findByUserIdAndGoodsIdAndProductId(userId, goodsId, productId);
+    Goods.Product product = goods.findByProductId(productId);
     if (exist == null) {
-      Goods.Product product = goodsProductMapper.findById(productId);
       //取得规格的信息,判断规格库存
       if (product == null || number > product.getNumber()) {
         throw new BadRequestException("库存不足");
@@ -51,7 +48,6 @@ public class CartService extends BasicService<String, Cart, CartMapper> {
       mapper.insert(cart);
     } else {
       int num = quickBuy ? number : exist.getNumber() + number;
-      Goods.Product product = goodsProductMapper.findById(productId);
       //取得规格的信息,判断规格库存
       if (product == null || num > product.getNumber()) {
         throw new BadRequestException("库存不足");

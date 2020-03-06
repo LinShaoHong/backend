@@ -35,7 +35,6 @@ public class CartResource extends AbstractResource {
   private final AddressMapper addressMapper;
   private final CouponMapper.User couponUserMapper;
   private final GrouponMapper.Rules grouponRulesMapper;
-  private final GoodsMapper.Product goodsProductMapper;
 
   @Inject
   public CartResource(CartMapper mapper,
@@ -44,8 +43,7 @@ public class CartResource extends AbstractResource {
                       CouponService couponService,
                       AddressMapper addressMapper,
                       CouponMapper.User couponUserMapper,
-                      GrouponMapper.Rules grouponRulesMapper,
-                      GoodsMapper.Product goodsProductMapper) {
+                      GrouponMapper.Rules grouponRulesMapper) {
     this.mapper = mapper;
     this.service = service;
     this.goodsMapper = goodsMapper;
@@ -53,7 +51,6 @@ public class CartResource extends AbstractResource {
     this.addressMapper = addressMapper;
     this.couponUserMapper = couponUserMapper;
     this.grouponRulesMapper = grouponRulesMapper;
-    this.goodsProductMapper = goodsProductMapper;
   }
 
   @GET
@@ -142,7 +139,7 @@ public class CartResource extends AbstractResource {
       throw new BadRequestException("商品已下架");
     }
     //取得规格的信息,判断规格库存
-    Goods.Product product = goodsProductMapper.findById(exist.getProductId());
+    Goods.Product product = goods.findByProductId(exist.getProductId());
     if (product == null || product.getNumber() < num) {
       throw new BadRequestException("库存不足");
     }

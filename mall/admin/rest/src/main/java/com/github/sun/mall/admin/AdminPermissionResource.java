@@ -1,6 +1,7 @@
 package com.github.sun.mall.admin;
 
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.mall.admin.api.AdminPermissionService;
 import com.github.sun.mall.admin.auth.Authentication;
 import com.github.sun.mall.admin.entity.Admin;
 import com.github.sun.mall.admin.entity.Permission;
@@ -44,19 +45,19 @@ public class AdminPermissionResource extends AbstractResource {
   public SingleResponse<PermissionResp> getPermissions(@NotEmpty(message = "require roleId")
                                                        @QueryParam("roleId") String roleId,
                                                        @Context Admin admin) {
-    List<AdminPermissionService.Node> system = service.getSystemPermTree();
+    List<AdminPermissionServiceImpl.Node> system = service.getSystemPermTree();
     Set<String> assigned;
     List<Permission> ps = mapper.findByRoleId(roleId);
     if (ps.stream().anyMatch(p -> p.getPermission().equalsIgnoreCase("*"))) {
       class Util {
-        private void traverse(AdminPermissionService.Node node, Consumer<AdminPermissionService.Node> func) {
+        private void traverse(AdminPermissionServiceImpl.Node node, Consumer<AdminPermissionServiceImpl.Node> func) {
           func.accept(node);
           node.getChildren().forEach(v -> traverse(v, func));
         }
       }
       Util u = new Util();
       assigned = new HashSet<>();
-      for (AdminPermissionService.Node n : system) {
+      for (AdminPermissionServiceImpl.Node n : system) {
         u.traverse(n, node -> {
           if (node.getApi() != null) {
             assigned.add(node.getId());
@@ -72,7 +73,7 @@ public class AdminPermissionResource extends AbstractResource {
   @Data
   @Builder
   private static class PermissionResp {
-    private List<AdminPermissionService.Node> system;
+    private List<AdminPermissionServiceImpl.Node> system;
     private Set<String> assigned;
   }
 

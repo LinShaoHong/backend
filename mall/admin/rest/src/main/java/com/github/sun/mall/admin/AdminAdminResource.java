@@ -107,7 +107,7 @@ public class AdminAdminResource extends AbstractResource {
       throw new NotFoundException("Can not find admin by id=" + id);
     }
     // 不允许管理员通过编辑接口修改密码
-    req.setPassword(null);
+    req.setPassword(exist.getPassword());
     req.setId(id);
     mapper.update(req);
     return responseOf();

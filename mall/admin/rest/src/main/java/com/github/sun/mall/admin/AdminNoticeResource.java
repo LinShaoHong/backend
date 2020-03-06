@@ -4,6 +4,7 @@ import com.github.sun.foundation.boot.exception.NotFoundException;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
+import com.github.sun.mall.admin.api.AdminNoticeService;
 import com.github.sun.mall.admin.auth.Authentication;
 import com.github.sun.mall.admin.entity.Admin;
 import com.github.sun.mall.admin.entity.Notice;

@@ -1,6 +1,7 @@
 package com.github.sun.mall.admin;
 
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.mall.admin.api.AdminSessionService;
 import com.github.sun.mall.admin.entity.Admin;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,8 +19,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.sun.mall.admin.AdminSessionService.TOKEN_EXPIRED;
-import static com.github.sun.mall.admin.AdminSessionService.TOKEN_NAME;
+import static com.github.sun.mall.admin.AdminSessionServiceImpl.TOKEN_EXPIRED;
+import static com.github.sun.mall.admin.AdminSessionServiceImpl.TOKEN_NAME;
 
 
 @Path("/v1/mall/admin/auth")

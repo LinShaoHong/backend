@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
@@ -24,6 +25,7 @@ import java.util.List;
 @NamingStrategy
 @Table(name = "mall_topic")
 public class Topic implements Entity<String> {
+  @Id
   private String id;
   @NotEmpty(message = "缺少标题")
   private String title;

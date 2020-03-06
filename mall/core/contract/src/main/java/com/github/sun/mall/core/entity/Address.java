@@ -1,6 +1,7 @@
 package com.github.sun.mall.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +39,7 @@ public class Address implements Entity<String> {
   @NotNull(message = "缺少手机号")
   @Pattern(message = "手机号格式不正确", regexp = "^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(16[6])|(17[0,1,3,5-8])|(18[0-9])|(19[8,9]))\\d{8}$")
   private String tel;
+  @JsonProperty("isDefault")
   private boolean isDefault;
   @Transient
   @JsonIgnore

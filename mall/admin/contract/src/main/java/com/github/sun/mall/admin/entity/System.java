@@ -1,7 +1,8 @@
-package com.github.sun.mall.core.entity;
+package com.github.sun.mall.admin.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.modelling.NamingStrategy;
+import com.github.sun.mall.core.entity.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "mall_system")
+@Table(name = "mall_admin_system")
 public class System implements Entity<String> {
   @Id
   private String id;

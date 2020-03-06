@@ -25,17 +25,14 @@ import javax.ws.rs.core.MediaType;
 public class DashboardResource extends AbstractResource {
   private final UserMapper userMapper;
   private final GoodsMapper goodsMapper;
-  private final GoodsMapper.Product productMapper;
   private final OrderMapper orderMapper;
 
   @Inject
   public DashboardResource(UserMapper userMapper,
                            GoodsMapper goodsMapper,
-                           GoodsMapper.Product productMapper,
                            OrderMapper orderMapper) {
     this.userMapper = userMapper;
     this.goodsMapper = goodsMapper;
-    this.productMapper = productMapper;
     this.orderMapper = orderMapper;
   }
 
@@ -44,7 +41,7 @@ public class DashboardResource extends AbstractResource {
   public SingleResponse<Resp> info(@Context Admin admin) {
     int userTotal = userMapper.count();
     int goodsTotal = goodsMapper.count();
-    int productTotal = productMapper.count();
+    int productTotal = goodsMapper.countProduct();
     int orderTotal = orderMapper.count();
     return responseOf(Resp.builder()
       .userTotal(userTotal)

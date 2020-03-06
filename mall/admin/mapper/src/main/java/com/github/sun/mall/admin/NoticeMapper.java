@@ -8,7 +8,6 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -25,8 +24,8 @@ public interface NoticeMapper extends CompositeMapper<Notice> {
     @Select("SELECT COUNT(0) FROM mall_admin_notice_admin WHERE noticeId = #{noticeId} AND readTime IS NOT NULL")
     int countByNoticeIdAndReadTimeNotNull(@Param("noticeId") String noticeId);
 
-    @Update("UPDATE mall_admin_notice_admin SET updateTime = #{updateTime} WHERE noticeId = #{noticeId}")
-    void updateUpdateTimeByNoticeId(@Param("noticeId") String noticeId, @Param("updateTime") Date updateTime);
+    @Update("UPDATE mall_admin_notice_admin SET noticeTitle = #{noticeTitle} WHERE noticeId = #{noticeId}")
+    void updateNoticeTitleByNoticeId(@Param("noticeId") String noticeId, @Param("noticeTitle") String noticeTitle);
 
     @Select("DELETE FROM mall_admin_notice_admin WHERE noticeId = #{noticeId}")
     void deleteByNoticeId(@Param("noticeId") String noticeId);

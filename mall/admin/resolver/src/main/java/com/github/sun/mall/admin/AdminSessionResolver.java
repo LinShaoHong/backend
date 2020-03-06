@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Cookie;
 
-import static com.github.sun.mall.admin.AdminSessionService.TOKEN_NAME;
+import static com.github.sun.mall.admin.AdminSessionServiceImpl.TOKEN_NAME;
 
 public class AdminSessionResolver implements RequestScopeContextResolver<Admin> {
   private final AdminMapper mapper;

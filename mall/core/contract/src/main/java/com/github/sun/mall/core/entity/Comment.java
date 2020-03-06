@@ -45,7 +45,6 @@ public class Comment implements Entity<String> {
   @Max(value = 5, message = "星级大于5")
   private int star;
   @Transient
-  @JsonIgnore
   private Date createTime;
   @Transient
   @JsonIgnore

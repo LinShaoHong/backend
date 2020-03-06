@@ -32,7 +32,7 @@ public class Category implements Entity<String> {
   private String iconUrl;
   private String picUrl;
   @Min(value = 1, message = "层级最少为1")
-  @Max(value = 1, message = "层级最大为2")
+  @Max(value = 2, message = "层级最大为2")
   private int level;
   private int sortOrder;
   @Transient

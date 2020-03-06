@@ -74,10 +74,14 @@ public class Coupon implements Entity<String> {
   @NamingStrategy
   @Table(name = "mall_coupon_user")
   public static class User implements Entity<String> {
+    public enum Status {
+      UNUSED, USED, EXPIRED, OUT
+    }
+
     private String id;
     private String userId;
     private String couponId;
-    private int status;
+    private Status status;
     private Date usedTime;
     private Date startTime;
     private Date endTime;

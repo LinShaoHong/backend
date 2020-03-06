@@ -1,10 +1,10 @@
 package com.github.sun.mall.admin;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.boot.Scanner;
 import com.github.sun.foundation.boot.exception.AccessDeniedException;
 import com.github.sun.foundation.boot.utility.Iterators;
 import com.github.sun.foundation.sql.IdGenerator;
+import com.github.sun.mall.admin.api.AdminPermissionService;
 import com.github.sun.mall.admin.auth.Authentication;
 import com.github.sun.mall.admin.entity.Permission;
 import lombok.Builder;
@@ -21,12 +21,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-public class AdminPermissionService {
+public class AdminPermissionServiceImpl implements AdminPermissionService {
   private static List<Node> cache = null;
 
   @Resource
   private PermissionMapper mapper;
 
+  @Override
   public List<Node> getSystemPermTree() {
     if (cache == null) {
       String basePackage = getClass().getPackage().getName();
@@ -101,12 +102,13 @@ public class AdminPermissionService {
     return roots.stream().map(u::makeTree).collect(Collectors.toList());
   }
 
+  @Override
   @Transactional
   public void update(String roleId, Set<String> permissions) {
     Set<String> ps = new HashSet<>(permissions);
     List<Node> system = getSystemPermTree();
     class Util {
-      private void traverse(AdminPermissionService.Node node, Consumer<Node> func) {
+      private void traverse(AdminPermissionServiceImpl.Node node, Consumer<Node> func) {
         func.accept(node);
         node.getChildren().forEach(v -> traverse(v, func));
       }
@@ -134,30 +136,6 @@ public class AdminPermissionService {
       .build()).collect(Collectors.toList());
     if (!list.isEmpty()) {
       mapper.insertAll(list);
-    }
-  }
-
-  @Data
-  @Builder
-  public static class Node {
-    private String id;
-    @JsonIgnore
-    private String parentId;
-    private String label;
-    private String api;
-    private List<Node> children;
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Node node = (Node) o;
-      return id.equals(node.id);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(id);
     }
   }
 

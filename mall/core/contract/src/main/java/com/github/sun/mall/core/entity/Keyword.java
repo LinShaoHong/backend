@@ -1,6 +1,7 @@
 package com.github.sun.mall.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +26,9 @@ public class Keyword implements Entity<String> {
   @NotEmpty(message = "缺少关键字")
   private String keyword;
   private String url;
+  @JsonProperty("isHot")
   private boolean isHot;
+  @JsonProperty("isDefault")
   private boolean isDefault;
   private int sortOrder;
   @Transient
