@@ -16,13 +16,13 @@ jib {
     }
   }
   to {
-    image = "docker.sun.com/sun/rest-server:" + version
+    image = "docker.sun.com/sun/mall-server:" + version
     auth {
       username = user
       password = pwd
     }
   }
   container {
-    mainClass = "com.github.sun.App"
+    mainClass = "com.github.sun.MallApp"
   }
 }

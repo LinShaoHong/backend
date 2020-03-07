@@ -10,12 +10,12 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-public class RestApp extends JerseyApplication {
-  public RestApp(ApplicationContext context) {
+public class ImageApp extends JerseyApplication {
+  public ImageApp(ApplicationContext context) {
     super(context);
   }
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(RestApp.class).run(args);
+    new SpringApplicationBuilder(ImageApp.class).run(args);
   }
 }
