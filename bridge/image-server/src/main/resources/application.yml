@@ -1,4 +1,4 @@
-server.port: 9729
+server.port: 9728
 
 spring:
   application:
