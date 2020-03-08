@@ -80,7 +80,7 @@ public class AdminBrandResource extends AbstractResource {
                                    @Context Admin admin) {
     Brand v = mapper.findById(id);
     if (v == null) {
-      throw new com.github.sun.foundation.boot.exception.NotFoundException("Can not find brand by id=" + id);
+      throw new NotFoundException("Can not find brand by id=" + id);
     }
     return responseOf(v);
   }
@@ -94,7 +94,7 @@ public class AdminBrandResource extends AbstractResource {
                          @Context Admin admin) {
     Brand e = mapper.findById(id);
     if (e == null) {
-      throw new com.github.sun.foundation.boot.exception.NotFoundException("Can not find brand by id=" + id);
+      throw new NotFoundException("Can not find brand by id=" + id);
     }
     v.setId(id);
     mapper.update(v);

@@ -92,7 +92,7 @@ public class AdminCategoryResource extends AbstractResource {
                                       @Context Admin admin) {
     Category v = mapper.findById(id);
     if (v == null) {
-      throw new com.github.sun.foundation.boot.exception.NotFoundException("Can not find Category by id=" + id);
+      throw new NotFoundException("Can not find Category by id=" + id);
     }
     return responseOf(v);
   }
@@ -106,7 +106,7 @@ public class AdminCategoryResource extends AbstractResource {
                          @Context Admin admin) {
     Category e = mapper.findById(id);
     if (e == null) {
-      throw new com.github.sun.foundation.boot.exception.NotFoundException("Can not find Category by id=" + id);
+      throw new NotFoundException("Can not find Category by id=" + id);
     }
     v.setId(id);
     mapper.update(v);

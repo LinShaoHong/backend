@@ -1,6 +1,5 @@
 package com.github.sun.mall.admin;
 
-import com.github.sun.foundation.boot.exception.NotFoundException;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.IdGenerator;
@@ -81,7 +80,7 @@ public class AdminAdvertiseResource extends AbstractResource {
                                        @Context Admin admin) {
     Advertise v = mapper.findById(id);
     if (v == null) {
-      throw new com.github.sun.foundation.boot.exception.NotFoundException("Can not find ad by id=" + id);
+      throw new NotFoundException("Can not find ad by id=" + id);
     }
     return responseOf(v);
   }
@@ -95,7 +94,7 @@ public class AdminAdvertiseResource extends AbstractResource {
                          @Context Admin admin) {
     Advertise e = mapper.findById(id);
     if (e == null) {
-      throw new com.github.sun.foundation.boot.exception.NotFoundException("Can not find ad by id=" + id);
+      throw new NotFoundException("Can not find ad by id=" + id);
     }
     v.setId(id);
     mapper.update(v);

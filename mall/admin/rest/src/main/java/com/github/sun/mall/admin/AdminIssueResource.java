@@ -79,7 +79,7 @@ public class AdminIssueResource extends AbstractResource {
                                                     @Context Admin admin) {
     Issue v = mapper.findById(id);
     if (v == null) {
-      throw new com.github.sun.foundation.boot.exception.NotFoundException("Can not find Issue by id=" + id);
+      throw new NotFoundException("Can not find Issue by id=" + id);
     }
     return responseOf(v);
   }
@@ -93,7 +93,7 @@ public class AdminIssueResource extends AbstractResource {
                                           @Context Admin admin) {
     Issue e = mapper.findById(id);
     if (e == null) {
-      throw new com.github.sun.foundation.boot.exception.NotFoundException("Can not find Issue by id=" + id);
+      throw new NotFoundException("Can not find Issue by id=" + id);
     }
     v.setId(id);
     mapper.update(v);
