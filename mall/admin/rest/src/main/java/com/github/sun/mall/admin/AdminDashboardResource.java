@@ -22,15 +22,15 @@ import javax.ws.rs.core.MediaType;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "mall-admin: 后台首页: dashboard")
-public class DashboardResource extends AbstractResource {
+public class AdminDashboardResource extends AbstractResource {
   private final UserMapper userMapper;
   private final GoodsMapper goodsMapper;
   private final OrderMapper orderMapper;
 
   @Inject
-  public DashboardResource(UserMapper userMapper,
-                           GoodsMapper goodsMapper,
-                           OrderMapper orderMapper) {
+  public AdminDashboardResource(UserMapper userMapper,
+                                GoodsMapper goodsMapper,
+                                OrderMapper orderMapper) {
     this.userMapper = userMapper;
     this.goodsMapper = goodsMapper;
     this.orderMapper = orderMapper;
