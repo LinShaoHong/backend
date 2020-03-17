@@ -48,6 +48,7 @@ public class AdminSearchHistoryResource extends AbstractResource {
       .and(keyword == null ? null : sb.field("keyword").contains(keyword));
     int total = mapper.countByTemplate(sb.from(SearchHistory.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Keyword.class)
         .where(condition)
         .orderBy(sort, asc)

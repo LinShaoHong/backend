@@ -63,6 +63,7 @@ public class AdminGoodsResource extends AbstractResource {
       .and(name == null ? null : sb.field("name").contains(name));
     int total = mapper.countByTemplate(sb.from(Goods.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Goods.class)
         .where(condition)
         .orderBy(sort, asc)

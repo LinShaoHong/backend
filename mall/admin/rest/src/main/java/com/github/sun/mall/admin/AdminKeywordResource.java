@@ -51,6 +51,7 @@ public class AdminKeywordResource extends AbstractResource {
       .and(url == null ? null : sb.field("username").contains(url));
     int total = mapper.countByTemplate(sb.from(Keyword.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Keyword.class)
         .where(condition)
         .orderBy(sort, asc)

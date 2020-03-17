@@ -73,6 +73,7 @@ public class AdminOrderResource extends AbstractResource {
       .and(endTime == null ? null : sb.field("endTime").le(endTime));
     int total = mapper.countByTemplate(sb.from(Order.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Order.class)
         .where(condition)
         .orderBy(sort, asc)

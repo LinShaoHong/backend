@@ -47,6 +47,7 @@ public class AdminFootprintResource extends AbstractResource {
       .and(goodsId == null ? null : sb.field("username").eq(goodsId));
     int total = mapper.countByTemplate(sb.from(Footprint.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Footprint.class)
         .where(condition)
         .orderBy(sort, asc)

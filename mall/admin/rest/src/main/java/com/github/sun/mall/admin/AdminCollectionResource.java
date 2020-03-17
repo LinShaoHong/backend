@@ -47,6 +47,7 @@ public class AdminCollectionResource extends AbstractResource {
       .and(valueId == null ? null : sb.field("valueId").contains(valueId));
     int total = mapper.countByTemplate(sb.from(Collection.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Collection.class)
         .where(condition)
         .orderBy(sort, asc)

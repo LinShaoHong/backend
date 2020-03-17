@@ -58,6 +58,7 @@ public class AdminCouponResource extends AbstractResource {
       .and(status == null ? null : sb.field("status").eq(status));
     int total = mapper.countByTemplate(sb.from(Coupon.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Coupon.class)
         .where(condition)
         .orderBy(sort, asc)

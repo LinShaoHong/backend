@@ -47,6 +47,7 @@ public class AdminFeedbackResource extends AbstractResource {
       .and(username == null ? null : sb.field("username").contains(username));
     int total = mapper.countByTemplate(sb.from(Feedback.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Feedback.class)
         .where(condition)
         .orderBy(sort, asc)

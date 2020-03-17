@@ -50,6 +50,7 @@ public class AdminIssueResource extends AbstractResource {
     Expression condition = Expression.nonNull(question).then(sb.field("userId").contains(question));
     int total = mapper.countByTemplate(sb.from(Issue.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Issue.class)
         .where(condition)
         .orderBy(sort, asc)

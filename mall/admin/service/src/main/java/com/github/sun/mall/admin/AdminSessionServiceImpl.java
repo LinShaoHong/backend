@@ -21,7 +21,7 @@ public class AdminSessionServiceImpl implements AdminSessionService {
     String hashPassword = Admin.hashPassword(password);
     Admin admin = mapper.findByUsernameAndPassword(username, hashPassword);
     if (admin == null) {
-      throw new UnAuthorizedException("请先登录");
+      throw new UnAuthorizedException("该用户不存在");
     }
     if (ip != null) {
       admin.setLastLoginIp(ip);

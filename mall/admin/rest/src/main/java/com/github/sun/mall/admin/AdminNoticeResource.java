@@ -56,6 +56,7 @@ public class AdminNoticeResource extends AbstractResource {
       .and(content == null ? null : sb.field("content").contains(content));
     int total = mapper.countByTemplate(sb.from(Notice.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Notice.class)
         .where(condition)
         .orderBy(sort, asc)

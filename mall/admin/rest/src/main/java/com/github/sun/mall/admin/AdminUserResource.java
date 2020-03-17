@@ -47,6 +47,7 @@ public class AdminUserResource extends AbstractResource {
       .and(mobile == null ? null : sb.field("mobile").eq(mobile));
     int total = mapper.countByTemplate(sb.from(User.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(User.class)
         .where(condition)
         .orderBy(sort, asc)

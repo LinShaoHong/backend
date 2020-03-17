@@ -47,6 +47,7 @@ public class AdminAddressResource extends AbstractResource {
       .and(name == null ? null : sb.field("name").contains(name));
     int total = mapper.countByTemplate(sb.from(Address.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Address.class)
         .where(condition)
         .orderBy(sort, asc)

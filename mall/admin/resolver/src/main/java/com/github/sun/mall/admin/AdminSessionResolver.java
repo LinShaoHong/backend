@@ -3,6 +3,7 @@ package com.github.sun.mall.admin;
 import com.github.sun.foundation.boot.exception.UnAuthorizedException;
 import com.github.sun.foundation.rest.RequestScopeContextResolver;
 import com.github.sun.mall.admin.entity.Admin;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -46,7 +47,16 @@ public class AdminSessionResolver implements RequestScopeContextResolver<Admin> 
   public void remove() {
   }
 
-  public static class BinderProviderImpl extends AbstractProvider<AdminSessionResolver, Admin> {
+  public static class BinderProviderImpl implements BinderProvider {
+    @Override
+    public AbstractBinder binder() {
+      return new AbstractBinder() {
+        @Override
+        protected void configure() {
+          bindFactory(AdminSessionResolver.class).to(Admin.class);
+        }
+      };
+    }
   }
 }
 

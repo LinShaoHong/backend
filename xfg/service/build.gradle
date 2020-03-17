@@ -1,0 +1,8 @@
+dependencies {
+  compile project(":$rootName-mybatis")
+  compile project(":$rootName-xfg-mapper")
+
+//  implementation "javax.mail:javax.mail:$vers.mail"
+}
+
+apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

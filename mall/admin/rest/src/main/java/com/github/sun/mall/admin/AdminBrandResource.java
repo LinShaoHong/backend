@@ -51,6 +51,7 @@ public class AdminBrandResource extends AbstractResource {
       .and(name == null ? null : sb.field("name").contains(name));
     int total = mapper.countByTemplate(sb.from(Brand.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Brand.class)
         .where(condition)
         .orderBy(sort, asc)

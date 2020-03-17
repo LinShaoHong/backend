@@ -51,6 +51,7 @@ public class AdminTopicResource extends AbstractResource {
       .and(subtitle == null ? null : sb.field("subtitle").contains(subtitle));
     int total = mapper.countByTemplate(sb.from(Topic.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Topic.class)
         .where(condition)
         .orderBy(sort, asc)

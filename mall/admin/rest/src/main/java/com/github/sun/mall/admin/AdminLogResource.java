@@ -44,6 +44,7 @@ public class AdminLogResource extends AbstractResource {
     Expression condition = Expression.nonNull(name).then(sb.field("admin").contains(name));
     int total = mapper.countByTemplate(sb.from(Log.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Log.class)
         .where(condition)
         .orderBy(sort, asc)

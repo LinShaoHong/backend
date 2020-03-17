@@ -48,6 +48,7 @@ public class AdminCommentResource extends AbstractResource {
       .and(sb.field("type").ne(Comment.Type.ORDER.name()));
     int total = mapper.countByTemplate(sb.from(Comment.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Comment.class)
         .where(condition)
         .orderBy(sort, asc)

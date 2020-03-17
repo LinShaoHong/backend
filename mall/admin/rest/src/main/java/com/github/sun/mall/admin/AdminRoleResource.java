@@ -52,6 +52,7 @@ public class AdminRoleResource extends AbstractResource {
     Expression condition = Expression.nonNull(name).then(sb.field("name").contains(name));
     int total = mapper.countByTemplate(sb.from(Role.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Role.class)
         .where(condition)
         .orderBy(sort, asc)

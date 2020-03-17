@@ -51,6 +51,7 @@ public class AdminAdvertiseResource extends AbstractResource {
       .and(name == null ? null : sb.field("content").contains(content));
     int total = mapper.countByTemplate(sb.from(Advertise.class).where(condition).count().template());
     if (start < total) {
+      sb.clear();
       SqlBuilder.Template template = sb.from(Advertise.class)
         .where(condition)
         .orderBy(sort, asc)
