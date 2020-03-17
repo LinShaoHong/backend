@@ -303,7 +303,7 @@ public class CommentResource extends AbstractResource {
             .filter(Objects::nonNull).collect(Collectors.toList());
           return responseOf(MessageRes.builder()
             .total(total)
-            .unReads(unReads + ((Long) messages.stream().filter(v -> v.isSystem() && !v.isRead() && v.getReplierId() != null).count()).intValue())
+            .unReads(unReads + ((Long) messages.stream().filter(v -> v.isSystem() && !v.isRead() && v.getReplierId() == null).count()).intValue())
             .messages(messages)
             .build());
         }
