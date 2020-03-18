@@ -1,0 +1,12 @@
+server.port: 9727
+
+spring:
+  application:
+    name: XzYy-Server
+  datasource:
+    url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER_OF_XZYY:root}
+    password: ${MYSQL_PASSWORD_OF_XZYY:root}
+
+footprint.max: ${FOOTPRINT_MAX:100}
+retrieve.password.key: ${RETRIEVE_PASSWORD_KEY:abcd}
