@@ -1,0 +1,8 @@
+dependencies {
+  compile project(":$rootName-rest")
+  compile project(":$rootName-qm-service")
+
+  implementation "com.hankcs:hanlp:$vers.hanlp"
+}
+
+apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")
