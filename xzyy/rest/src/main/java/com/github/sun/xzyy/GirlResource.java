@@ -14,7 +14,6 @@ import lombok.Data;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -82,6 +81,7 @@ public class GirlResource extends AbstractResource {
   @Builder
   private static class GirlResp {
     private String id;
+    private Girl.Type type;
     private String name;
     private String city;
     private String mainImage;
@@ -91,6 +91,7 @@ public class GirlResource extends AbstractResource {
     private static GirlResp from(Girl v) {
       return GirlResp.builder()
         .id(v.getId())
+        .type(v.getType())
         .name(v.getName())
         .city(v.getCity())
         .mainImage(v.getMainImage())
@@ -250,8 +251,7 @@ public class GirlResource extends AbstractResource {
   @GET
   @Path("/search")
   @ApiOperation("搜索")
-  public SingleResponse<SearchResp> search(@Pattern(regexp = "COLLECTIVE|INDIVIDUAL|IMAGE|VIDEO") String type,
-                                           @NotNull @QueryParam("q") String q) {
+  public SingleResponse<SearchResp> search(@NotNull @QueryParam("q") String q) {
     if (q.trim().isEmpty()) {
       return responseOf(SearchResp.builder()
         .girls(Collections.emptyList())
@@ -265,7 +265,7 @@ public class GirlResource extends AbstractResource {
     SqlBuilder sb = factory.create();
     Expression conn = EMPTY;
     for (String word : keyWords) {
-      Expression e = sb.field("title").contains(word);
+      Expression e = sb.field("name").contains(word);
       conn = conn == EMPTY ? e : conn.or(e);
     }
     SqlBuilder.Template template = sb.from(Girl.class)
@@ -274,8 +274,10 @@ public class GirlResource extends AbstractResource {
       .template();
     List<Girl> girls = mapper.findByTemplate(template);
     return responseOf(SearchResp.builder()
-      .girls(girls.stream().map(GirlResp::from).collect(Collectors.toList()))
-      .keyWords(keyWords)
+      .girls(girls.stream()
+        .map(GirlResp::from)
+        .collect(Collectors.toList())
+      ).keyWords(keyWords)
       .build());
   }
 
