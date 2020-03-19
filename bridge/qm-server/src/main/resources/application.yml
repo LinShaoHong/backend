@@ -10,3 +10,6 @@ spring:
 
 footprint.max: ${FOOTPRINT_MAX:100}
 retrieve.password.key: ${RETRIEVE_PASSWORD_KEY:abcd}
+gmail.username: ${GMAIL_USERNAME:xfanggirl2@gmail.com}
+gmail.password: ${GMAIL_PASSWORD:cjunbmlztfuribvh}
+server.http.domain: ${GMAIL_PASSWORD:http://localhost:1379/#/user/changePwd}

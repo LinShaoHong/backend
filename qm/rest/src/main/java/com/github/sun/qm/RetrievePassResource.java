@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Objects;
 
 @Path("/v1/qm/retrievePass")
@@ -27,16 +29,18 @@ public class RetrievePassResource extends AbstractResource {
   private Environment env;
 
   private final UserMapper userMapper;
+  private final MailService mailService;
 
   @Inject
-  public RetrievePassResource(UserMapper userMapper) {
+  public RetrievePassResource(UserMapper userMapper, MailService mailService) {
     this.userMapper = userMapper;
+    this.mailService = mailService;
   }
 
   @POST
   @Path("/url")
   @ApiOperation("生成验证链接")
-  public SingleResponse<String> genUrl(@NotNull(message = "缺乏实体") GenReq req) {
+  public Response genUrl(@NotNull(message = "缺乏实体") GenReq req) throws UnsupportedEncodingException {
     User user = userMapper.findByEmail(req.getEmail());
     if (user == null) {
       throw new Message(4000);
@@ -44,7 +48,13 @@ public class RetrievePassResource extends AbstractResource {
     String KEY = env.getProperty(key);
     long timestamp = System.currentTimeMillis();
     String sign = User.hashPassword(user.getId() + ":" + timestamp + ":" + KEY);
-    return responseOf(String.format("sign=%s&timestamp=%s&id=%s", sign, timestamp, user.getId()));
+    String url = String.format("sign=%s&timestamp=%s&id=%s", URLEncoder.encode(sign, "utf-8"), timestamp, user.getId());
+    new Thread(() -> {
+      String href = env.getProperty("server.http.domain") + "?" + url;
+      String html = "親愛的用戶 天地往來： 您好<br/>&nbsp;&nbsp;&nbsp;&nbsp;請訪問： <a>" + href + "</a>  更改您的密碼";
+      mailService.sendHTML(req.getEmail(), "更改密碼", html);
+    }).start();
+    return responseOf();
   }
 
   @Data

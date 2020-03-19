@@ -34,6 +34,13 @@ public class SessionService {
       .readSystemMessageIds(Collections.emptySet())
       .build();
     mapper.insert(user);
+    commentMapper.insert(Comment.builder()
+      .id(IdGenerator.next())
+      .commentatorId(Comment.SYSTEM)
+      .replierId(id)
+      .time(System.currentTimeMillis())
+      .content(username + " 恭喜您注册成功，快去個人中心簽到吧，可賺取1金幣哦~~~")
+      .build());
     return id;
   }
 

@@ -94,7 +94,14 @@ public class AdminChargeResource extends AbstractResource {
   @POST
   @Path("/yq")
   public Response addYq(Charge.YQ yq) {
-    yqMapper.insert(yq);
+    Charge.YQ v = yqMapper.findById(yq.getType());
+    if (v == null) {
+      yqMapper.insert(yq);
+    } else {
+      v.setUrl(yq.getUrl());
+      v.setAmount(yq.getAmount());
+      yqMapper.update(yq);
+    }
     return responseOf();
   }
 

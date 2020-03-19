@@ -64,5 +64,6 @@ public class Charge {
     @Id
     private Type type;
     private String url;
+    private int amount;
   }
 }

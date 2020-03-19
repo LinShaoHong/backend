@@ -12,7 +12,6 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -124,7 +123,6 @@ public class UserResource extends AbstractResource {
 
   @Data
   private static class DeleteReq {
-    @NotEmpty
     private String path;
   }
 }

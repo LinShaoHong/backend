@@ -1,5 +1,6 @@
 package com.github.sun.qm;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.qm.resolver.Session;
 import io.swagger.annotations.Api;
@@ -52,6 +53,7 @@ public class SessionResource extends AbstractResource {
   }
 
   @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
   private static class RegisterReq {
     @NotNull(message = "缺少用户")
     private String username;

@@ -238,7 +238,8 @@ public class CommentResource extends AbstractResource {
     try {
       SqlBuilder sb = factory.create();
       Expression c1 = sb.field("replierId").eq(user.getId()).and(sb.field("commentatorId").ne(Comment.SYSTEM));
-      Expression c2 = sb.field("commentatorId").eq(Comment.SYSTEM);
+      Expression c2 = sb.field("commentatorId").eq(Comment.SYSTEM)
+        .and(sb.field("replierId").isNull().or(sb.field("replierId").isNotNull().and(sb.field("replierId").eq(user.getId()))));
       Expression condition = isComment ? c1 : c2;
       if (latestId != null) {
         Comment latestComment = mapper.findById(latestId);
@@ -261,8 +262,9 @@ public class CommentResource extends AbstractResource {
           .and(sb.field("commentatorId").ne(Comment.SYSTEM))
           .and(sb.field("read").eq(false));
         c2 = sb.field("commentatorId").eq(Comment.SYSTEM)
+          .and(sb.field("replierId").isNull().or(sb.field("replierId").isNotNull().and(sb.field("replierId").eq(user.getId()))))
           .and(sb.field("read").eq(false))
-          .and(sb.field("id").notIn(set));
+          .and(set == null || set.isEmpty() ? null : sb.field("id").notIn(set));
         Expression conn = isComment ? c1 : c2;
         unReads = mapper.countByTemplate(sb.from(Comment.class)
           .where(conn)
