@@ -1,6 +1,7 @@
 package com.github.sun.qm;
 
 import com.github.sun.foundation.sql.IdGenerator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -9,8 +10,10 @@ import java.util.Date;
 
 @Service
 public class StorageService {
-  private static final String BASE_PATH = "/opt/static/image/qm";
   private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+
+  @Value("${image.store.dir}")
+  private String basePath;
 
   public String upload(InputStream in, String name) throws IOException {
     int i = name.lastIndexOf(".");
@@ -20,7 +23,7 @@ public class StorageService {
     }
     String id = IdGenerator.next();
     String day = FORMATTER.format(new Date());
-    String path = BASE_PATH + "/" + day + "/" + id + "." + ext;
+    String path = basePath + "/" + day + "/" + id + "." + ext;
     File file = new File(path);
     if (!file.exists()) {
       File dir = new File(file.getParent());
@@ -39,7 +42,7 @@ public class StorageService {
   }
 
   public void delete(String path) {
-    File file = new File(BASE_PATH + path);
+    File file = new File(basePath + path);
     if (file.exists()) {
       file.delete();
     }

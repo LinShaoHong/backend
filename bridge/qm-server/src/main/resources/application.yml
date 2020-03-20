@@ -13,3 +13,4 @@ retrieve.password.key: ${RETRIEVE_PASSWORD_KEY:abcd}
 gmail.username: ${GMAIL_USERNAME:xfanggirl2@gmail.com}
 gmail.password: ${GMAIL_PASSWORD:cjunbmlztfuribvh}
 server.http.domain: ${GMAIL_PASSWORD:http://localhost:1379/#/user/changePwd}
+image.store.dir: ${IMAGE_STORE_DIR:/opt/static/image/qm}
