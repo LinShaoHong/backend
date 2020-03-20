@@ -23,19 +23,9 @@ import java.util.Objects;
 @NamingStrategy
 @Table(name = "spider_job")
 public class SpiderJob {
-  public enum Group {
-    IMAGE("图片");
-
-    public final String label;
-
-    Group(String label) {
-      this.label = label;
-    }
-  }
-
   @Id
   private String id;
-  private Group group;
+  private String group;
   private boolean publish;
   private long startTime;
   private String rate;

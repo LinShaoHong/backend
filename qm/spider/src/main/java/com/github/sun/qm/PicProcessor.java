@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-@Service("IMAGE" + Spider.Processor.SUFFIX)
+@Service("QM_PIC" + Spider.Processor.SUFFIX)
 public class PicProcessor implements Spider.Processor {
   @Value("${image.store.dir}")
   private String basePath;

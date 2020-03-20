@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.*;
 
-@Path("/consoles/sql")
+@Path("/v1/sql")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class SqlResource extends AbstractResource {

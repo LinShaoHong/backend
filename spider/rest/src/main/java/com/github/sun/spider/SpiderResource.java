@@ -1,4 +1,4 @@
-package com.github.sun.console;
+package com.github.sun.spider;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,9 +7,6 @@ import com.github.sun.foundation.boot.exception.NotFoundException;
 import com.github.sun.foundation.boot.utility.Throws;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
-import com.github.sun.spider.Setting;
-import com.github.sun.spider.Spider;
-import com.github.sun.spider.SpiderJob;
 import com.github.sun.spider.mapper.SpiderJobMapper;
 import com.github.sun.spider.schedule.SpiderJobScheduler;
 import com.github.sun.spider.spi.BasicSpider;
@@ -30,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
-@Path("/consoles/spider/jobs")
+@Path("/v1/spider/jobs")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class SpiderResource extends AbstractResource {
@@ -99,8 +96,7 @@ public class SpiderResource extends AbstractResource {
         if (name != null && name.endsWith(Spider.Processor.SUFFIX)) {
           name = name.substring(0, name.lastIndexOf(Spider.Processor.SUFFIX));
         }
-        SpiderJob.Group group = SpiderJob.Group.valueOf(name);
-        return GroupRes.builder().label(group.label).value(group.name()).build();
+        return GroupRes.builder().label(name).value(name).build();
       }).filter(Objects::nonNull).collect(Collectors.toList());
     return responseOf(groups);
   }
@@ -183,7 +179,7 @@ public class SpiderResource extends AbstractResource {
   @AllArgsConstructor
   private static class JobRequest {
     @NotNull(message = "require group")
-    private SpiderJob.Group group;
+    private String group;
     @NotNull(message = "require startTime")
     private long startTime;
     private String time;

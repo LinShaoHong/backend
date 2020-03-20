@@ -1,5 +1,5 @@
 dependencies {
-  compile project(":$rootName-image-spider")
+  compile project(":$rootName-mybatis")
   compile project(":$rootName-spider-contract")
 
   compile project(":$rootName-test")
