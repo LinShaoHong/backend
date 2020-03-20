@@ -1,5 +1,6 @@
 package com.github.sun.qm;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.modelling.Converter;
 import com.github.sun.foundation.modelling.JsonHandler;
 import com.github.sun.foundation.modelling.NamingStrategy;
@@ -37,6 +38,8 @@ public class Girl {
   private String contact;
   private BigDecimal price;
   private Type type;
+  private String category;
+  private String categorySpell;
   private String mainImage;
   private String city;
   @Converter(JsonHandler.ListStringHandler.class)
@@ -51,4 +54,25 @@ public class Girl {
   private Date createTime;
   @Transient
   private Date updateTime;
+
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @NamingStrategy
+  @Table(name = "qm_girl_category")
+  public static class Category {
+    @Id
+    private String id;
+    private Type type;
+    private String name;
+    private String nameSpell;
+    private long count;
+    @Transient
+    @JsonIgnore
+    private Date createTime;
+    @Transient
+    @JsonIgnore
+    private Date updateTime;
+  }
 }

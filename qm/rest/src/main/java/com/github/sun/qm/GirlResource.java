@@ -8,11 +8,14 @@ import com.github.sun.qm.resolver.MayLogin;
 import com.hankcs.hanlp.HanLP;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -29,6 +32,7 @@ import static com.github.sun.foundation.expression.Expression.EMPTY;
 @Api(value = "Girl Resource")
 public class GirlResource extends AbstractResource {
   private final GirlMapper mapper;
+  private final GirlMapper.Category categoryMapper;
   private final UserMapper userMapper;
   private final PayLogMapper payLogMapper;
   private final SqlBuilder.Factory factory;
@@ -37,12 +41,14 @@ public class GirlResource extends AbstractResource {
 
   @Inject
   public GirlResource(GirlMapper mapper,
+                      GirlMapper.Category categoryMapper,
                       UserMapper userMapper,
                       PayLogMapper payLogMapper,
                       @Named("mysql") SqlBuilder.Factory factory,
                       CollectionMapper collectionMapper,
                       FootprintService footprintService) {
     this.mapper = mapper;
+    this.categoryMapper = categoryMapper;
     this.userMapper = userMapper;
     this.payLogMapper = payLogMapper;
     this.factory = factory;
@@ -55,13 +61,16 @@ public class GirlResource extends AbstractResource {
   public PageResponse<GirlResp> paged(@QueryParam("start") int start,
                                       @QueryParam("count") int count,
                                       @QueryParam("type") String type,
+                                      @QueryParam("category") String category,
                                       @QueryParam("city") String city,
                                       @QueryParam("q") String q,
                                       @DefaultValue("updateTime") @QueryParam("rank") String rank) {
     SqlBuilder sb = factory.create();
     Expression qConn = EMPTY;
     List<String> keyWords = new ArrayList<>();
+    boolean search = false;
     if (q != null && !q.isEmpty()) {
+      search = true;
       keyWords = HanLP.extractKeyword(q, 10);
       if (keyWords.isEmpty()) {
         keyWords.add(q);
@@ -69,6 +78,7 @@ public class GirlResource extends AbstractResource {
       qConn = searchCondition(keyWords, q);
     }
     Expression condition = Expression.nonEmpty(type).then(sb.field("type").eq(type))
+      .and((search || category == null || category.isEmpty()) ? null : sb.field("categorySpell").contains(category))
       .and(city == null || city.isEmpty() ? null : sb.field("city").eq(city))
       .and(sb.field("onService").eq(true))
       .and(qConn);
@@ -339,5 +349,35 @@ public class GirlResource extends AbstractResource {
       .filter(Objects::nonNull)
       .collect(Collectors.toList());
     return responseOf(cities);
+  }
+
+  private static final List<String> ignores = Arrays.asList("网", "馆", "社", "院", "荟");
+
+  @GET
+  @Path("/category")
+  @ApiOperation("获取目录")
+  public ListResponse<CategoryResp> category(@NotEmpty(message = "缺少类型") @QueryParam("type") String type) {
+    SqlBuilder sb = factory.create();
+    SqlBuilder.Template template = sb.from(Girl.Category.class)
+      .where(sb.field("type").eq(type))
+      .where(sb.field("count").ge(10))
+      .desc("count")
+      .asc(sb.field("LENGTH").call(sb.field("name")))
+      .limit(20)
+      .template();
+    List<Girl.Category> categories = categoryMapper.findByTemplate(template);
+    return responseOf(categories.stream().map(v -> CategoryResp.builder()
+      .name(v.getName())
+      .nameSpell(v.getNameSpell())
+      .build()).collect(Collectors.toList()));
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  private static class CategoryResp {
+    private String name;
+    private String nameSpell;
   }
 }

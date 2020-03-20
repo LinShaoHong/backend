@@ -1,5 +1,6 @@
 package com.github.sun.qm.admin;
 
+import com.github.sun.foundation.boot.utility.Pinyins;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.IdGenerator;
@@ -15,8 +16,11 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Path("/v1/qm/admin/girl")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -24,11 +28,15 @@ import java.util.List;
 @Api(value = "Admin Girl Resource")
 public class AdminGirlResource extends AbstractResource {
   private final GirlMapper mapper;
+  private final GirlMapper.Category categoryMapper;
   private final SqlBuilder.Factory factory;
 
   @Inject
-  public AdminGirlResource(GirlMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
+  public AdminGirlResource(GirlMapper mapper,
+                           GirlMapper.Category categoryMapper,
+                           @Named("mysql") SqlBuilder.Factory factory) {
     this.mapper = mapper;
+    this.categoryMapper = categoryMapper;
     this.factory = factory;
   }
 
@@ -64,8 +72,33 @@ public class AdminGirlResource extends AbstractResource {
   @ApiOperation("添加")
   public Response create(@Valid @NotNull(message = "缺少实体") Girl v) {
     v.setId(IdGenerator.next());
+    if (v.getCategory() != null) {
+      v.setCategorySpell(Stream.of(v.getCategory().split("\\|")).map(Pinyins::spell).collect(Collectors.joining("|")));
+      updateCategory(v);
+    }
     mapper.insert(v);
+    if (v.getCategory() != null && !v.getCategory().isEmpty()) {
+      updateCategory(v);
+    }
     return responseOf();
+  }
+
+  private void updateCategory(Girl v) {
+    String tags = v.getCategory();
+    List<Girl.Category> categories = Arrays.stream(tags.split("\\|"))
+      .distinct()
+      .map(name -> {
+        String nameSpell = Pinyins.spell(name);
+        return Girl.Category.builder()
+          .id(v.getType().name() + ":" + nameSpell)
+          .type(v.getType())
+          .name(name)
+          .nameSpell(nameSpell)
+          .count(1)
+          .build();
+      })
+      .collect(Collectors.toList());
+    categories.forEach(categoryMapper::insertOrUpdate);
   }
 
   @GET
@@ -104,8 +137,13 @@ public class AdminGirlResource extends AbstractResource {
   @ApiOperation("修改")
   public Response create(@PathParam("id") String id,
                          @Valid @NotNull(message = "缺少实体") Girl v) {
+    Girl e = mapper.findById(id);
+    if (e.getCategory() != null) {
+      categoryMapper.dec(v.getType().name() + ":" + v.getCategorySpell());
+    }
     v.setId(id);
     mapper.update(v);
+    updateCategory(v);
     return responseOf();
   }
 }

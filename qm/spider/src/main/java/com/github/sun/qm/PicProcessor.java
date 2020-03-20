@@ -100,6 +100,8 @@ public class PicProcessor implements Spider.Processor {
   public static class ImgService {
     @Autowired
     private GirlMapper mapper;
+    @Autowired
+    private GirlMapper.Category categoryMapper;
 
     @Transactional
     public void save(Img p) {
@@ -123,8 +125,30 @@ public class PicProcessor implements Spider.Processor {
       Girl exist = mapper.findById(id);
       if (exist == null) {
         mapper.insert(girl);
+        updateCategory(girl);
       } else {
         mapper.update(girl);
+      }
+    }
+
+    private void updateCategory(Girl girl) {
+      String tags = girl.getCategory();
+      if (tags != null && !tags.isEmpty()) {
+        List<Girl.Category> categories = Arrays.stream(tags.split("\\|"))
+          .distinct()
+          .map(name -> {
+            Girl.Type type = girl.getType();
+            String nameSpell = Pinyins.spell(name);
+            return Girl.Category.builder()
+              .id(type + ":" + nameSpell)
+              .type(type)
+              .name(name)
+              .nameSpell(nameSpell)
+              .count(1)
+              .build();
+          })
+          .collect(Collectors.toList());
+        categories.forEach(categoryMapper::insertOrUpdate);
       }
     }
   }
