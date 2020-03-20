@@ -60,8 +60,9 @@ public class GirlResource extends AbstractResource {
                                       @DefaultValue("updateTime") @QueryParam("rank") String rank) {
     SqlBuilder sb = factory.create();
     Expression qConn = EMPTY;
+    List<String> keyWords = new ArrayList<>();
     if (q != null && !q.isEmpty()) {
-      List<String> keyWords = HanLP.extractKeyword(q, 10);
+      keyWords = HanLP.extractKeyword(q, 10);
       if (keyWords.isEmpty()) {
         keyWords.add(q);
       }
@@ -82,7 +83,8 @@ public class GirlResource extends AbstractResource {
         .limit(start, count)
         .template();
       List<Girl> girls = mapper.findByTemplate(template);
-      return responseOf(total, girls.stream().map(GirlResp::from).collect(Collectors.toList()));
+      final List<String> ks = keyWords;
+      return responseOf(total, girls.stream().map(v -> GirlResp.from(v, ks)).collect(Collectors.toList()));
     }
     return responseOf(total, Collections.emptyList());
   }
@@ -97,6 +99,20 @@ public class GirlResource extends AbstractResource {
     private String mainImage;
     private long likes;
     private long visits;
+    private List<String> keyWords;
+
+    private static GirlResp from(Girl v, List<String> keyWords) {
+      return GirlResp.builder()
+        .id(v.getId())
+        .type(v.getType())
+        .name(v.getName())
+        .city(v.getCity())
+        .mainImage(v.getMainImage())
+        .visits(v.getVisits())
+        .likes(v.getLikes())
+        .keyWords(keyWords)
+        .build();
+    }
 
     private static GirlResp from(Girl v) {
       return GirlResp.builder()
@@ -107,6 +123,7 @@ public class GirlResource extends AbstractResource {
         .mainImage(v.getMainImage())
         .visits(v.getVisits())
         .likes(v.getLikes())
+        .keyWords(Collections.emptyList())
         .build();
     }
   }
@@ -287,6 +304,7 @@ public class GirlResource extends AbstractResource {
       .girls(girls.stream()
         .map(GirlResp::from)
         .collect(Collectors.toList())
+        .subList(0, Math.min(girls.size(), 120))
       ).keyWords(keyWords)
       .build());
   }
