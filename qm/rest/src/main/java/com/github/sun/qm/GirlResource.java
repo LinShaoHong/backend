@@ -18,10 +18,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.sun.foundation.expression.Expression.EMPTY;
@@ -58,9 +55,22 @@ public class GirlResource extends AbstractResource {
   public PageResponse<GirlResp> paged(@QueryParam("start") int start,
                                       @QueryParam("count") int count,
                                       @QueryParam("type") String type,
+                                      @QueryParam("city") String city,
+                                      @QueryParam("q") String q,
                                       @DefaultValue("updateTime") @QueryParam("rank") String rank) {
     SqlBuilder sb = factory.create();
-    Expression condition = Expression.nonEmpty(type).then(sb.field("type").eq(type)).and(sb.field("onService").eq(true));
+    Expression qConn = EMPTY;
+    if (q != null && !q.isEmpty()) {
+      List<String> keyWords = HanLP.extractKeyword(q, 10);
+      if (keyWords.isEmpty()) {
+        keyWords.add(q);
+      }
+      qConn = searchCondition(keyWords, q);
+    }
+    Expression condition = Expression.nonEmpty(type).then(sb.field("type").eq(type))
+      .and(city == null || city.isEmpty() ? null : sb.field("city").eq(city))
+      .and(sb.field("onService").eq(true))
+      .and(qConn);
     SqlBuilder.Template template = sb.from(Girl.class)
       .where(condition).count().template();
     int total = mapper.countByTemplate(template);
@@ -251,23 +261,23 @@ public class GirlResource extends AbstractResource {
   @GET
   @Path("/search")
   @ApiOperation("搜索")
-  public SingleResponse<SearchResp> search(@NotNull @QueryParam("q") String q) {
+  public SingleResponse<SearchResp> search(@QueryParam("type") String type,
+                                           @QueryParam("city") String city,
+                                           @NotNull @QueryParam("q") String q) {
     if (q.trim().isEmpty()) {
       return responseOf(SearchResp.builder()
         .girls(Collections.emptyList())
         .keyWords(Collections.emptyList())
         .build());
     }
+    SqlBuilder sb = factory.create();
     List<String> keyWords = HanLP.extractKeyword(q, 10);
     if (keyWords.isEmpty()) {
       keyWords.add(q);
     }
-    SqlBuilder sb = factory.create();
-    Expression conn = EMPTY;
-    for (String word : keyWords) {
-      Expression e = sb.field("name").contains(word);
-      conn = conn == EMPTY ? e : conn.or(e);
-    }
+    Expression conn = Expression.nonEmpty(type).then(sb.field("type").eq(type))
+      .and(city == null || city.isEmpty() ? null : sb.field("city").eq(city))
+      .and(searchCondition(keyWords, q));
     SqlBuilder.Template template = sb.from(Girl.class)
       .where(conn)
       .desc("visits")
@@ -281,10 +291,35 @@ public class GirlResource extends AbstractResource {
       .build());
   }
 
+  private Expression searchCondition(List<String> keyWords, String q) {
+    Expression conn = EMPTY;
+    for (String word : keyWords) {
+      Expression e = Expression.id("name").contains(word);
+      conn = conn == EMPTY ? e : conn.or(e);
+    }
+    return conn;
+  }
+
   @Data
   @Builder
   private static class SearchResp {
     private List<GirlResp> girls;
     private List<String> keyWords;
+  }
+
+  @GET
+  @Path("/city")
+  @ApiOperation("获取城市")
+  public ListResponse<String> city(@QueryParam("type") String type) {
+    SqlBuilder sb = factory.create();
+    SqlBuilder.Template template = sb.from(Girl.class)
+      .where(type == null ? null : sb.field("type").eq(type))
+      .select(sb.field("city").distinct(), "city")
+      .template();
+    List<String> cities = mapper.findByTemplateAsMap(template).stream()
+      .map(v -> (String) v.get("city"))
+      .filter(Objects::nonNull)
+      .collect(Collectors.toList());
+    return responseOf(cities);
   }
 }
