@@ -50,7 +50,7 @@ public class PicProcessor implements Spider.Processor {
           InputStream mainIn = open(p.getOriginalUrl(), setting);
           String mfPath = mainPath + "/main" + p.getExt();
           Files.asByteSink(new File(mfPath)).writeFrom(mainIn);
-          p.setPath(mfPath);
+          p.setPath(mfPath.substring(basePath.length()));
           p.getDetails().stream().filter(d -> d.getExt() != null)
             .forEach(d -> {
               try {
@@ -60,7 +60,7 @@ public class PicProcessor implements Spider.Processor {
                 if (!file.exists()) {
                   InputStream detailIn = open(d.getOriginalUrl(), setting);
                   Files.asByteSink(file).writeFrom(detailIn);
-                  d.setPath(dfPath);
+                  d.setPath(dfPath.substring(basePath.length()));
                 }
               } catch (Exception ex) {
                 func.accept(ex);
@@ -106,6 +106,7 @@ public class PicProcessor implements Spider.Processor {
     @Transactional
     public void save(Img p) {
       String id = String.valueOf(p.getHashCode());
+      String title = p.getCategory().replace("|", " ");
       String categorySpell = p.getCategory();
       if (categorySpell != null && !categorySpell.isEmpty()) {
         categorySpell = Stream.of(categorySpell.split("\\|")).map(Pinyins::spell).collect(Collectors.joining("|"));
@@ -113,7 +114,9 @@ public class PicProcessor implements Spider.Processor {
       Girl girl = Girl.builder()
         .id(id)
         .name(p.getTitle())
-        .title(categorySpell)
+        .title(title)
+        .category(p.getCategory())
+        .categorySpell(categorySpell)
         .type(Girl.Type.PIC)
         .onService(true)
         .mainImage(p.getPath())
