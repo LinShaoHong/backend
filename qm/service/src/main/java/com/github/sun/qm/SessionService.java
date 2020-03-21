@@ -30,6 +30,7 @@ public class SessionService {
     String id = IdGenerator.next();
     User user = User.builder()
       .id(id)
+      .avatar("/avatar.jpg")
       .username(username)
       .password(User.hashPassword(password))
       .email(email)
