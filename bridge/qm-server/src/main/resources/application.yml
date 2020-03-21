@@ -8,13 +8,13 @@ spring:
     username: ${MYSQL_USER_OF_QM:root}
     password: ${MYSQL_PASSWORD_OF_QM:root}
 
-admin.username: ${BASE64_SECRET_KEY:admin}
-admin.password: ${BASE64_SECRET_KEY:admin123}
+admin.username: ${ADMIN_USERNAME:admin}
+admin.password: ${ADMIN_PASSWORD:admin123}
 
 footprint.max: ${FOOTPRINT_MAX:100}
 retrieve.password.key: ${RETRIEVE_PASSWORD_KEY:abcd}
 gmail.username: ${GMAIL_USERNAME:xfanggirl2@gmail.com}
 gmail.password: ${GMAIL_PASSWORD:cjunbmlztfuribvh}
-server.http.domain: ${GMAIL_PASSWORD:http://localhost:1379/#/user/changePwd}
+server.http.domain: ${SERVER_HTTP_DOMAIN:http://localhost:1379/#/user/changePwd}
 image.store.dir: ${IMAGE_STORE_DIR:/opt/static/image/qm}
 base64.secret.key: ${BASE64_SECRET_KEY:Bar12345Bar12345}
