@@ -115,7 +115,7 @@ public class UserResource extends AbstractResource {
   @ApiOperation("删除头像")
   public Response deleteImage(@Valid DeleteReq path) {
     final String p = path.getPath();
-    if (p != null && !p.isEmpty()) {
+    if (p != null && !p.isEmpty() && !Objects.equals("/avatar.jpb", p)) {
       storageService.delete(p);
     }
     return responseOf();
