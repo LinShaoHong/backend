@@ -13,6 +13,7 @@ import lombok.Data;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.*;
 
@@ -38,7 +39,8 @@ public class AdminUserResource extends AbstractResource {
                                   @QueryParam("vip") Boolean vip,
                                   @QueryParam("start") int start,
                                   @QueryParam("count") int count,
-                                  @DefaultValue("createTime") @QueryParam("rank") String rank) {
+                                  @DefaultValue("createTime") @QueryParam("rank") String rank,
+                                  @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonEmpty(id).then(sb.field("id").eq(id))
       .and(username == null ? null : sb.field("username").contains(username))
@@ -61,7 +63,8 @@ public class AdminUserResource extends AbstractResource {
   @GET
   @Path("/stat")
   @ApiOperation("统计用户")
-  public SingleResponse<StatResp> statUser(@QueryParam("timeType") int timeType) {
+  public SingleResponse<StatResp> statUser(@QueryParam("timeType") int timeType,
+                                           @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Calendar c = Calendar.getInstance();
     Date now = new Date();

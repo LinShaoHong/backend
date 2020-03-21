@@ -15,6 +15,7 @@ import javax.inject.Named;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,7 +49,8 @@ public class AdminGirlResource extends AbstractResource {
                                   @QueryParam("name") String name,
                                   @QueryParam("start") int start,
                                   @QueryParam("count") int count,
-                                  @DefaultValue("updateTime") @QueryParam("rank") String rank) {
+                                  @DefaultValue("updateTime") @QueryParam("rank") String rank,
+                                  @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonEmpty(type).then(sb.field("type").eq(type))
       .and(id == null ? null : sb.field("id").eq(id))
@@ -70,7 +72,8 @@ public class AdminGirlResource extends AbstractResource {
 
   @POST
   @ApiOperation("添加")
-  public Response create(@Valid @NotNull(message = "缺少实体") Girl v) {
+  public Response create(@Valid @NotNull(message = "缺少实体") Girl v,
+                         @Context Admin admin) {
     v.setId(IdGenerator.next());
     if (v.getCategory() != null) {
       v.setCategorySpell(Stream.of(v.getCategory().split("\\|")).map(Pinyins::spell).collect(Collectors.joining("|")));
@@ -104,14 +107,16 @@ public class AdminGirlResource extends AbstractResource {
   @GET
   @Path("/${id}")
   @ApiOperation("详情")
-  public SingleResponse<Girl> create(@PathParam("id") String id) {
+  public SingleResponse<Girl> create(@PathParam("id") String id,
+                                     @Context Admin admin) {
     return responseOf(mapper.findById(id));
   }
 
   @DELETE
   @Path("/${id}")
   @ApiOperation("删除")
-  public Response delete(@PathParam("id") String id) {
+  public Response delete(@PathParam("id") String id,
+                         @Context Admin admin) {
     Girl girl = mapper.findById(id);
     if (girl != null && girl.isOnService()) {
       girl.setOnService(false);
@@ -123,7 +128,8 @@ public class AdminGirlResource extends AbstractResource {
   @PUT
   @Path("/publish/${id}")
   @ApiOperation("上课")
-  public Response publish(@PathParam("id") String id) {
+  public Response publish(@PathParam("id") String id,
+                          @Context Admin admin) {
     Girl girl = mapper.findById(id);
     if (girl != null && !girl.isOnService()) {
       girl.setOnService(true);
@@ -136,7 +142,8 @@ public class AdminGirlResource extends AbstractResource {
   @Path("/${id}")
   @ApiOperation("修改")
   public Response create(@PathParam("id") String id,
-                         @Valid @NotNull(message = "缺少实体") Girl v) {
+                         @Valid @NotNull(message = "缺少实体") Girl v,
+                         @Context Admin admin) {
     Girl e = mapper.findById(id);
     if (e.getCategory() != null) {
       categoryMapper.dec(v.getType().name() + ":" + v.getCategorySpell());

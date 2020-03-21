@@ -16,6 +16,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +37,8 @@ public class AdminStorageResource extends AbstractResource {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @ApiOperation("上传图片")
   public SingleResponse<String> uploadImage(@FormDataParam("file") InputStream in,
-                                            @FormDataParam("file") FormDataContentDisposition meta) {
+                                            @FormDataParam("file") FormDataContentDisposition meta,
+                                            @Context Admin admin) {
     try {
       return responseOf(service.upload(in, meta.getFileName()));
     } catch (IOException ex) {
@@ -47,7 +49,8 @@ public class AdminStorageResource extends AbstractResource {
   @POST
   @Path("/delete")
   @ApiOperation("删除图片")
-  public Response deleteImage(@Valid @NotNull DeleteReq path) {
+  public Response deleteImage(@Valid @NotNull DeleteReq path,
+                              @Context Admin admin) {
     service.delete(path.getPath());
     return responseOf();
   }

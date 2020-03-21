@@ -13,6 +13,7 @@ import lombok.Data;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +36,8 @@ public class AdminMessageResource extends AbstractResource {
   @ApiOperation("分页获取消息")
   public PageResponse<Comment> paged(@QueryParam("start") int start,
                                      @QueryParam("count") int count,
-                                     @DefaultValue("time") @QueryParam("rank") String rank) {
+                                     @DefaultValue("time") @QueryParam("rank") String rank,
+                                     @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.id("commentatorId").eq(Comment.SYSTEM)
       .and(sb.field("replierId").isNull());
@@ -55,7 +57,8 @@ public class AdminMessageResource extends AbstractResource {
 
   @POST
   @ApiOperation("添加")
-  public Response add(MessageReq req) {
+  public Response add(MessageReq req,
+                      @Context Admin admin) {
     Comment comment = Comment.builder()
       .id(IdGenerator.next())
       .commentatorId(Comment.SYSTEM)
@@ -69,7 +72,8 @@ public class AdminMessageResource extends AbstractResource {
   @PUT
   @Path("/${id}")
   @ApiOperation("更新")
-  public Response update(@PathParam("id") String id, MessageReq req) {
+  public Response update(@PathParam("id") String id, MessageReq req,
+                         @Context Admin admin) {
     Comment comment = mapper.findById(id);
     comment.setContent(req.getContent());
     mapper.update(comment);
@@ -84,7 +88,8 @@ public class AdminMessageResource extends AbstractResource {
   @DELETE
   @Path("/${id}")
   @ApiOperation("删除")
-  public Response delete(@PathParam("id") String id) {
+  public Response delete(@PathParam("id") String id,
+                         @Context Admin admin) {
     mapper.deleteById(id);
     return responseOf();
   }

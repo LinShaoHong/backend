@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiOperation;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +37,8 @@ public class AdminCommentResource extends AbstractResource {
                                      @QueryParam("commentatorId") String commentatorId,
                                      @QueryParam("start") int start,
                                      @QueryParam("count") int count,
-                                     @DefaultValue("time") @QueryParam("rank") String rank) {
+                                     @DefaultValue("time") @QueryParam("rank") String rank,
+                                     @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.id("commentatorId").ne(Comment.SYSTEM)
       .and(id == null ? null : sb.field("id").eq(id))
@@ -59,7 +61,8 @@ public class AdminCommentResource extends AbstractResource {
   @DELETE
   @Path("/${id}")
   @ApiOperation("删除")
-  public Response delete(@PathParam("id") String id) {
+  public Response delete(@PathParam("id") String id,
+                         @Context Admin admin) {
     mapper.deleteById(id);
     return responseOf();
   }

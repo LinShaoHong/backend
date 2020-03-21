@@ -1,6 +1,5 @@
 package com.github.sun.qm;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.boot.exception.UnexpectedException;
 import com.github.sun.foundation.boot.utility.Hex;
 import com.github.sun.foundation.modelling.Converter;

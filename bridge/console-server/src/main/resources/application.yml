@@ -1,0 +1,13 @@
+server.port: 9725
+
+spring:
+  application:
+    name: Console-Server
+  datasource:
+    url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER_OF_SUN:root}
+    password: ${MYSQL_PASSWORD_OF_SUN:root}
+    admin:
+      url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/%s?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true
+      username: root
+      password: ${MYSQL_ROOT_PASSWORD:root}

@@ -1,7 +1,6 @@
 dependencies {
   compile project(":$rootName-image-rest")
   compile project(":$rootName-layout-rest")
-  compile project(":$rootName-console-rest")
   compile project(":$rootName-image-spider")
   compile project(":$rootName-spider-rest")
 }

@@ -1,7 +1,6 @@
 dependencies {
   compile project(":$rootName-image-service")
   compile project(":$rootName-spider-contract")
-  implementation "com.google.guava:guava:$vers.guava"
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

@@ -1,19 +1,23 @@
 package com.github.sun.qm.resolver;
 
 import com.github.sun.foundation.boot.exception.UnAuthorizedException;
+import com.github.sun.foundation.boot.utility.AES;
 import com.github.sun.foundation.rest.RequestScopeContextResolver;
 import com.github.sun.qm.User;
 import com.github.sun.qm.UserMapper;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.springframework.core.env.Environment;
 
 import javax.inject.Inject;
 
 public class UserResolver implements RequestScopeContextResolver<User> {
   private final Session session;
+  private final String secretKey;
   private final UserMapper mapper;
 
   @Inject
-  public UserResolver(Session session, UserMapper mapper) {
+  public UserResolver(Environment env, Session session, UserMapper mapper) {
+    this.secretKey = env.getProperty("base64.secret.key");
     this.session = session;
     this.mapper = mapper;
   }
@@ -24,7 +28,8 @@ public class UserResolver implements RequestScopeContextResolver<User> {
     if (token == null) {
       throw new UnAuthorizedException("请先登录");
     }
-    User user = mapper.findById(token);
+    String userId = AES.decrypt(token, secretKey);
+    User user = mapper.findById(userId);
     if (user == null) {
       throw new UnAuthorizedException(1000);
     }

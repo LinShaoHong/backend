@@ -14,6 +14,7 @@ import javax.inject.Named;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +33,8 @@ public class AdminChargeResource extends AbstractResource {
   @Inject
   public AdminChargeResource(ChargeMapper mapper,
                              ChargeMapper.YQMapper yqMapper,
-                             @Named("mysql") SqlBuilder.Factory factory) {
+                             @Named("mysql") SqlBuilder.Factory factory,
+                             @Context Admin admin) {
     this.mapper = mapper;
     this.yqMapper = yqMapper;
     this.factory = factory;
@@ -44,7 +46,8 @@ public class AdminChargeResource extends AbstractResource {
                                     @QueryParam("count") int count,
                                     @QueryParam("type") String type,
                                     @QueryParam("used") Boolean used,
-                                    @DefaultValue("updateTime") @QueryParam("rank") String rank) {
+                                    @DefaultValue("updateTime") @QueryParam("rank") String rank,
+                                    @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonEmpty(type).then(sb.field("type").eq(type))
       .and(used == null ? null : sb.field("used").eq(used));
@@ -64,7 +67,8 @@ public class AdminChargeResource extends AbstractResource {
 
   @POST
   @ApiOperation("添加")
-  public Response add(@Valid ChargeReq req) {
+  public Response add(@Valid ChargeReq req,
+                      @Context Admin admin) {
     List<Charge> vs = Stream.of(req.getCards().replaceAll(" ", "").split(","))
       .map(card -> Charge.builder()
         .id(card)
@@ -86,14 +90,16 @@ public class AdminChargeResource extends AbstractResource {
   @DELETE
   @Path("/${id}")
   @ApiOperation("删除")
-  public Response delete(@PathParam("id") String id) {
+  public Response delete(@PathParam("id") String id,
+                         @Context Admin admin) {
     mapper.deleteById(id);
     return responseOf();
   }
 
   @POST
   @Path("/yq")
-  public Response addYq(Charge.YQ yq) {
+  public Response addYq(Charge.YQ yq,
+                        @Context Admin admin) {
     Charge.YQ v = yqMapper.findById(yq.getType());
     if (v == null) {
       yqMapper.insert(yq);
@@ -107,13 +113,14 @@ public class AdminChargeResource extends AbstractResource {
 
   @GET
   @Path("/yq")
-  public ListResponse<Charge.YQ> yqAll() {
+  public ListResponse<Charge.YQ> yqAll(@Context Admin admin) {
     return responseOf(yqMapper.findAll());
   }
 
   @DELETE
   @Path("/yq/${id}")
-  public Response deleteYq(@PathParam("id") String id) {
+  public Response deleteYq(@PathParam("id") String id,
+                           @Context Admin admin) {
     yqMapper.deleteById(id);
     return responseOf();
   }

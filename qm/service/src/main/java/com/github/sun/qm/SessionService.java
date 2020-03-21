@@ -1,7 +1,9 @@
 package com.github.sun.qm;
 
 import com.github.sun.foundation.boot.exception.Message;
+import com.github.sun.foundation.boot.utility.AES;
 import com.github.sun.foundation.sql.IdGenerator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,8 @@ public class SessionService {
   private UserMapper mapper;
   @Resource
   private CommentMapper commentMapper;
+  @Value("${base64.secret.key}")
+  private String secretKey;
 
   @Transactional
   public String register(String username, String password, String email, String ip) {
@@ -41,7 +45,7 @@ public class SessionService {
       .time(System.currentTimeMillis())
       .content(username + " 恭喜您注册成功，快去個人中心簽到吧，可賺取1金幣哦~~~")
       .build());
-    return id;
+    return AES.encrypt(id, secretKey);
   }
 
   @Transactional
@@ -60,6 +64,6 @@ public class SessionService {
     }
     user.setLastLoginTime(new Date());
     mapper.update(user);
-    return user.getId();
+    return AES.encrypt(user.getId(), secretKey);
   }
 }
