@@ -7,8 +7,12 @@ import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.Girl;
 import com.github.sun.qm.GirlMapper;
+import com.github.sun.qm.ViewStat;
+import com.github.sun.qm.ViewStatMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.Builder;
+import lombok.Data;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -17,9 +21,8 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,14 +32,17 @@ import java.util.stream.Stream;
 @Api(value = "Admin Girl Resource")
 public class AdminGirlResource extends AbstractResource {
   private final GirlMapper mapper;
+  private final ViewStatMapper statMapper;
   private final GirlMapper.Category categoryMapper;
   private final SqlBuilder.Factory factory;
 
   @Inject
   public AdminGirlResource(GirlMapper mapper,
+                           ViewStatMapper statMapper,
                            GirlMapper.Category categoryMapper,
                            @Named("mysql") SqlBuilder.Factory factory) {
     this.mapper = mapper;
+    this.statMapper = statMapper;
     this.categoryMapper = categoryMapper;
     this.factory = factory;
   }
@@ -152,5 +158,62 @@ public class AdminGirlResource extends AbstractResource {
     mapper.update(v);
     updateCategory(v);
     return responseOf();
+  }
+
+  private final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+
+  @GET
+  @Path("/stat")
+  @ApiOperation("统计访问量")
+  public SingleResponse<StatResp> statUser(@QueryParam("timeType") int timeType,
+                                           @QueryParam("type") String type,
+                                           @Context Admin admin) {
+    SqlBuilder sb = factory.create();
+    Calendar c = Calendar.getInstance();
+    Date now = new Date();
+    c.setTime(now);
+    switch (timeType) {
+      case 1:
+        c.add(Calendar.DAY_OF_WEEK, -1);
+        break;
+      case 2:
+        c.add(Calendar.MONTH, -1);
+        break;
+      case 3:
+        c.add(Calendar.MONTH, -3);
+        break;
+      case 4:
+        c.add(Calendar.MONTH, -6);
+        break;
+      case 5:
+        c.add(Calendar.YEAR, -1);
+        break;
+    }
+    SqlBuilder.Template template = sb.from(ViewStat.class)
+      .where(sb.field("date").ge(FORMATTER.format(c.getTime())))
+      .where(sb.field("type").eq(type))
+      .select(sb.field("type"), "type")
+      .select(sb.field("date"), "time")
+      .select(sb.field("visits"), "count")
+      .template();
+    List<Map<String, Object>> list = mapper.findByTemplateAsMap(template);
+    List<String> times = new ArrayList<>();
+    List<Integer> visits = new ArrayList<>();
+    for (Map<String, Object> map : list) {
+      times.add((String) map.get("time"));
+      Integer inc = ((Long) map.get("count")).intValue();
+      visits.add(inc);
+    }
+    return responseOf(StatResp.builder()
+      .times(times)
+      .visits(visits)
+      .build());
+  }
+
+  @Data
+  @Builder
+  private static class StatResp {
+    private List<String> times;
+    private List<Integer> visits;
   }
 }

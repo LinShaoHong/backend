@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -21,16 +22,19 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.sun.foundation.expression.Expression.EMPTY;
 
+@Slf4j
 @Path("/v1/qm/girls")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "Girl Resource")
 public class GirlResource extends AbstractResource {
+  private final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
   private final GirlMapper mapper;
   private final GirlMapper.Category categoryMapper;
   private final UserMapper userMapper;
@@ -38,6 +42,7 @@ public class GirlResource extends AbstractResource {
   private final SqlBuilder.Factory factory;
   private final CollectionMapper collectionMapper;
   private final FootprintService footprintService;
+  private final ViewStatMapper statMapper;
 
   @Inject
   public GirlResource(GirlMapper mapper,
@@ -46,7 +51,8 @@ public class GirlResource extends AbstractResource {
                       PayLogMapper payLogMapper,
                       @Named("mysql") SqlBuilder.Factory factory,
                       CollectionMapper collectionMapper,
-                      FootprintService footprintService) {
+                      FootprintService footprintService,
+                      ViewStatMapper statMapper) {
     this.mapper = mapper;
     this.categoryMapper = categoryMapper;
     this.userMapper = userMapper;
@@ -54,6 +60,7 @@ public class GirlResource extends AbstractResource {
     this.factory = factory;
     this.collectionMapper = collectionMapper;
     this.footprintService = footprintService;
+    this.statMapper = statMapper;
   }
 
   @GET
@@ -201,9 +208,22 @@ public class GirlResource extends AbstractResource {
     if (mayLogin.user != null) {
       collected = collectionMapper.countByUserIdAndGirlId(mayLogin.user.getId(), id) > 0;
     }
-    // 记录足迹
+    // 统计及记录足迹
     if (mayLogin.user != null) {
-      new Thread(() -> footprintService.record(mayLogin.user.getId(), id)).start();
+      new Thread(() -> {
+        try {
+          String date = FORMATTER.format(new Date());
+          statMapper.insertOrUpdate(ViewStat.builder()
+            .id(ViewStat.makeId(girl.getType(), date))
+            .type(girl.getType())
+            .date(date)
+            .visits(1)
+            .build());
+          footprintService.record(mayLogin.user.getId(), id);
+        } catch (Throwable ex) {
+          log.error("Error:\n", ex);
+        }
+      }).start();
     }
     return responseOf(DetailResp.from(girl, accessible, collected, needCharge));
   }
