@@ -209,22 +209,22 @@ public class GirlResource extends AbstractResource {
       collected = collectionMapper.countByUserIdAndGirlId(mayLogin.user.getId(), id) > 0;
     }
     // 统计及记录足迹
-    if (mayLogin.user != null) {
-      new Thread(() -> {
-        try {
-          String date = FORMATTER.format(new Date());
-          statMapper.insertOrUpdate(ViewStat.builder()
-            .id(ViewStat.makeId(girl.getType(), date))
-            .type(girl.getType())
-            .date(date)
-            .visits(1)
-            .build());
+    new Thread(() -> {
+      try {
+        String date = FORMATTER.format(new Date());
+        statMapper.insertOrUpdate(ViewStat.builder()
+          .id(ViewStat.makeId(girl.getType(), date))
+          .type(girl.getType())
+          .date(date)
+          .visits(1)
+          .build());
+        if (mayLogin.user != null) {
           footprintService.record(mayLogin.user.getId(), id);
-        } catch (Throwable ex) {
-          log.error("Error:\n", ex);
         }
-      }).start();
-    }
+      } catch (Throwable ex) {
+        log.error("Error:\n", ex);
+      }
+    }).start();
     return responseOf(DetailResp.from(girl, accessible, collected, needCharge));
   }
 
