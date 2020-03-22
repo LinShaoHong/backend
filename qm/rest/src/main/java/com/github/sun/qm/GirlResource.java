@@ -232,6 +232,7 @@ public class GirlResource extends AbstractResource {
   @Builder
   private static class DetailResp {
     private String id;
+    private Girl.Type type;
     private String name;
     private String city;
     private String title;
@@ -249,15 +250,23 @@ public class GirlResource extends AbstractResource {
     private boolean onService;
 
     private static DetailResp from(Girl v, boolean accessible, boolean collected, boolean needCharge) {
+      List<String> detailImages = v.getDetailImages();
+      if (!accessible && v.getType() == Girl.Type.PIC) {
+        int i = detailImages.size() / 3;
+        for (int j = i; j < detailImages.size(); j++) {
+          detailImages.set(j, "/inaccessible.jpg");
+        }
+      }
       return DetailResp.builder()
         .id(v.getId())
+        .type(v.getType())
         .name(v.getName())
         .city(v.getCity())
         .title(v.getTitle())
         .price(v.getPrice())
         .contact(accessible ? v.getContact() : null)
         .mainImage(v.getMainImage())
-        .detailImages(v.getDetailImages())
+        .detailImages(detailImages)
         .mainImage(v.getMainImage())
         .visits(v.getVisits())
         .likes(v.getLikes())
