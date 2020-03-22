@@ -345,7 +345,7 @@ public class GirlResource extends AbstractResource {
       .select(sb.field("city").distinct(), "city")
       .template();
     List<String> cities = mapper.findByTemplateAsMap(template).stream()
-      .map(v -> (String) v.get("city"))
+      .map(v -> v == null ? null : (String) v.get("city"))
       .filter(Objects::nonNull)
       .collect(Collectors.toList());
     return responseOf(cities);
