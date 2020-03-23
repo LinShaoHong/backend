@@ -69,7 +69,7 @@ public class AdminChargeResource extends AbstractResource {
   @ApiOperation("添加")
   public Response add(@Valid ChargeReq req,
                       @Context Admin admin) {
-    List<Charge> vs = Stream.of(req.getCards().replaceAll(" ", "").split(","))
+    List<Charge> vs = Stream.of(req.getCards().replaceAll(" ", "").split("\n"))
       .map(card -> Charge.builder()
         .id(card)
         .type(Charge.Type.valueOf(req.getType()))
