@@ -1,0 +1,6 @@
+dependencies {
+  compile project(":$rootName-mybatis")
+  compile project(":$rootName-scheduler-contract")
+}
+
+apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

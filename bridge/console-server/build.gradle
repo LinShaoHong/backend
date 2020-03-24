@@ -1,5 +1,6 @@
 dependencies {
-  compile project(":$rootName-rest")
+  compile project(":$rootName-qm-scheduler")
+  compile project(":$rootName-scheduler-rest")
 }
 
 apply from: project.file("./docker.gradle")

@@ -1,6 +1,7 @@
 package com.github.sun.spider.spi;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.boot.utility.Iterators;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.spider.Setting;
@@ -481,7 +482,7 @@ public class BasicSpider extends AbstractSpider {
       .errors(new ArrayList<>(errors))
       .startTime(startTime == null ? "" : formatter.format(startTime))
       .endTime(finishTime == null ? "" : formatter.format(finishTime))
-      .usedTime(startTime == null ? "" : formatTime((finishTime == null ? System.currentTimeMillis() : finishTime.getTime()) - startTime.getTime()))
+      .usedTime(startTime == null ? "" : Dates.formatTime((finishTime == null ? System.currentTimeMillis() : finishTime.getTime()) - startTime.getTime()))
       .build();
   }
 
@@ -500,33 +501,6 @@ public class BasicSpider extends AbstractSpider {
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
     }
-  }
-
-  public static String formatTime(long millis) {
-    StringBuilder sb = new StringBuilder();
-    long days = millis / (3600 * 24 * 1000);
-    if (days > 0) {
-      sb.append(days).append(" 天 ");
-      millis = millis % (3600 * 24 * 1000);
-    }
-    long hours = millis / (3600 * 1000);
-    if (hours > 0) {
-      sb.append(hours).append(" 时 ");
-      millis = millis % (3600 * 1000);
-    }
-    long minutes = millis / (60 * 1000);
-    if (minutes > 0) {
-      sb.append(minutes).append(" 分 ");
-      millis = millis % (60 * 1000);
-    }
-    long seconds = millis / 1000;
-    if (seconds > 0) {
-      sb.append(seconds).append(" 秒 ");
-    }
-    if (sb.length() > 0) {
-      sb.setLength(sb.length() - 1);
-    }
-    return sb.toString();
   }
 
   @Component

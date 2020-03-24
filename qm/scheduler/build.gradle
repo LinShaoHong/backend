@@ -1,0 +1,7 @@
+dependencies {
+  compile project(":$rootName-quartz")
+  compile project(":$rootName-scheduler-mapper")
+  implementation "com.jcraft:jsch:$vers.jsch"
+}
+
+apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

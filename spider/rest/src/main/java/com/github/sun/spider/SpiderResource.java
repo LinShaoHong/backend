@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.boot.Injector;
 import com.github.sun.foundation.boot.exception.NotFoundException;
+import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.boot.utility.Throws;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
@@ -295,7 +296,7 @@ public class SpiderResource extends AbstractResource {
       String remainTime = null;
       if (next != null) {
         long remains = next.getTime() - System.currentTimeMillis();
-        remainTime = BasicSpider.formatTime(remains);
+        remainTime = Dates.formatTime(remains);
       }
       if (p == null) {
         return ProgressRes.builder()

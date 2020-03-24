@@ -1,9 +1,9 @@
 package com.github.sun.qm;
 
+import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
-import com.github.sun.qm.util.Dates;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
