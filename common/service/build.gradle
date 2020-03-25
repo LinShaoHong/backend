@@ -1,0 +1,6 @@
+dependencies {
+  compile project(":$rootName-boot")
+  compile "com.sun.mail:javax.mail:$vers.mail"
+}
+
+apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

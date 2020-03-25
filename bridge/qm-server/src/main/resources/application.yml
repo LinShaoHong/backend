@@ -4,7 +4,7 @@ spring:
   application:
     name: QM-Server
   datasource:
-    url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
     username: ${MYSQL_USER_OF_QM:root}
     password: ${MYSQL_PASSWORD_OF_QM:root}
 
