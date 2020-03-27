@@ -1,6 +1,7 @@
 package com.github.sun.qm;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.github.sun.common.EmailSender;
 import com.github.sun.foundation.boot.exception.Message;
 import com.github.sun.foundation.rest.AbstractResource;
 import io.swagger.annotations.Api;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -29,10 +31,10 @@ public class RetrievePassResource extends AbstractResource {
   private Environment env;
 
   private final UserMapper userMapper;
-  private final MailService mailService;
+  private final EmailSender mailService;
 
   @Inject
-  public RetrievePassResource(UserMapper userMapper, MailService mailService) {
+  public RetrievePassResource(UserMapper userMapper, @Named("gmail") EmailSender mailService) {
     this.userMapper = userMapper;
     this.mailService = mailService;
   }
@@ -51,8 +53,8 @@ public class RetrievePassResource extends AbstractResource {
     String url = String.format("sign=%s&timestamp=%s&id=%s", URLEncoder.encode(sign, "utf-8"), timestamp, user.getId());
     new Thread(() -> {
       String href = env.getProperty("server.http.domain") + "?" + url;
-      String html = "親愛的用戶 天地往來： 您好<br/>&nbsp;&nbsp;&nbsp;&nbsp;請訪問： <a>" + href + "</a>  更改您的密碼";
-      mailService.sendHTML(req.getEmail(), "更改密碼", html);
+      String html = "親愛的用戶 天地往來： 您好<br/>&nbsp;&nbsp;&nbsp;&nbsp;請訪問： <a href='" + href + "'>" + href + "</a>  更改您的密碼";
+      mailService.sendHTML("尋芳閣", "更改密碼", html, req.getEmail());
     }).start();
     return responseOf();
   }

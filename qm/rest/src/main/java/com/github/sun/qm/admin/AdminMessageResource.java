@@ -1,11 +1,13 @@
 package com.github.sun.qm.admin;
 
+import com.github.sun.common.EmailSender;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.Comment;
 import com.github.sun.qm.CommentMapper;
+import com.github.sun.qm.UserMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
@@ -17,6 +19,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Path("/v1/qm/admin/message")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -24,11 +29,18 @@ import java.util.List;
 @Api(value = "Admin Message Resource")
 public class AdminMessageResource extends AbstractResource {
   private final CommentMapper mapper;
+  private final UserMapper userMapper;
+  private final EmailSender emailSender;
   private final SqlBuilder.Factory factory;
 
   @Inject
-  public AdminMessageResource(CommentMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
+  public AdminMessageResource(CommentMapper mapper,
+                              UserMapper userMapper,
+                              @Named("gmail") EmailSender emailSender,
+                              @Named("mysql") SqlBuilder.Factory factory) {
     this.mapper = mapper;
+    this.userMapper = userMapper;
+    this.emailSender = emailSender;
     this.factory = factory;
   }
 
@@ -92,5 +104,31 @@ public class AdminMessageResource extends AbstractResource {
                          @Context Admin admin) {
     mapper.deleteById(id);
     return responseOf();
+  }
+
+  @POST
+  @Path("/email")
+  @ApiOperation("发送邮件")
+  public Response email(EmailReq req, @Context Admin admin) {
+    Set<String> emails = Stream.of(req.getTo().replaceAll(" ", "").split(",")).collect(Collectors.toSet());
+    if (emails.size() == 1 && emails.iterator().next().equals("@all")) {
+      emails = userMapper.findAllEmail();
+    }
+    if (!emails.isEmpty()) {
+      if (req.getFormat().equalsIgnoreCase("HTML")) {
+        emailSender.sendHTML("尋芳閣", req.getTitle(), req.getBody(), emails);
+      } else {
+        emailSender.sendMessage("尋芳閣", req.getTitle(), req.getBody(), emails);
+      }
+    }
+    return responseOf();
+  }
+
+  @Data
+  private static class EmailReq {
+    private String to;
+    private String title;
+    private String body;
+    private String format;
   }
 }

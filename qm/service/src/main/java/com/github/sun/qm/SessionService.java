@@ -27,6 +27,9 @@ public class SessionService {
     if (mapper.countByUsername(username) > 0) {
       throw new Message(1001);
     }
+    if (mapper.countByEmail(email) > 0) {
+      throw new Message(1003);
+    }
     String id = IdGenerator.next();
     User user = User.builder()
       .id(id)

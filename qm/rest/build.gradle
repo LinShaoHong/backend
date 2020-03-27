@@ -1,6 +1,7 @@
 dependencies {
   compile project(":$rootName-rest")
   compile project(":$rootName-qm-service")
+  compile project(":$rootName-common-service")
 
   implementation "com.hankcs:hanlp:$vers.hanlp"
 }

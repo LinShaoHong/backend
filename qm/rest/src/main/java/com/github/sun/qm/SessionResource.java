@@ -52,6 +52,13 @@ public class SessionResource extends AbstractResource {
     return responseOf(mapper.countByUsername(name) > 0);
   }
 
+  @GET
+  @Path("/checkEmail")
+  @ApiOperation("校验邮箱是否已存在")
+  public SingleResponse<Boolean> checkEmail(@NotEmpty(message = "缺少邮箱") @QueryParam("email") String email) {
+    return responseOf(mapper.countByEmail(email) > 0);
+  }
+
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
   private static class RegisterReq {

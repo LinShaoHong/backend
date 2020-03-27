@@ -13,8 +13,24 @@ admin.password: ${ADMIN_PASSWORD:admin123}
 
 footprint.max: ${FOOTPRINT_MAX:100}
 retrieve.password.key: ${RETRIEVE_PASSWORD_KEY:abcd}
-gmail.username: ${GMAIL_USERNAME:xfanggirl2@gmail.com}
-gmail.password: ${GMAIL_PASSWORD:cjunbmlztfuribvh}
 server.http.domain: ${SERVER_HTTP_DOMAIN:http://localhost:1379/#/user/changePwd}
 image.store.dir: ${IMAGE_STORE_DIR:/opt/static/image/qm}
-base64.secret.key: ${BASE64_SECRET_KEY:Bar12345Bar12345}
+base64.secret.key: ${BASE64_SECRET_KEY:3[7#96;97@6$2]68}
+
+gmail.username: ${GMAIL_USERNAME:xfanggirl2@gmail.com}
+gmail.password: ${GMAIL_PASSWORD:cjunbmlztfuribvh}
+gmail.mail.transport.protocol: ${GMAIL_TRANSPORT_PROTOCOL:smtp}
+gmail.mail.smtp.host: ${GMAIL_SMTP_HOST:smtp.gmail.com}
+gmail.mail.smtp.auth: ${GMAIL_SMTP_AUTH:ture}
+gmail.mail.smtp.port: ${GMAIL_SMTP_PORT:587}
+gmail.mail.smtp.starttls.enable: ${GMAIL_STARTTLS_ENABLE:true}
+
+logging:
+  config: classpath:logback-spring.xml
+  email:
+    host: ${LOGGING_EMAIL_HOST:smtp.qq.com}
+    port: ${LOGGING_EMAIL_PORT:25}
+    username: ${LOGGING_EMAIL_USERNAME:340417867@qq.com}
+    password: ${LOGGING_EMAIL_PASSWORD:gtfzkixrdnybcbbg}
+    from: ${LOGGING_EMAIL_FROM:尋芳閣错误日志 <340417867@qq.com>}
+    to: ${LOGGING_EMAIL_TO:lin3404@126.com}
