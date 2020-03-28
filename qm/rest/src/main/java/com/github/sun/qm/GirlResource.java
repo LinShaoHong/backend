@@ -252,8 +252,7 @@ public class GirlResource extends AbstractResource {
     private static DetailResp from(Girl v, boolean accessible, boolean collected, boolean needCharge) {
       List<String> detailImages = v.getDetailImages();
       if (!accessible && v.getType() == Girl.Type.PIC) {
-        int i = detailImages.size() / 3;
-        for (int j = i; j < detailImages.size(); j++) {
+        for (int j = 10; j < detailImages.size(); j++) {
           detailImages.set(j, "/inaccessible.jpg");
         }
       }

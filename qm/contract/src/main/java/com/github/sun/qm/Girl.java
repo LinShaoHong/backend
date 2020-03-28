@@ -34,7 +34,6 @@ public class Girl {
   private String name;
   @NotEmpty(message = "缺少描述")
   private String title;
-  @NotEmpty(message = "缺少获取值")
   private String contact;
   private BigDecimal price;
   private Type type;
