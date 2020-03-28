@@ -53,7 +53,7 @@ public class RetrievePassResource extends AbstractResource {
     String url = String.format("sign=%s&timestamp=%s&id=%s", URLEncoder.encode(sign, "utf-8"), timestamp, user.getId());
     new Thread(() -> {
       String href = env.getProperty("server.http.domain") + "?" + url;
-      String html = "親愛的用戶 天地往來： 您好<br/>&nbsp;&nbsp;&nbsp;&nbsp;請訪問： <a href='" + href + "'>" + href + "</a>  更改您的密碼";
+      String html = "親愛的用戶 " + user.getUsername() + "： 您好<br/>&nbsp;&nbsp;&nbsp;&nbsp;請訪問： <a href='" + href + "'>" + href + "</a>  更改您的密碼";
       mailService.sendHTML("尋芳閣", "更改密碼", html, req.getEmail());
     }).start();
     return responseOf();
