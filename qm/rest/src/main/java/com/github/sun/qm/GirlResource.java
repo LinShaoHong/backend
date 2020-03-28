@@ -301,12 +301,20 @@ public class GirlResource extends AbstractResource {
   public ListResponse<GirlResp> recommend(@PathParam("id") String id,
                                           @QueryParam("count") int count) {
     Girl girl = mapper.findById(id);
-    String type = girl.getType().name();
     SqlBuilder sb = factory.create();
+    Expression conn = EMPTY;
+    String categorySpell = girl.getCategorySpell();
+    if (categorySpell != null && !categorySpell.isEmpty()) {
+      for (String c : categorySpell.split("\\|")) {
+        conn = conn.or(sb.field("categorySpell").contains(c));
+      }
+    }
+    String type = girl.getType().name();
     SqlBuilder.Template template = sb.from(Girl.class)
       .where(sb.field("id").ne(id))
       .where(sb.field("type").eq(type))
       .where(sb.field("onService").eq(true))
+      .where(conn)
       .desc("visits")
       .limit(count)
       .template();
@@ -395,10 +403,12 @@ public class GirlResource extends AbstractResource {
       .limit(20)
       .template();
     List<Girl.Category> categories = categoryMapper.findByTemplate(template);
-    return responseOf(categories.stream().map(v -> CategoryResp.builder()
-      .name(v.getName())
-      .nameSpell(v.getNameSpell())
-      .build()).collect(Collectors.toList()));
+    return responseOf(categories.stream()
+      .filter(v -> ignores.stream().noneMatch(i -> v.getName().contains(i)))
+      .map(v -> CategoryResp.builder()
+        .name(v.getName())
+        .nameSpell(v.getNameSpell())
+        .build()).collect(Collectors.toList()));
   }
 
   @Data
