@@ -174,7 +174,7 @@ public class AdminGirlResource extends AbstractResource {
     c.setTime(now);
     switch (timeType) {
       case 1:
-        c.add(Calendar.DAY_OF_WEEK, -1);
+        c.add(Calendar.DAY_OF_WEEK, -7);
         break;
       case 2:
         c.add(Calendar.MONTH, -1);
