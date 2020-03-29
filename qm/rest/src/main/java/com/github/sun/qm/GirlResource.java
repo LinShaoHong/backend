@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.sun.foundation.expression.Expression.EMPTY;
 
@@ -146,10 +147,40 @@ public class GirlResource extends AbstractResource {
   }
 
   @GET
-  @Path("/hot")
-  @ApiOperation("获取热门")
-  public ListResponse<GirlResp> host(@QueryParam("count") int count,
-                                     @NotNull(message = "缺少type") @QueryParam("type") String type) {
+  @Path("/index")
+  @ApiOperation("首页")
+  public ListResponse<IndexResp> index(@QueryParam("start") int start,
+                                       @QueryParam("count") int count,
+                                       @QueryParam("hotCount") int hotCount,
+                                       @DefaultValue("updateTime") @QueryParam("rank") String rank) {
+    SqlBuilder sb = factory.create();
+    return responseOf(Stream.of(Girl.Type.values()).map(type -> {
+      sb.clear();
+      Expression condition = sb.field("type").eq(type).and(sb.field("onService").eq(true));
+      SqlBuilder.Template template = sb.from("qm_girl")
+        .where(condition)
+        .desc(rank)
+        .limit(start, count)
+        .template();
+      List<Girl> girls = mapper.findByTemplate(template);
+      List<GirlResp> hots = hotCount == 0 ? new ArrayList<>() : hot(hotCount, type.name());
+      return IndexResp.builder()
+        .type(type.name())
+        .girls(girls.stream().map(GirlResp::from).collect(Collectors.toList()))
+        .hots(hots)
+        .build();
+    }).collect(Collectors.toList()));
+  }
+
+  @Data
+  @Builder
+  private static class IndexResp {
+    private String type;
+    private List<GirlResp> girls;
+    private List<GirlResp> hots;
+  }
+
+  private List<GirlResp> hot(int count, String type) {
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(Girl.class)
       .where(sb.field("type").eq(type))
@@ -163,7 +194,7 @@ public class GirlResource extends AbstractResource {
       .template();
     List<Girl> girls = mapper.findByTemplate(template);
     girls.sort((g1, g2) -> -g1.getUpdateTime().compareTo(g2.getUpdateTime()));
-    return responseOf(girls.stream().map(GirlResp::from).collect(Collectors.toList()));
+    return girls.stream().map(GirlResp::from).collect(Collectors.toList());
   }
 
   @GET
