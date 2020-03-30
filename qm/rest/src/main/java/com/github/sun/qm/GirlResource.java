@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.github.sun.foundation.expression.Expression.EMPTY;
 
@@ -149,12 +148,13 @@ public class GirlResource extends AbstractResource {
   @GET
   @Path("/index")
   @ApiOperation("首页")
-  public ListResponse<IndexResp> index(@QueryParam("start") int start,
+  public ListResponse<IndexResp> index(@QueryParam("types") List<String> types,
+                                       @QueryParam("start") int start,
                                        @QueryParam("count") int count,
                                        @QueryParam("hotCount") int hotCount,
                                        @DefaultValue("updateTime") @QueryParam("rank") String rank) {
     SqlBuilder sb = factory.create();
-    return responseOf(Stream.of(Girl.Type.values()).map(type -> {
+    return responseOf(types.stream().map(type -> {
       sb.clear();
       Expression condition = sb.field("type").eq(type).and(sb.field("onService").eq(true));
       SqlBuilder.Template template = sb.from("qm_girl")
@@ -163,9 +163,9 @@ public class GirlResource extends AbstractResource {
         .limit(start, count)
         .template();
       List<Girl> girls = mapper.findByTemplate(template);
-      List<GirlResp> hots = hotCount == 0 ? new ArrayList<>() : hot(hotCount, type.name());
+      List<GirlResp> hots = hotCount == 0 ? new ArrayList<>() : hot(hotCount, type);
       return IndexResp.builder()
-        .type(type.name())
+        .type(type)
         .girls(girls.stream().map(GirlResp::from).collect(Collectors.toList()))
         .hots(hots)
         .build();
