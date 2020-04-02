@@ -11,3 +11,11 @@ spring:
       url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/%s?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true
       username: root
       password: ${MYSQL_ROOT_PASSWORD:root}
+
+qmail.username: ${QMAIL_USERNAME:340417867@qq.com}
+qmail.password: ${QMAIL_PASSWORD:gtfzkixrdnybcbbg}
+qmail.mail.transport.protocol: ${QMAIL_TRANSPORT_PROTOCOL:smtp}
+qmail.mail.smtp.host: ${QMAIL_SMTP_HOST:smtp.qq.com}
+qmail.mail.smtp.auth: ${QMAIL_SMTP_AUTH:ture}
+qmail.mail.smtp.port: ${QMAIL_SMTP_PORT:25}
+qmail.mail.smtp.starttls.enable: ${QMAIL_STARTTLS_ENABLE:true}

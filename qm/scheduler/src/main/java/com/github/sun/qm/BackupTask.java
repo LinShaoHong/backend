@@ -72,7 +72,7 @@ public class BackupTask implements SchedulerTask {
         }
         this.running.set(false);
         progress.setRunning(false);
-        progress.setEndTime(DATE_FORMATTER.format(new Date()));
+        progress.setEndTime(TIME_FORMATTER.format(new Date()));
         pushProgress();
       }
     }
