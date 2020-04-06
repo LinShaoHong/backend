@@ -7,8 +7,8 @@ import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.Girl;
 import com.github.sun.qm.GirlMapper;
+import com.github.sun.qm.StorageService;
 import com.github.sun.qm.ViewStat;
-import com.github.sun.qm.ViewStatMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Builder;
@@ -32,17 +32,17 @@ import java.util.stream.Stream;
 @Api(value = "Admin Girl Resource")
 public class AdminGirlResource extends AbstractResource {
   private final GirlMapper mapper;
-  private final ViewStatMapper statMapper;
+  private final StorageService storageService;
   private final GirlMapper.Category categoryMapper;
   private final SqlBuilder.Factory factory;
 
   @Inject
   public AdminGirlResource(GirlMapper mapper,
-                           ViewStatMapper statMapper,
+                           StorageService storageService,
                            GirlMapper.Category categoryMapper,
                            @Named("mysql") SqlBuilder.Factory factory) {
     this.mapper = mapper;
-    this.statMapper = statMapper;
+    this.storageService = storageService;
     this.categoryMapper = categoryMapper;
     this.factory = factory;
   }
@@ -118,6 +118,19 @@ public class AdminGirlResource extends AbstractResource {
     return responseOf(mapper.findById(id));
   }
 
+  @PUT
+  @Path("/unShelve/${id}")
+  @ApiOperation("下架")
+  public Response unShelve(@PathParam("id") String id,
+                           @Context Admin admin) {
+    Girl girl = mapper.findById(id);
+    if (girl != null && girl.isOnService()) {
+      girl.setOnService(false);
+      mapper.update(girl);
+    }
+    return responseOf();
+  }
+
   @DELETE
   @Path("/${id}")
   @ApiOperation("删除")
@@ -125,8 +138,11 @@ public class AdminGirlResource extends AbstractResource {
                          @Context Admin admin) {
     Girl girl = mapper.findById(id);
     if (girl != null && girl.isOnService()) {
-      girl.setOnService(false);
-      mapper.update(girl);
+      if (girl.getMainImage() != null) {
+        storageService.delete(girl.getMainImage());
+      }
+      girl.getDetailImages().forEach(storageService::delete);
+      mapper.deleteById(id);
     }
     return responseOf();
   }
