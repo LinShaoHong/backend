@@ -287,6 +287,10 @@ public class GirlResource extends AbstractResource {
           detailImages.set(j, "/inaccessible.jpg");
         }
       }
+      if (accessible && v.getContactImages() != null && !v.getContactImages().isEmpty()) {
+        v.getContactImages().addAll(detailImages);
+        detailImages = v.getContactImages();
+      }
       return DetailResp.builder()
         .id(v.getId())
         .type(v.getType())

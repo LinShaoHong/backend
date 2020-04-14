@@ -117,7 +117,7 @@ public class ChargeResource extends AbstractResource {
           .girl(girl == null ? null : GirlRes.from(girl))
           .time(FORMATTER.format(v.getCreateTime()))
           .build();
-      }).collect(Collectors.toList()));
+      }).filter(Objects::nonNull).collect(Collectors.toList()));
     }
     return responseOf(total, Collections.emptyList());
   }

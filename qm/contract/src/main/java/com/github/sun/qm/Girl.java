@@ -43,6 +43,8 @@ public class Girl {
   private String city;
   @Converter(JsonHandler.ListStringHandler.class)
   private List<String> detailImages;
+  @Converter(JsonHandler.ListStringHandler.class)
+  private List<String> contactImages;
   private long likes;
   private long visits;
   private long collects;
