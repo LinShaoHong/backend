@@ -343,11 +343,13 @@ public class GirlResource extends AbstractResource {
         conn = conn.or(sb.field("categorySpell").contains(c));
       }
     }
+    String city = girl.getCity();
     String type = girl.getType().name();
     SqlBuilder.Template template = sb.from(Girl.class)
       .where(sb.field("id").ne(id))
       .where(sb.field("type").eq(type))
       .where(sb.field("onService").eq(true))
+      .where(city != null && !city.isEmpty() ? sb.field("city").eq(city) : null)
       .where(conn)
       .desc("visits")
       .limit(count)
