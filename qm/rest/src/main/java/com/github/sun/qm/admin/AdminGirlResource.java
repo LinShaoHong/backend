@@ -53,15 +53,19 @@ public class AdminGirlResource extends AbstractResource {
                                   @QueryParam("type") String type,
                                   @QueryParam("city") String city,
                                   @QueryParam("name") String name,
+                                  @QueryParam("title") String title,
+                                  @QueryParam("contact") String contact,
                                   @QueryParam("start") int start,
                                   @QueryParam("count") int count,
                                   @DefaultValue("updateTime") @QueryParam("rank") String rank,
                                   @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonEmpty(type).then(sb.field("type").eq(type))
-      .and(id == null ? null : sb.field("id").eq(id))
-      .and(city == null ? null : sb.field("city").eq(city))
-      .and(name == null ? null : sb.field("name").contains(name));
+      .and(id == null || id.isEmpty() ? null : sb.field("id").eq(id))
+      .and(city == null || city.isEmpty() ? null : sb.field("city").eq(city))
+      .and(name == null || name.isEmpty() ? null : sb.field("name").contains(name))
+      .and(title == null || title.isEmpty() ? null : sb.field("title").contains(title))
+      .and(contact == null || contact.isEmpty() ? null : sb.field("contact").contains(contact));
     int total = mapper.countByTemplate(sb.from(Girl.class).where(condition).count().template());
     if (start < total) {
       sb.clear();

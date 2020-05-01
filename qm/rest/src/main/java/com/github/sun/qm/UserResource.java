@@ -59,7 +59,7 @@ public class UserResource extends AbstractResource {
   }
 
   private static final SimpleDateFormat DAY_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
-  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd: HH:mm:ss");
+  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   @Data
   @Builder

@@ -26,10 +26,11 @@ public class FootprintService {
     if (exist != null) {
       mapper.updateTime(exist.getId(), new Date());
     } else {
-      int total = mapper.countByTemplate(sb.from(Footprint.class).count().template());
+      int total = mapper.countByTemplate(sb.from(Footprint.class).where(sb.field("userId").eq(userId)).count().template());
       if (total >= max) {
         sb.clear();
         SqlBuilder.Template template = sb.from(Footprint.class)
+          .where(sb.field("userId").eq(userId))
           .desc("updateTime")
           .limit(max - 1, total)
           .template();
@@ -41,7 +42,7 @@ public class FootprintService {
         .userId(userId)
         .girlId(girlId)
         .build();
-      mapper.insert(footprint);
+      mapper.insertOrUpdate(footprint);
     }
   }
 }

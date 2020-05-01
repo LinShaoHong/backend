@@ -78,7 +78,7 @@ public class ChargeResource extends AbstractResource {
     private String girlId;
   }
 
-  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd: HH:mm:ss");
+  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   @GET
   @Path("/flow")

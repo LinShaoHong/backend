@@ -1,44 +1,61 @@
 package com.github.sun.qm.admin;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.sun.foundation.expression.Expression;
-import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.Comment;
 import com.github.sun.qm.CommentMapper;
+import com.github.sun.qm.GirlMapper;
+import com.github.sun.qm.UserMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.Data;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Path("/v1/qm/admin/comment")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "Admin Comment Resource")
-public class AdminCommentResource extends AbstractResource {
+public class AdminCommentResource extends AdminBasicResource {
   private final CommentMapper mapper;
+  private final UserMapper userMapper;
   private final SqlBuilder.Factory factory;
 
   @Inject
-  public AdminCommentResource(CommentMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
+  public AdminCommentResource(UserMapper userMapper,
+                              GirlMapper girlMapper,
+                              CommentMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
+    super(userMapper, girlMapper);
     this.mapper = mapper;
+    this.userMapper = userMapper;
     this.factory = factory;
   }
 
   @GET
   @ApiOperation("分页获取评论")
-  public PageResponse<Comment> paged(@QueryParam("id") String id,
-                                     @QueryParam("girlId") String girlId,
-                                     @QueryParam("commentatorId") String commentatorId,
-                                     @QueryParam("start") int start,
-                                     @QueryParam("count") int count,
-                                     @DefaultValue("time") @QueryParam("rank") String rank,
-                                     @Context Admin admin) {
+  public PageResponse<ObjectNode> paged(@QueryParam("id") String id,
+                                        @QueryParam("girlId") String girlId,
+                                        @QueryParam("commentatorName") String commentatorName,
+                                        @QueryParam("start") int start,
+                                        @QueryParam("count") int count,
+                                        @DefaultValue("time") @QueryParam("rank") String rank,
+                                        @Context Admin admin) {
+    String commentatorId = null;
+    if (commentatorName != null && !commentatorName.isEmpty()) {
+      commentatorId = userMapper.findIdByUsername(commentatorName);
+    }
     SqlBuilder sb = factory.create();
     Expression condition = Expression.id("commentatorId").ne(Comment.SYSTEM)
       .and(id == null ? null : sb.field("id").eq(id))
@@ -53,7 +70,7 @@ public class AdminCommentResource extends AbstractResource {
         .limit(start, count)
         .template();
       List<Comment> list = mapper.findByTemplate(template);
-      return responseOf(total, list);
+      return responseOf(total, join(list, "commentatorId", "replierId", "girlId"));
     }
     return responseOf(total, Collections.emptyList());
   }
@@ -65,5 +82,37 @@ public class AdminCommentResource extends AbstractResource {
                          @Context Admin admin) {
     mapper.deleteById(id);
     return responseOf();
+  }
+
+  @POST
+  @ApiOperation("通知")
+  public Response notice(NoticeReq req, @Context Admin admin) {
+    Set<String> userIds = Stream.of(req.getUsername().replaceAll(" ", "").split(",")).collect(Collectors.toSet());
+    if (userIds.size() == 1 && userIds.iterator().next().equals("@all")) {
+      userIds = userMapper.findAllIds();
+    } else {
+      userIds.clear();
+      String id = userMapper.findIdByUsername(req.getUsername());
+      if (id != null) {
+        userIds.add(id);
+      }
+    }
+    List<Comment> comments = userIds.stream().map(id -> Comment.builder()
+      .id(IdGenerator.next())
+      .commentatorId(Comment.SYSTEM)
+      .replierId(id)
+      .time(System.currentTimeMillis())
+      .content(req.getContent())
+      .build()).collect(Collectors.toList());
+    if (!comments.isEmpty()) {
+      mapper.insertAll(comments);
+    }
+    return responseOf();
+  }
+
+  @Data
+  private static class NoticeReq {
+    private String username;
+    private String content;
   }
 }

@@ -3,6 +3,7 @@ package com.github.sun.qm.admin;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
+import com.github.sun.qm.Collection;
 import com.github.sun.qm.User;
 import com.github.sun.qm.UserMapper;
 import io.swagger.annotations.Api;
@@ -43,8 +44,8 @@ public class AdminUserResource extends AbstractResource {
                                   @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonEmpty(id).then(sb.field("id").eq(id))
-      .and(username == null ? null : sb.field("username").contains(username))
-      .and(email == null ? null : sb.field("email").contains(email))
+      .and(username == null || username.isEmpty() ? null : sb.field("username").eq(username))
+      .and(email == null || email.isEmpty() ? null : sb.field("email").eq(email))
       .and(vip == null ? null : sb.field("vip").eq(vip));
     int total = mapper.countByTemplate(sb.from(User.class).where(condition).count().template());
     if (start < total) {
@@ -87,21 +88,35 @@ public class AdminUserResource extends AbstractResource {
         break;
     }
     SqlBuilder.Template template = sb.from(User.class)
+      .select(sb.field("id").count())
+      .template();
+    int total = mapper.countByTemplate(template);
+
+    template = sb.from(User.class)
       .where(sb.id("UNIX_TIMESTAMP").call(sb.field("createTime")).ge(c.getTimeInMillis() / 1000))
       .groupBy(sb.field("substr").call(sb.field("createTime"), 1, 10))
       .select(sb.field("substr").call(sb.field("createTime"), 1, 10), "time")
       .select(sb.field("id").distinct().count(), "count")
       .template();
     List<Map<String, Object>> list = mapper.findByTemplateAsMap(template);
+
     List<String> times = new ArrayList<>();
     List<Integer> incs = new ArrayList<>();
     List<Integer> nums = new ArrayList<>();
+
+    Collections.reverse(list);
     for (Map<String, Object> map : list) {
       times.add((String) map.get("time"));
       Integer inc = ((Long) map.get("count")).intValue();
       incs.add(inc);
-      nums.add(nums.size() > 0 ? (nums.get(nums.size() - 1) + inc) : inc);
+
+      nums.add(total);
+      total -= inc;
     }
+
+    Collections.reverse(times);
+    Collections.reverse(incs);
+    Collections.reverse(nums);
     return responseOf(StatResp.builder()
       .times(times)
       .incs(incs)

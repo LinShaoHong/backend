@@ -24,9 +24,7 @@ public class Collection {
   private String userId;
   private String girlId;
   @Transient
-  @JsonIgnore
   private Date createTime;
   @Transient
-  @JsonIgnore
   private Date updateTime;
 }

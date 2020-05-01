@@ -7,7 +7,6 @@ import com.github.sun.scheduler.SchedulerJob;
 import com.github.sun.scheduler.SchedulerJobMapper;
 import com.github.sun.scheduler.SchedulerTask;
 import com.jcraft.jsch.*;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -21,16 +20,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Calendar.DATE;
 
-@Slf4j
-@Service("QM_BACKUP" + SchedulerTask.SUFFIX)
-public class BackupTask implements SchedulerTask {
+public abstract class BasicBackupTask implements SchedulerTask {
   private static final int MAX_LATEST_SIZE = 7;
-  private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+  private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy_MM_dd");
   private static final SimpleDateFormat TIME_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   private final List<Progress> latest = new ArrayList<>();
   private Progress progress = null;
   private AtomicBoolean running = new AtomicBoolean(false);
+
+  protected abstract String id();
 
   @Resource
   private SchedulerJobMapper mapper;
@@ -38,7 +37,7 @@ public class BackupTask implements SchedulerTask {
   @Override
   public void start() {
     Session session = null;
-    SchedulerJob job = mapper.findById("QM_BACKUP");
+    SchedulerJob job = mapper.findById(id());
     if (job != null) {
       Throwable e = null;
       try {
@@ -99,7 +98,7 @@ public class BackupTask implements SchedulerTask {
   private void copyRemoteToLocal(Session session, String from, String to, long startTime) throws JSchException, IOException {
     Date now = new Date();
     int index = to.lastIndexOf(File.separator);
-    to = to.substring(0, index) + File.separator + DATE_FORMATTER.format(now) + "-" + to.substring(index + 1);
+    to = to.substring(0, index) + File.separator + DATE_FORMATTER.format(now) + "_" + to.substring(index + 1);
     Channel channel = session.openChannel("exec");
     try {
       ((ChannelExec) channel).setCommand(from);
@@ -177,7 +176,7 @@ public class BackupTask implements SchedulerTask {
         Calendar c = Calendar.getInstance();
         c.setTime(now);
         c.add(DATE, -1);
-        String prev = to.substring(0, index) + File.separator + DATE_FORMATTER.format(c.getTime()) + "-" + to.substring(index + 1);
+        String prev = to.substring(0, index) + File.separator + DATE_FORMATTER.format(c.getTime()) + "_" + to.substring(index + 1);
         File file = new File(prev);
         if (file.exists()) {
           file.delete();
@@ -240,5 +239,21 @@ public class BackupTask implements SchedulerTask {
   @Override
   public List<Progress> latestProgress() {
     return this.latest;
+  }
+
+  @Service("QM_DB_BACKUP" + SchedulerTask.SUFFIX)
+  public static class DbBackupTask extends BasicBackupTask {
+    @Override
+    protected String id() {
+      return "QM_DB_BACKUP";
+    }
+  }
+
+  @Service("QM_ALL_BACKUP" + SchedulerTask.SUFFIX)
+  public static class AllBackupTask extends BasicBackupTask {
+    @Override
+    protected String id() {
+      return "QM_ALL_BACKUP";
+    }
   }
 }

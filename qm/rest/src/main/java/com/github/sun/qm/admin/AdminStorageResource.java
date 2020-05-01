@@ -35,7 +35,7 @@ public class AdminStorageResource extends AbstractResource {
 
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
-  @ApiOperation("上传图片")
+  @ApiOperation("上传")
   public SingleResponse<String> uploadImage(@FormDataParam("file") InputStream in,
                                             @FormDataParam("file") FormDataContentDisposition meta,
                                             @Context Admin admin) {
@@ -48,7 +48,7 @@ public class AdminStorageResource extends AbstractResource {
 
   @POST
   @Path("/delete")
-  @ApiOperation("删除图片")
+  @ApiOperation("删除")
   public Response deleteImage(@Valid @NotNull DeleteReq path,
                               @Context Admin admin) {
     service.delete(path.getPath());
