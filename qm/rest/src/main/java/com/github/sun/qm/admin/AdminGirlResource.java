@@ -98,20 +98,22 @@ public class AdminGirlResource extends AbstractResource {
 
   private void updateCategory(Girl v) {
     String tags = v.getCategory();
-    List<Girl.Category> categories = Arrays.stream(tags.split("\\|"))
-      .distinct()
-      .map(name -> {
-        String nameSpell = Pinyins.spell(name);
-        return Girl.Category.builder()
-          .id(v.getType().name() + ":" + nameSpell)
-          .type(v.getType())
-          .name(name)
-          .nameSpell(nameSpell)
-          .count(1)
-          .build();
-      })
-      .collect(Collectors.toList());
-    categories.forEach(categoryMapper::insertOrUpdate);
+    if (tags != null && !tags.isEmpty()) {
+      List<Girl.Category> categories = Arrays.stream(tags.split("\\|"))
+        .distinct()
+        .map(name -> {
+          String nameSpell = Pinyins.spell(name);
+          return Girl.Category.builder()
+            .id(v.getType().name() + ":" + nameSpell)
+            .type(v.getType())
+            .name(name)
+            .nameSpell(nameSpell)
+            .count(1)
+            .build();
+        })
+        .collect(Collectors.toList());
+      categories.forEach(categoryMapper::insertOrUpdate);
+    }
   }
 
   @GET

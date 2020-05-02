@@ -271,6 +271,7 @@ public class GirlResource extends AbstractResource {
     private String mainImage;
     private BigDecimal price;
     private List<String> detailImages;
+    private String video;
     private boolean accessible;
     private boolean collected;
     private boolean needCharge;
@@ -301,7 +302,7 @@ public class GirlResource extends AbstractResource {
         .contact(accessible ? v.getContact() : null)
         .mainImage(v.getMainImage())
         .detailImages(detailImages)
-        .mainImage(v.getMainImage())
+        .video(v.getVideo())
         .visits(v.getVisits())
         .likes(v.getLikes())
         .collects(v.getCollects())
@@ -377,7 +378,8 @@ public class GirlResource extends AbstractResource {
     }
     Expression conn = Expression.nonEmpty(type).then(sb.field("type").eq(type))
       .and(city == null || city.isEmpty() ? null : sb.field("city").eq(city))
-      .and(searchCondition(keyWords, q));
+      .and(searchCondition(keyWords, q))
+      .and(sb.field("onService").eq(true));
     SqlBuilder.Template template = sb.from(Girl.class)
       .where(conn)
       .desc("visits")

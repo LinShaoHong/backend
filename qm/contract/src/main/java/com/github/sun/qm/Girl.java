@@ -45,6 +45,7 @@ public class Girl {
   private List<String> detailImages;
   @Converter(JsonHandler.ListStringHandler.class)
   private List<String> contactImages;
+  private String video;
   private long likes;
   private long visits;
   private long collects;
