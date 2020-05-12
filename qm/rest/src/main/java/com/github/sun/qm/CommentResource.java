@@ -25,11 +25,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Path("/v1/qm/comment")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "Comment Resource")
-@Slf4j
 public class CommentResource extends AbstractResource {
   private final CommentMapper mapper;
   private final CommentService service;

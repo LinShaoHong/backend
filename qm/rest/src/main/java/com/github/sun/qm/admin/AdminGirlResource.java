@@ -55,6 +55,7 @@ public class AdminGirlResource extends AbstractResource {
                                   @QueryParam("name") String name,
                                   @QueryParam("title") String title,
                                   @QueryParam("contact") String contact,
+                                  @QueryParam("hasVideo") Boolean hasVideo,
                                   @QueryParam("start") int start,
                                   @QueryParam("count") int count,
                                   @DefaultValue("updateTime") @QueryParam("rank") String rank,
@@ -65,7 +66,8 @@ public class AdminGirlResource extends AbstractResource {
       .and(city == null || city.isEmpty() ? null : sb.field("city").eq(city))
       .and(name == null || name.isEmpty() ? null : sb.field("name").contains(name))
       .and(title == null || title.isEmpty() ? null : sb.field("title").contains(title))
-      .and(contact == null || contact.isEmpty() ? null : sb.field("contact").contains(contact));
+      .and(contact == null || contact.isEmpty() ? null : sb.field("contact").contains(contact))
+      .and(hasVideo == null ? null : (hasVideo ? sb.field("videos").isNotNull() : sb.field("videos").isNull()));
     int total = mapper.countByTemplate(sb.from(Girl.class).where(condition).count().template());
     if (start < total) {
       sb.clear();

@@ -6,6 +6,7 @@ import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.inject.Inject;
@@ -16,8 +17,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -170,5 +170,99 @@ public class AdminChargeResource extends AdminBasicResource {
       return responseOf(total, join(list, "userId", "girlId"));
     }
     return responseOf(total, Collections.emptyList());
+  }
+
+  @GET
+  @Path("/stat")
+  @ApiOperation("统计充值金额")
+  public SingleResponse<StatResp> statRecharge(@QueryParam("groupType") String groupType,
+                                               @QueryParam("timeType") int timeType,
+                                               @Context Admin admin) {
+    SqlBuilder sb = factory.create();
+    Calendar c = Calendar.getInstance();
+    Date now = new Date();
+    c.setTime(now);
+    switch (timeType) {
+      case 1:
+        if (groupType.equals("day")) {
+          c.add(Calendar.DAY_OF_WEEK, -7);
+        } else {
+          c.add(Calendar.MONTH, -1);
+        }
+        break;
+      case 2:
+        if (groupType.equals("day")) {
+          c.add(Calendar.MONTH, -1);
+        } else {
+          c.add(Calendar.MONTH, -3);
+        }
+        break;
+      case 3:
+        if (groupType.equals("day")) {
+          c.add(Calendar.MONTH, -3);
+        } else {
+          c.add(Calendar.MONTH, -6);
+        }
+        break;
+      case 4:
+        if (groupType.equals("day")) {
+          c.add(Calendar.MONTH, -6);
+        } else {
+          c.add(Calendar.YEAR, -1);
+        }
+        break;
+      case 5:
+        if (groupType.equals("day")) {
+          c.add(Calendar.YEAR, -1);
+        } else {
+          c.add(Calendar.YEAR, -3);
+        }
+        break;
+    }
+    SqlBuilder.Template template = sb.from(PayLog.class)
+      .where(sb.field("type").eq("RECHARGE"))
+      .select(sb.field("amount").sum())
+      .template();
+    BigDecimal total = (BigDecimal) mapper.findOneByTemplateAsMap(template).values().iterator().next();
+
+    template = sb.from(PayLog.class)
+      .where(sb.field("type").eq("RECHARGE"))
+      .where(sb.id("UNIX_TIMESTAMP").call(sb.field("createTime")).ge(c.getTimeInMillis() / 1000))
+      .groupBy(sb.field("substr").call(sb.field("createTime"), 1, groupType.equals("day") ? 10 : 7))
+      .select(sb.field("substr").call(sb.field("createTime"), 1, groupType.equals("day") ? 10 : 7), "time")
+      .select(sb.field("amount").sum(), "total")
+      .template();
+    List<Map<String, Object>> list = mapper.findByTemplateAsMap(template);
+
+    List<String> times = new ArrayList<>();
+    List<BigDecimal> nums = new ArrayList<>();
+    List<BigDecimal> totals = new ArrayList<>();
+
+    Collections.reverse(list);
+    for (Map<String, Object> map : list) {
+      times.add((String) map.get("time"));
+      BigDecimal inc = (BigDecimal) map.get("total");
+      nums.add(inc);
+
+      totals.add(total);
+      total = total.subtract(inc);
+    }
+
+    Collections.reverse(times);
+    Collections.reverse(nums);
+    Collections.reverse(totals);
+    return responseOf(StatResp.builder()
+      .times(times)
+      .nums(nums)
+      .totals(totals)
+      .build());
+  }
+
+  @Data
+  @Builder
+  private static class StatResp {
+    private List<String> times;
+    private List<BigDecimal> nums;
+    private List<BigDecimal> totals;
   }
 }

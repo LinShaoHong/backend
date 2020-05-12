@@ -10,11 +10,14 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class ChargeService {
   @Resource
   private ChargeMapper mapper;
+  @Resource
+  private ChargeMapper.YQMapper yqMapper;
   @Resource
   private UserMapper userMapper;
   @Resource
@@ -38,46 +41,50 @@ public class ChargeService {
     mapper.update(charge);
 
     user.setVip(charge.isVip());
-    if (charge.isVip()) {
-      Date now = new Date();
-      user.setVipStartTime(now);
-      Calendar c = Calendar.getInstance();
-      c.setTime(now);
-      switch (charge.getType()) {
-        case VIP_MONTH:
-          c.add(Calendar.MONTH, 1);
-          break;
-        case VIP_QUARTER:
-          c.add(Calendar.MONTH, 3);
-          break;
-        case VIP_YEAR:
-          c.add(Calendar.YEAR, 1);
-          break;
-        case VIP_FOREVER:
-          c.add(Calendar.YEAR, 100);
-          break;
+    List<Charge.YQ> yqs = yqMapper.findAll();
+    yqs.stream().filter(v -> v.getType() == charge.getType()).findFirst().ifPresent(yq -> {
+      final BigDecimal price = new BigDecimal(yq.getAmount());
+      if (charge.isVip()) {
+        Date now = new Date();
+        user.setVipStartTime(now);
+        Calendar c = Calendar.getInstance();
+        c.setTime(now);
+        switch (charge.getType()) {
+          case VIP_MONTH:
+            c.add(Calendar.MONTH, 1);
+            break;
+          case VIP_QUARTER:
+            c.add(Calendar.MONTH, 3);
+            break;
+          case VIP_YEAR:
+            c.add(Calendar.YEAR, 1);
+            break;
+          case VIP_FOREVER:
+            c.add(Calendar.YEAR, 100);
+            break;
+        }
+        user.setVipEndTime(c.getTime());
+      } else {
+        user.setAmount(user.getAmount() == null ? price : price.add(user.getAmount()));
       }
-      user.setVipEndTime(c.getTime());
-    } else {
-      user.setAmount(user.getAmount() == null ? charge.getType().price : charge.getType().price.add(user.getAmount()));
-    }
-    userMapper.update(user);
-    payLogMapper.insert(PayLog.builder()
-      .id(IdGenerator.next())
-      .userId(user.getId())
-      .type(PayLog.Type.RECHARGE)
-      .amount(charge.getType().price)
-      .chargeType(charge.getType().name())
-      .build());
+      userMapper.update(user);
+      payLogMapper.insert(PayLog.builder()
+        .id(IdGenerator.next())
+        .userId(user.getId())
+        .type(PayLog.Type.RECHARGE)
+        .amount(price)
+        .chargeType(charge.getType().name())
+        .build());
 
-    if (user.isVip()) {
-      SqlBuilder sb = factory.create();
-      SqlBuilder.Template template = sb.from(Girl.class)
-        .update()
-        .set("payments", sb.field("payments").plus(1))
-        .template();
-      girlMapper.updateByTemplate(template);
-    }
+      if (user.isVip()) {
+        SqlBuilder sb = factory.create();
+        SqlBuilder.Template template = sb.from(Girl.class)
+          .update()
+          .set("payments", sb.field("payments").plus(1))
+          .template();
+        girlMapper.updateByTemplate(template);
+      }
+    });
   }
 
   @Transactional

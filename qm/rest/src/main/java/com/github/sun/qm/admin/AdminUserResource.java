@@ -3,7 +3,6 @@ package com.github.sun.qm.admin;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
-import com.github.sun.qm.Collection;
 import com.github.sun.qm.User;
 import com.github.sun.qm.UserMapper;
 import io.swagger.annotations.Api;
@@ -16,6 +15,7 @@ import javax.inject.Named;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Path("/v1/qm/admin/user")
@@ -61,6 +61,25 @@ public class AdminUserResource extends AbstractResource {
     return responseOf(total, Collections.emptyList());
   }
 
+  @PUT
+  @Path("/${id}")
+  @ApiOperation("更改用户")
+  public Response update(@PathParam("id") String id,
+                         UserReq req,
+                         @Context Admin admin) {
+    User u = mapper.findById(id);
+    if (u != null) {
+      u.setAmount(req.getAmount());
+      mapper.update(u);
+    }
+    return responseOf();
+  }
+
+  @Data
+  private static class UserReq {
+    private BigDecimal amount;
+  }
+
   @GET
   @Path("/stat")
   @ApiOperation("统计用户")
@@ -101,26 +120,27 @@ public class AdminUserResource extends AbstractResource {
     List<Map<String, Object>> list = mapper.findByTemplateAsMap(template);
 
     List<String> times = new ArrayList<>();
-    List<Integer> incs = new ArrayList<>();
     List<Integer> nums = new ArrayList<>();
+    List<Integer> totals = new ArrayList<>();
 
     Collections.reverse(list);
     for (Map<String, Object> map : list) {
       times.add((String) map.get("time"));
       Integer inc = ((Long) map.get("count")).intValue();
-      incs.add(inc);
+      nums.add(inc);
 
-      nums.add(total);
+
+      totals.add(total);
       total -= inc;
     }
 
     Collections.reverse(times);
-    Collections.reverse(incs);
     Collections.reverse(nums);
+    Collections.reverse(totals);
     return responseOf(StatResp.builder()
       .times(times)
-      .incs(incs)
       .nums(nums)
+      .totals(totals)
       .build());
   }
 
@@ -128,7 +148,7 @@ public class AdminUserResource extends AbstractResource {
   @Builder
   private static class StatResp {
     private List<String> times;
-    private List<Integer> incs;
     private List<Integer> nums;
+    private List<Integer> totals;
   }
 }

@@ -185,6 +185,7 @@ public class GirlResource extends AbstractResource {
     SqlBuilder.Template template = sb.from(Girl.class)
       .where(sb.field("type").eq(type))
       .where(sb.field("visits").gt(0))
+      .where(sb.field("onService").eq(true))
       .desc(sb.field("payments").mul(0.4)
         .plus(sb.field("likes").mul(0.3))
         .plus(sb.field("collects").mul(0.2))
@@ -271,7 +272,7 @@ public class GirlResource extends AbstractResource {
     private String mainImage;
     private BigDecimal price;
     private List<String> detailImages;
-    private String video;
+    private List<String> videos;
     private boolean accessible;
     private boolean collected;
     private boolean needCharge;
@@ -292,6 +293,11 @@ public class GirlResource extends AbstractResource {
         v.getContactImages().addAll(detailImages);
         detailImages = v.getContactImages();
       }
+      List<String> videos = v.getVideos();
+      if (videos == null) {
+        videos = new ArrayList<>();
+      }
+      videos.removeIf(video -> video == null || video.isEmpty());
       return DetailResp.builder()
         .id(v.getId())
         .type(v.getType())
@@ -302,7 +308,7 @@ public class GirlResource extends AbstractResource {
         .contact(accessible ? v.getContact() : null)
         .mainImage(v.getMainImage())
         .detailImages(detailImages)
-        .video(v.getVideo())
+        .videos(videos)
         .visits(v.getVisits())
         .likes(v.getLikes())
         .collects(v.getCollects())
