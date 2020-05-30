@@ -27,7 +27,7 @@ public abstract class BasicBackupTask implements SchedulerTask {
 
   private final List<Progress> latest = new ArrayList<>();
   private Progress progress = null;
-  private AtomicBoolean running = new AtomicBoolean(false);
+  private final AtomicBoolean running = new AtomicBoolean(false);
 
   protected abstract String id();
 

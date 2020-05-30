@@ -1,5 +1,6 @@
 package com.github.sun.qm;
 
+import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
@@ -22,6 +23,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Path("/v1/qm/charge")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -52,7 +54,7 @@ public class ChargeResource extends AbstractResource {
   @ApiOperation("充值")
   public Response recharge(@Valid @NotNull(message = "require body") RechargeReq req,
                            @Context User user) {
-    service.recharge(req.getCardNo(), user);
+    service.recharge(req.getCardNo().replaceAll(" ", ""), user);
     return responseOf();
   }
 

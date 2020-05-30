@@ -9,6 +9,8 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.springframework.core.env.Environment;
 
 import javax.inject.Inject;
+import java.util.Calendar;
+import java.util.Date;
 
 public class UserResolver implements RequestScopeContextResolver<User> {
   private final Session session;
@@ -32,6 +34,14 @@ public class UserResolver implements RequestScopeContextResolver<User> {
     User user = mapper.findById(userId);
     if (user == null) {
       throw new UnAuthorizedException(1000);
+    }
+    if (user.isVip()) {
+      Calendar c = Calendar.getInstance();
+      c.setTime(user.getVipEndTime());
+      if (c.getTime().compareTo(new Date()) < 0) {
+        user.setVip(false);
+        mapper.update(user);
+      }
     }
     return user;
   }
