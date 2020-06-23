@@ -2,21 +2,20 @@ apply plugin: "com.google.cloud.tools.jib"
 
 import org.gradle.util.VersionNumber
 
-def user = System.properties["repoUser"]
-def pwd = System.properties["repoPassword"]
+def user = System.properties["aliRepoUser"]
+def pwd = System.properties["aliRepoPassword"]
 def version = VersionNumber.parse((String) project.version).baseVersion
 
 jib {
-  allowInsecureRegistries = true
   from {
-    image = "docker.sun.com/components/oracle-jre:8"
+    image = "registry.cn-hangzhou.aliyuncs.com/linsh_components/oracle-jre:8"
     auth {
       username = user
       password = pwd
     }
   }
   to {
-    image = "docker.sun.com/sun/console-server:" + version
+    image = "registry.cn-hangzhou.aliyuncs.com/linsh_sun/console-server:" + version
     auth {
       username = user
       password = pwd
