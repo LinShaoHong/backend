@@ -69,7 +69,7 @@ public class AdminGirlResource extends AbstractResource {
       .and(title == null || title.isEmpty() ? null : sb.field("title").contains(title))
       .and(contact == null || contact.isEmpty() ? null : sb.field("contact").contains(contact))
       .and(onService == null ? null : sb.field("onService").eq(onService))
-      .and(hasVideo == null ? null : (hasVideo ? sb.field("videos").isNotNull() : sb.field("videos").isNull()));
+      .and(hasVideo == null ? null : (hasVideo ? sb.field("json_length").call(sb.field("videos")).gt(0) : sb.field("videos").isNull()));
     int total = mapper.countByTemplate(sb.from(Girl.class).where(condition).count().template());
     if (start < total) {
       sb.clear();
