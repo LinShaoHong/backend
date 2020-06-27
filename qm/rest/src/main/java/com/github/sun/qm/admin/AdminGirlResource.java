@@ -1,5 +1,7 @@
 package com.github.sun.qm.admin;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.Pinyins;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
@@ -49,18 +51,18 @@ public class AdminGirlResource extends AbstractResource {
 
   @GET
   @ApiOperation("分页获取")
-  public PageResponse<Girl> paged(@QueryParam("id") String id,
-                                  @QueryParam("type") String type,
-                                  @QueryParam("city") String city,
-                                  @QueryParam("name") String name,
-                                  @QueryParam("title") String title,
-                                  @QueryParam("contact") String contact,
-                                  @QueryParam("hasVideo") Boolean hasVideo,
-                                  @QueryParam("onService") Boolean onService,
-                                  @QueryParam("start") int start,
-                                  @QueryParam("count") int count,
-                                  @DefaultValue("updateTime") @QueryParam("rank") String rank,
-                                  @Context Admin admin) {
+  public PageResponse<ObjectNode> paged(@QueryParam("id") String id,
+                                        @QueryParam("type") String type,
+                                        @QueryParam("city") String city,
+                                        @QueryParam("name") String name,
+                                        @QueryParam("title") String title,
+                                        @QueryParam("contact") String contact,
+                                        @QueryParam("hasVideo") Boolean hasVideo,
+                                        @QueryParam("onService") Boolean onService,
+                                        @QueryParam("start") int start,
+                                        @QueryParam("count") int count,
+                                        @DefaultValue("updateTime") @QueryParam("rank") String rank,
+                                        @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonEmpty(type).then(sb.field("type").eq(type))
       .and(id == null || id.isEmpty() ? null : sb.field("id").eq(id))
@@ -79,7 +81,7 @@ public class AdminGirlResource extends AbstractResource {
         .limit(start, count)
         .template();
       final List<Girl> list = mapper.findByTemplate(template);
-      return responseOf(total, list);
+      return responseOf(total, JSON.deserializeAsList(list, ObjectNode.class));
     }
     return responseOf(total, Collections.emptyList());
   }

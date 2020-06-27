@@ -1,5 +1,7 @@
 package com.github.sun.qm.admin;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
@@ -34,14 +36,14 @@ public class AdminUserResource extends AbstractResource {
 
   @GET
   @ApiOperation("分页获取用户信息")
-  public PageResponse<User> paged(@QueryParam("id") String id,
-                                  @QueryParam("username") String username,
-                                  @QueryParam("email") String email,
-                                  @QueryParam("vip") Boolean vip,
-                                  @QueryParam("start") int start,
-                                  @QueryParam("count") int count,
-                                  @DefaultValue("createTime") @QueryParam("rank") String rank,
-                                  @Context Admin admin) {
+  public PageResponse<ObjectNode> paged(@QueryParam("id") String id,
+                                        @QueryParam("username") String username,
+                                        @QueryParam("email") String email,
+                                        @QueryParam("vip") Boolean vip,
+                                        @QueryParam("start") int start,
+                                        @QueryParam("count") int count,
+                                        @DefaultValue("createTime") @QueryParam("rank") String rank,
+                                        @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonEmpty(id).then(sb.field("id").eq(id))
       .and(username == null || username.isEmpty() ? null : sb.field("username").eq(username))
@@ -56,7 +58,7 @@ public class AdminUserResource extends AbstractResource {
         .limit(start, count)
         .template();
       List<User> list = mapper.findByTemplate(template);
-      return responseOf(total, list);
+      return responseOf(total, JSON.deserializeAsList(list, ObjectNode.class));
     }
     return responseOf(total, Collections.emptyList());
   }
