@@ -47,7 +47,7 @@ public class AdminFootprintResource extends AdminBasicResource {
                                         @Context Admin admin) {
     String userId = null;
     if (userName != null && !userName.isEmpty()) {
-      userId = userMapper.findIdByUsername(userName);
+      userId = userMapper.findIdByUsername(userName.replaceAll(" ", ""));
     }
     SqlBuilder sb = factory.create();
     Expression condition = Expression.EMPTY

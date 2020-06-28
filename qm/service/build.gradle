@@ -1,6 +1,7 @@
 dependencies {
   compile project(":$rootName-mybatis")
   compile project(":$rootName-qm-mapper")
+  compile project(":$rootName-common-service")
 
   implementation "com.sun.mail:javax.mail:$vers.mail"
 }

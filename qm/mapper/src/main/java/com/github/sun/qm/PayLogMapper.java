@@ -6,12 +6,11 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Mapper
 public interface PayLogMapper extends CompositeMapper<PayLog> {
-  @Select("SELECT * FROM qm_pay_log WHERE userId = #{userId}")
-  List<PayLog> findByUserId(@Param("userId") String userId);
+  @Select("SELECT * FROM qm_pay_log WHERE userId = #{userId} AND girlId = #{girlId} LIMIT 1")
+  PayLog findByUserIdAndGirlId(@Param("userId") String userId, @Param("girlId") String girlId);
 
   @Select("SELECT SUM(amount) FROM qm_pay_log WHERE userId = #{userId}")
   BigDecimal sumByUserId(@Param("userId") String userId);

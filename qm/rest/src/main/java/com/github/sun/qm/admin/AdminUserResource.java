@@ -46,7 +46,7 @@ public class AdminUserResource extends AbstractResource {
                                         @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonEmpty(id).then(sb.field("id").eq(id))
-      .and(username == null || username.isEmpty() ? null : sb.field("username").eq(username))
+      .and(username == null || username.isEmpty() ? null : sb.field("username").eq(username.trim()))
       .and(email == null || email.isEmpty() ? null : sb.field("email").eq(email))
       .and(vip == null ? null : sb.field("vip").eq(vip));
     int total = mapper.countByTemplate(sb.from(User.class).where(condition).count().template());

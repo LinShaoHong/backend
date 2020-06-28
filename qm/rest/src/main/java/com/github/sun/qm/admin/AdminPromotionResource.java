@@ -51,7 +51,7 @@ public class AdminPromotionResource extends AdminBasicResource {
                                         @Context Admin admin) {
     String userId = null;
     if (userName != null && !userName.isEmpty()) {
-      userId = userMapper.findIdByUsername(userName);
+      userId = userMapper.findIdByUsername(userName.trim());
     }
     SqlBuilder sb = factory.create();
     Expression condition = Expression.EMPTY

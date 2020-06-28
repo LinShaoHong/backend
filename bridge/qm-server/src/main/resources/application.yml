@@ -35,3 +35,5 @@ logging:
     password: ${LOGGING_EMAIL_PASSWORD:gtfzkixrdnybcbbg}
     from: ${LOGGING_EMAIL_FROM:尋芳閣错误日志 <340417867@qq.com>}
     to: ${LOGGING_EMAIL_TO:lin3404@126.com}
+
+notice.mail: ${NOTICE_MAIL:lin3404@126.com}

@@ -1,8 +1,12 @@
 package com.github.sun.qm;
 
+import com.github.sun.common.EmailSender;
 import com.github.sun.foundation.boot.exception.Message;
 import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +30,15 @@ public class ChargeService {
   private PayLogMapper payLogMapper;
   @Resource(name = "mysql")
   private SqlBuilder.Factory factory;
+  @Value("${notice.mail}")
+  private String noticeMail;
+
+  private final EmailSender mailService;
+
+  @Autowired
+  public ChargeService(@Qualifier("gmail") EmailSender mailService) {
+    this.mailService = mailService;
+  }
 
   @Transactional
   public void recharge(String id, User user) {
@@ -117,7 +130,18 @@ public class ChargeService {
           .set("payments", sb.field("payments").plus(1))
           .template();
         girlMapper.updateByTemplate(template);
+        new Thread(() -> sendEmail(user, girl)).start();
       }
     }
+  }
+
+  private void sendEmail(User user, Girl girl) {
+    String girlInfo = girl.getCity() == null ? girl.getName() : girl.getCity() + " " + girl.getName();
+    String content = user.getUsername() + " 购买了【" + girlInfo + "】";
+    if (girl.getContact() != null && !girl.getContact().isEmpty()) {
+      content += "\n\n联系方式:\n" + girl.getContact();
+    }
+    content += "\n\n消耗金币: " + girl.getPrice().intValue();
+    mailService.sendMessage("寻芳阁购买", user.getUsername(), content, noticeMail);
   }
 }
