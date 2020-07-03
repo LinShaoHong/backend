@@ -27,12 +27,21 @@ public interface CommentMapper extends CompositeMapper<Comment> {
   @Update("UPDATE qm_comment SET `read` = TRUE WHERE replierId = #{userId}")
   void readAll(@Param("userId") String userId);
 
+  @Update("UPDATE qm_comment SET `privately` = TRUE WHERE id = #{id}")
+  void publicity(@Param("id") String id);
+
   @Select("SELECT id FROM qm_comment WHERE commentatorId = 'SYSTEM' AND replierId IS NULL")
   Set<String> findAllSystemMessageId();
 
   @Select("select m.rowNum from " +
     "(SELECT @rownum := @rownum + 1 as rowNum, e.* FROM (SELECT @rownum := 0) r, qm_comment e " +
-    "WHERE e.girlId = #{girlId} AND e.replierId IS NULL ORDER BY e.createTime DESC) m " +
+    "WHERE e.girlId = #{girlId} AND e.privately = FALSE AND e.replierId IS NULL OR (e.commentatorId = #{userId} AND e.privately = TRUE) ORDER BY e.createTime DESC) m " +
+    "WHERE m.id = #{id}")
+  int findRowNumByUserId(@Param("userId") String userId, @Param("girlId") String girlId, @Param("id") String id);
+
+  @Select("select m.rowNum from " +
+    "(SELECT @rownum := @rownum + 1 as rowNum, e.* FROM (SELECT @rownum := 0) r, qm_comment e " +
+    "WHERE e.girlId = #{girlId} AND e.privately = FALSE AND e.replierId IS NULL ORDER BY e.createTime DESC) m " +
     "WHERE m.id = #{id}")
   int findRowNum(@Param("girlId") String girlId, @Param("id") String id);
 }

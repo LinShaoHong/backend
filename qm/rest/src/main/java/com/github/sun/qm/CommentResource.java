@@ -5,6 +5,7 @@ import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
+import com.github.sun.qm.resolver.MayLogin;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
@@ -52,17 +53,28 @@ public class CommentResource extends AbstractResource {
   public SingleResponse<CommentRes> list(@QueryParam("start") int start,
                                          @QueryParam("count") int count,
                                          @QueryParam("commentId") String commentId,
-                                         @NotEmpty(message = "缺少评论物品") @QueryParam("girlId") String girlId) {
+                                         @NotEmpty(message = "缺少评论物品") @QueryParam("girlId") String girlId,
+                                         @Context MayLogin mayLogin) {
     SqlBuilder sb = factory.create();
     Expression condition = sb.field("girlId").eq(girlId).and(sb.field("replierId").isNull());
+    Expression privateConn = sb.field("privately").eq(false);
+    if (mayLogin.isLogin()) {
+      String userId = mayLogin.user.getId();
+      privateConn = privateConn.or(sb.field("commentatorId").eq(userId).and(sb.field("privately").eq(true)));
+    }
+    condition = condition.and(privateConn);
     int total = mapper.countByTemplate(sb.from(Comment.class).where(condition).count().template());
     sb.clear();
-    int sum = mapper.countByTemplate(sb.from(Comment.class).where(sb.field("girlId").eq(girlId)).count().template());
+    int sum = mapper.countByTemplate(sb.from(Comment.class)
+      .where(sb.field("girlId").eq(girlId))
+      .where(privateConn)
+      .count()
+      .template());
     if (commentId != null && !commentId.isEmpty()) {
       Comment comment = mapper.findById(commentId);
       if (comment != null) {
         String id = commentId.equals(comment.getSessionId()) ? commentId : comment.getSessionId();
-        int rowNum = mapper.findRowNum(girlId, id);
+        int rowNum = mayLogin.isLogin() ? mapper.findRowNumByUserId(mayLogin.user.getId(), girlId, id) : mapper.findRowNum(girlId, id);
         start = (rowNum / count) * count;
       }
     }

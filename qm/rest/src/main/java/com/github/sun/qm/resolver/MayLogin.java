@@ -8,4 +8,8 @@ public class MayLogin {
   public MayLogin(User user) {
     this.user = user;
   }
+
+  public boolean isLogin() {
+    return user != null;
+  }
 }

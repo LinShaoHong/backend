@@ -17,7 +17,6 @@ import javax.inject.Named;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -81,6 +80,15 @@ public class AdminCommentResource extends AdminBasicResource {
   public Response delete(@PathParam("id") String id,
                          @Context Admin admin) {
     mapper.deleteById(id);
+    return responseOf();
+  }
+
+  @PUT
+  @Path("/private/${id}")
+  @ApiOperation("禁开")
+  public Response privately(@PathParam("id") String id,
+                            @Context Admin admin) {
+    mapper.publicity(id);
     return responseOf();
   }
 

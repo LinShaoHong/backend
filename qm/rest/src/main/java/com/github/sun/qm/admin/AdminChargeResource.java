@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 @Path("/v1/qm/admin/charge")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Admin Message Resource")
+@Api(value = "Admin Charge Resource")
 public class AdminChargeResource extends AdminBasicResource {
   private final ChargeMapper mapper;
   private final UserMapper userMapper;
@@ -71,6 +71,21 @@ public class AdminChargeResource extends AdminBasicResource {
       return responseOf(total, list);
     }
     return responseOf(total, Collections.emptyList());
+  }
+
+  @GET
+  @Path("/unused")
+  @ApiOperation("分页获取")
+  public void unused(@QueryParam("type") String type) {
+    SqlBuilder sb = factory.create();
+    SqlBuilder.Template template = sb.from(Charge.class)
+      .where(sb.field("type").eq(type))
+      .where(sb.field("used").eq(false))
+      .template();
+    System.out.println(mapper.findByTemplate(template)
+      .stream()
+      .map(Charge::getId)
+      .collect(Collectors.joining("\n")));
   }
 
   @POST

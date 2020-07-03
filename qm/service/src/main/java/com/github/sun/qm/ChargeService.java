@@ -97,7 +97,14 @@ public class ChargeService {
           .template();
         girlMapper.updateByTemplate(template);
       }
+      new Thread(() -> sendEmail(user, charge)).start();
     });
+  }
+
+  private void sendEmail(User user, Charge charge) {
+    String username = user.getUsername();
+    String content = username + "充值: " + charge.getType().name();
+    mailService.sendMessage("寻芳阁充值", username, content, noticeMail);
   }
 
   @Transactional
@@ -142,6 +149,7 @@ public class ChargeService {
       content += "\n\n联系方式:\n" + girl.getContact();
     }
     content += "\n\n消耗金币: " + girl.getPrice().intValue();
+    content += "\n剩余金币: " + user.getAmount().intValue();
     mailService.sendMessage("寻芳阁购买", user.getUsername(), content, noticeMail);
   }
 }

@@ -1,8 +1,11 @@
 package com.github.sun.qm;
 
+import com.github.sun.common.EmailSender;
 import com.github.sun.foundation.boot.exception.Message;
 import com.github.sun.foundation.boot.utility.AES;
 import com.github.sun.foundation.sql.IdGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,15 @@ public class SessionService {
   private CommentMapper commentMapper;
   @Value("${base64.secret.key}")
   private String secretKey;
+  @Value("${notice.mail}")
+  private String noticeMail;
+
+  private final EmailSender mailService;
+
+  @Autowired
+  public SessionService(@Qualifier("gmail") EmailSender mailService) {
+    this.mailService = mailService;
+  }
 
   @Transactional
   public String register(String username, String password, String email, String ip) {
@@ -49,7 +61,15 @@ public class SessionService {
       .time(System.currentTimeMillis())
       .content(username + " 恭喜您注册成功，快去個人中心簽到吧，可賺取1金幣哦~~~")
       .build());
+    new Thread(() -> sendEmail(user)).start();
     return AES.encrypt(id, secretKey);
+  }
+
+  private void sendEmail(User user) {
+    String username = user.getUsername();
+    String email = user.getEmail();
+    String content = "用户名: " + username + "\n邮箱: " + email;
+    mailService.sendMessage("寻芳阁注册", username, content, noticeMail);
   }
 
   @Transactional

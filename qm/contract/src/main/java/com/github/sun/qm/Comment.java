@@ -29,6 +29,7 @@ public class Comment {
   private String replierId;
   private String content;
   private boolean read;
+  private boolean privately;
   private long likes;
   private long hates;
   private long time;
