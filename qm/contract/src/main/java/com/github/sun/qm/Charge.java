@@ -29,7 +29,7 @@ public class Charge {
     VIP_YEAR("年VIP"),
     VIP_FOREVER("永久VIP");
 
-    private final String name;
+    public final String name;
 
     Type(String name) {
       this.name = name;

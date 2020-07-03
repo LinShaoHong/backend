@@ -12,12 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 @Service
 public class ChargeService {
+  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+
   @Resource
   private ChargeMapper mapper;
   @Resource
@@ -103,7 +106,16 @@ public class ChargeService {
 
   private void sendEmail(User user, Charge charge) {
     String username = user.getUsername();
-    String content = username + "充值: " + charge.getType().name();
+    String content = "类型: " + charge.getType().name;
+    SqlBuilder sb = factory.create();
+    SqlBuilder.Template template = sb.from(PayLog.class)
+      .where(sb.field("type").eq("RECHARGE"))
+      .where(sb.field("substr").call(sb.field("createTime"), 1, 10).eq(FORMATTER.format(new Date())))
+      .select(sb.field("amount").sum())
+      .template();
+    int todayIncome = ((BigDecimal) payLogMapper.findOneByTemplateAsMap(template).values().iterator().next()).intValue();
+    content += "\n今日: " + todayIncome;
+    content += "\n总计: " + mapper.rechargeTotal();
     mailService.sendMessage("寻芳阁充值", username, content, noticeMail);
   }
 
