@@ -4,6 +4,7 @@ import com.github.sun.common.EmailSender;
 import com.github.sun.foundation.boot.exception.Message;
 import com.github.sun.foundation.boot.utility.AES;
 import com.github.sun.foundation.sql.IdGenerator;
+import com.github.sun.foundation.sql.SqlBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,17 +12,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 
 @Service
 public class SessionService {
   public static final String TOKEN_NAME = "QM-TOKEN";
+  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
 
   @Resource
   private UserMapper mapper;
   @Resource
   private CommentMapper commentMapper;
+  @Resource(name = "mysql")
+  private SqlBuilder.Factory factory;
   @Value("${base64.secret.key}")
   private String secretKey;
   @Value("${notice.mail}")
@@ -66,9 +71,22 @@ public class SessionService {
   }
 
   private void sendEmail(User user) {
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException ex) {
+      // do nothing
+    }
     String username = user.getUsername();
     String email = user.getEmail();
-    String content = "用户名: " + username + "\n邮箱: " + email;
+    String content = "邮箱: " + email;
+    SqlBuilder sb = factory.create();
+    SqlBuilder.Template template = sb.from(User.class)
+      .where(sb.field("substr").call(sb.field("createTime"), 1, 10).eq(FORMATTER.format(new Date())))
+      .select(sb.field("id").distinct().count())
+      .template();
+    int todayRegister = ((Long) mapper.findOneByTemplateAsMap(template).values().iterator().next()).intValue();
+    content += "\n今日: " + todayRegister;
+    content += "\n总计: " + mapper.count();
     mailService.sendMessage("寻芳阁注册", username, content, noticeMail);
   }
 

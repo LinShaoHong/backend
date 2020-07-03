@@ -105,6 +105,11 @@ public class ChargeService {
   }
 
   private void sendEmail(User user, Charge charge) {
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException ex) {
+      // do nothing
+    }
     String username = user.getUsername();
     String content = "类型: " + charge.getType().name;
     SqlBuilder sb = factory.create();
