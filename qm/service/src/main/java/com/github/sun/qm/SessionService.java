@@ -25,6 +25,8 @@ public class SessionService {
   private UserMapper mapper;
   @Resource
   private CommentMapper commentMapper;
+  @Resource
+  private ViewStatMapper viewStatMapper;
   @Resource(name = "mysql")
   private SqlBuilder.Factory factory;
   @Value("${base64.secret.key}")
@@ -79,14 +81,19 @@ public class SessionService {
     String username = user.getUsername();
     String email = user.getEmail();
     String content = "邮箱: " + email;
+    String today = FORMATTER.format(new Date());
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(User.class)
-      .where(sb.field("substr").call(sb.field("createTime"), 1, 10).eq(FORMATTER.format(new Date())))
+      .where(sb.field("substr").call(sb.field("createTime"), 1, 10).eq(today))
       .select(sb.field("id").distinct().count())
       .template();
     int todayRegister = ((Long) mapper.findOneByTemplateAsMap(template).values().iterator().next()).intValue();
     content += "\n今日: " + todayRegister;
     content += "\n总计: " + mapper.count();
+    ViewStat viewStat = viewStatMapper.findById("QM:" + today);
+    if (viewStat != null) {
+      content += "\n访问: " + viewStat.getVisits();
+    }
     mailService.sendMessage("寻芳阁注册", username, content, noticeMail);
   }
 
