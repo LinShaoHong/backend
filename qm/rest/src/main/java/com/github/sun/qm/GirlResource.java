@@ -82,7 +82,7 @@ public class GirlResource extends AbstractResource {
       if (keyWords.isEmpty()) {
         keyWords.add(q);
       }
-      qConn = searchCondition(keyWords, q);
+      qConn = searchCondition(keyWords);
     }
     Expression condition = Expression.nonEmpty(type).then(sb.field("type").eq(type))
       .and((search || category == null || category.isEmpty()) ? null : sb.field("categorySpell").contains(category))
@@ -384,7 +384,7 @@ public class GirlResource extends AbstractResource {
     }
     Expression conn = Expression.nonEmpty(type).then(sb.field("type").eq(type))
       .and(city == null || city.isEmpty() ? null : sb.field("city").eq(city))
-      .and(searchCondition(keyWords, q))
+      .and(searchCondition(keyWords))
       .and(sb.field("onService").eq(true));
     SqlBuilder.Template template = sb.from(Girl.class)
       .where(conn)
@@ -400,7 +400,7 @@ public class GirlResource extends AbstractResource {
       .build());
   }
 
-  private Expression searchCondition(List<String> keyWords, String q) {
+  private Expression searchCondition(List<String> keyWords) {
     Expression conn = EMPTY;
     for (String word : keyWords) {
       Expression e = Expression.id("name").contains(word);
