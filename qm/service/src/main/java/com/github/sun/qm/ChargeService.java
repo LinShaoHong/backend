@@ -110,17 +110,26 @@ public class ChargeService {
     } catch (InterruptedException ex) {
       // do nothing
     }
+    String now = FORMATTER.format(new Date());
     String username = user.getUsername();
     String content = "类型: " + charge.getType().name;
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(PayLog.class)
       .where(sb.field("type").eq("RECHARGE"))
-      .where(sb.field("substr").call(sb.field("createTime"), 1, 10).eq(FORMATTER.format(new Date())))
+      .where(sb.field("substr").call(sb.field("createTime"), 1, 10).eq(now))
       .select(sb.field("amount").sum())
       .template();
     int todayIncome = ((BigDecimal) payLogMapper.findOneByTemplateAsMap(template).values().iterator().next()).intValue();
+    sb.clear();
+    template = sb.from(PayLog.class)
+      .where(sb.field("type").eq("RECHARGE"))
+      .where(sb.field("substr").call(sb.field("createTime"), 1, 7).eq(now))
+      .select(sb.field("amount").sum())
+      .template();
+    int monthIncome = ((BigDecimal) payLogMapper.findOneByTemplateAsMap(template).values().iterator().next()).intValue();
     content += "\n今日: " + todayIncome;
-    content += "\n总计: " + mapper.rechargeTotal();
+    content += "\n本月: " + monthIncome;
+    content += "\n总计: " + mapper.rechargeTotal().intValue();
     mailService.sendMessage("寻芳阁充值", username, content, noticeMail);
   }
 
