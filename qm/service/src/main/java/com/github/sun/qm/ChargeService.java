@@ -123,7 +123,7 @@ public class ChargeService {
     sb.clear();
     template = sb.from(PayLog.class)
       .where(sb.field("type").eq("RECHARGE"))
-      .where(sb.field("substr").call(sb.field("createTime"), 1, 7).eq(now))
+      .where(sb.field("substr").call(sb.field("createTime"), 1, 7).eq(now.substring(0, now.length() - 3)))
       .select(sb.field("amount").sum())
       .template();
     int monthIncome = ((BigDecimal) payLogMapper.findOneByTemplateAsMap(template).values().iterator().next()).intValue();
