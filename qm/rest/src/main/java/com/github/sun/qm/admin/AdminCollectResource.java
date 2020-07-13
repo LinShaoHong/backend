@@ -23,7 +23,6 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "Admin Message Resource")
 public class AdminCollectResource extends AdminBasicResource {
-  private final UserMapper userMapper;
   private final CollectionMapper mapper;
   private final SqlBuilder.Factory factory;
 
@@ -34,7 +33,6 @@ public class AdminCollectResource extends AdminBasicResource {
                               @Named("mysql") SqlBuilder.Factory factory) {
     super(userMapper, girlMapper);
     this.mapper = mapper;
-    this.userMapper = userMapper;
     this.factory = factory;
   }
 

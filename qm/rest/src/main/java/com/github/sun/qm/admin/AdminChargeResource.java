@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 @Api(value = "Admin Charge Resource")
 public class AdminChargeResource extends AdminBasicResource {
   private final ChargeMapper mapper;
-  private final UserMapper userMapper;
   private final PayLogMapper payLogMapper;
   private final ChargeMapper.YQMapper yqMapper;
   private final SqlBuilder.Factory factory;
@@ -42,7 +41,6 @@ public class AdminChargeResource extends AdminBasicResource {
                              @Context Admin admin) {
     super(userMapper, girlMapper);
     this.mapper = mapper;
-    this.userMapper = userMapper;
     this.yqMapper = yqMapper;
     this.factory = factory;
     this.payLogMapper = payLogMapper;
@@ -73,20 +71,20 @@ public class AdminChargeResource extends AdminBasicResource {
     return responseOf(total, Collections.emptyList());
   }
 
-  @GET
-  @Path("/unused")
-  @ApiOperation("分页获取")
-  public void unused(@QueryParam("type") String type) {
-    SqlBuilder sb = factory.create();
-    SqlBuilder.Template template = sb.from(Charge.class)
-      .where(sb.field("type").eq(type))
-      .where(sb.field("used").eq(false))
-      .template();
-    System.out.println(mapper.findByTemplate(template)
-      .stream()
-      .map(Charge::getId)
-      .collect(Collectors.joining("\n")));
-  }
+//  @GET
+//  @Path("/unused")
+//  @ApiOperation("分页获取")
+//  public void unused(@QueryParam("type") String type) {
+//    SqlBuilder sb = factory.create();
+//    SqlBuilder.Template template = sb.from(Charge.class)
+//      .where(sb.field("type").eq(type))
+//      .where(sb.field("used").eq(false))
+//      .template();
+//    System.out.println(mapper.findByTemplate(template)
+//      .stream()
+//      .map(Charge::getId)
+//      .collect(Collectors.joining("\n")));
+//  }
 
   @POST
   @ApiOperation("添加")

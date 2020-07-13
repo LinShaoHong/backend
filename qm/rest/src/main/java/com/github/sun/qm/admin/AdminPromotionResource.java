@@ -24,7 +24,6 @@ import java.util.List;
 @Api(value = "Admin Promotion Resource")
 public class AdminPromotionResource extends AdminBasicResource {
   private final PromotionMapper mapper;
-  private final UserMapper userMapper;
   private final PayLogMapper payLogMapper;
   private final SqlBuilder.Factory factory;
 
@@ -36,7 +35,6 @@ public class AdminPromotionResource extends AdminBasicResource {
                                 @Named("mysql") SqlBuilder.Factory factory) {
     super(userMapper, girlMapper);
     this.mapper = mapper;
-    this.userMapper = userMapper;
     this.payLogMapper = payLogMapper;
     this.factory = factory;
   }

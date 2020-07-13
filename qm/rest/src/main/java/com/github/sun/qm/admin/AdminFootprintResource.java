@@ -23,7 +23,6 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "Admin Message Resource")
 public class AdminFootprintResource extends AdminBasicResource {
-  private final UserMapper userMapper;
   private final FootprintMapper mapper;
   private final SqlBuilder.Factory factory;
 
@@ -35,7 +34,6 @@ public class AdminFootprintResource extends AdminBasicResource {
     super(userMapper, girlMapper);
     this.mapper = mapper;
     this.factory = factory;
-    this.userMapper = userMapper;
   }
 
   @GET

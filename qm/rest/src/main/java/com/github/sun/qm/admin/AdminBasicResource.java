@@ -13,8 +13,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class AdminBasicResource extends AbstractResource {
-  private final UserMapper userMapper;
-  private final GirlMapper girlMapper;
+  protected final UserMapper userMapper;
+  protected final GirlMapper girlMapper;
 
   public AdminBasicResource(UserMapper userMapper, GirlMapper girlMapper) {
     this.userMapper = userMapper;

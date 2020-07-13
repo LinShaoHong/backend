@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 @Api(value = "Admin Comment Resource")
 public class AdminCommentResource extends AdminBasicResource {
   private final CommentMapper mapper;
-  private final UserMapper userMapper;
   private final SqlBuilder.Factory factory;
 
   @Inject
@@ -38,15 +37,16 @@ public class AdminCommentResource extends AdminBasicResource {
                               CommentMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
     super(userMapper, girlMapper);
     this.mapper = mapper;
-    this.userMapper = userMapper;
     this.factory = factory;
   }
 
   @GET
   @ApiOperation("分页获取评论")
   public PageResponse<ObjectNode> paged(@QueryParam("id") String id,
-                                        @QueryParam("girlId") String girlId,
                                         @QueryParam("commentatorName") String commentatorName,
+                                        @QueryParam("replierName") String replierName,
+                                        @QueryParam("girlName") String girlName,
+                                        @QueryParam("system") boolean system,
                                         @QueryParam("start") int start,
                                         @QueryParam("count") int count,
                                         @DefaultValue("time") @QueryParam("rank") String rank,
@@ -55,10 +55,24 @@ public class AdminCommentResource extends AdminBasicResource {
     if (commentatorName != null && !commentatorName.isEmpty()) {
       commentatorId = userMapper.findIdByUsername(commentatorName);
     }
+    String replierId = null;
+    if (replierName != null && !replierName.isEmpty()) {
+      replierId = userMapper.findIdByUsername(replierName);
+    }
+    Set<String> girlIds = null;
+    if (girlName != null && !girlName.isEmpty()) {
+      girlIds = girlMapper.findIdsByName(girlName);
+    }
     SqlBuilder sb = factory.create();
-    Expression condition = Expression.id("commentatorId").ne(Comment.SYSTEM)
-      .and(id == null ? null : sb.field("id").eq(id))
-      .and(girlId == null ? null : sb.field("girlId").eq(girlId))
+    Expression condition = (
+      system ?
+        (Expression.id("commentatorId").eq(Comment.SYSTEM)
+          .and(sb.field("replierId").isNotNull())
+          .and(sb.field("content").contains("恭喜您注册成功").not())) :
+        (Expression.id("commentatorId").ne(Comment.SYSTEM))
+    ).and(id == null ? null : sb.field("id").eq(id))
+      .and(girlIds == null || girlIds.isEmpty() ? null : sb.field("girlId").in(girlIds))
+      .and(replierId == null ? null : sb.field("replierId").eq(replierId))
       .and(commentatorId == null ? null : sb.field("commentatorId").eq(commentatorId));
     int total = mapper.countByTemplate(sb.from(Comment.class).where(condition).count().template());
     if (start < total) {
@@ -107,6 +121,7 @@ public class AdminCommentResource extends AdminBasicResource {
     }
     List<Comment> comments = userIds.stream().map(id -> Comment.builder()
       .id(IdGenerator.next())
+      .girlId(req.getGirlId())
       .commentatorId(Comment.SYSTEM)
       .replierId(id)
       .time(System.currentTimeMillis())
@@ -122,5 +137,6 @@ public class AdminCommentResource extends AdminBasicResource {
   private static class NoticeReq {
     private String username;
     private String content;
+    private String girlId;
   }
 }

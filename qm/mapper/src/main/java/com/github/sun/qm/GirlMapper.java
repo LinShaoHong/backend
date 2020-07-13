@@ -4,9 +4,15 @@ import com.github.sun.foundation.mybatis.CompositeMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.Set;
 
 @Mapper
 public interface GirlMapper extends CompositeMapper<Girl> {
+  @Select("SELECT ID FROM `qm_girl` WHERE `name` = #{name}")
+  Set<String> findIdsByName(@Param("name") String name);
+
   @Mapper
   interface Category extends CompositeMapper<Girl.Category> {
     @Insert("INSERT INTO `qm_girl_category`(`id`, `type`, `name`, `nameSpell`, `count`) " +
