@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 abstract class AbstractSpider extends SchemaParser implements Spider {
   private static final HtmlCleaner hc = new HtmlCleaner();
   private static final Fetcher fetcher = new JSoupFetcher();
-  private Cache<JSON.Valuer, List<Field>> fieldsCache = new Cache<>();
+  private final Cache<JSON.Valuer, List<Field>> fieldsCache = new Cache<>();
 
   JsonNode crawl(Node node, JSON.Valuer process) {
     Map<Path, Map<Field, List<XPaths>>> parentPaths = new HashMap<>();

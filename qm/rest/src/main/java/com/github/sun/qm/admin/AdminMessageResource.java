@@ -48,7 +48,7 @@ public class AdminMessageResource extends AbstractResource {
   @ApiOperation("分页获取消息")
   public PageResponse<Comment> paged(@QueryParam("start") int start,
                                      @QueryParam("count") int count,
-                                     @DefaultValue("time") @QueryParam("rank") String rank,
+                                     @QueryParam("rank") @DefaultValue("time") String rank,
                                      @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.id("commentatorId").eq(Comment.SYSTEM)

@@ -71,7 +71,7 @@ public class GirlResource extends AbstractResource {
                                       @QueryParam("category") String category,
                                       @QueryParam("city") String city,
                                       @QueryParam("q") String q,
-                                      @DefaultValue("updateTime") @QueryParam("rank") String rank) {
+                                      @QueryParam("rank") @DefaultValue("updateTime") String rank) {
     SqlBuilder sb = factory.create();
     Expression qConn = EMPTY;
     List<String> keyWords = new ArrayList<>();
@@ -245,7 +245,7 @@ public class GirlResource extends AbstractResource {
       try {
         String date = FORMATTER.format(new Date());
         statMapper.insertOrUpdate(ViewStat.builder()
-          .id(ViewStat.makeId(girl.getType(), date))
+          .id(ViewStat.makeId(girl.getType(), girl.getCity(), date))
           .type(girl.getType())
           .date(date)
           .visits(1)

@@ -67,6 +67,7 @@ public class CommentResource extends AbstractResource {
     sb.clear();
     int sum = mapper.countByTemplate(sb.from(Comment.class)
       .where(sb.field("girlId").eq(girlId))
+      .where(sb.field("commentatorId").ne(Comment.SYSTEM))
       .where(privateConn)
       .count()
       .template());

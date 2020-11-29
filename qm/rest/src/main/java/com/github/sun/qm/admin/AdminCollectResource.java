@@ -41,7 +41,7 @@ public class AdminCollectResource extends AdminBasicResource {
   public PageResponse<ObjectNode> paged(@QueryParam("start") int start,
                                         @QueryParam("count") int count,
                                         @QueryParam("userName") String userName,
-                                        @DefaultValue("updateTime") @QueryParam("rank") String rank,
+                                        @QueryParam("rank") @DefaultValue("updateTime") String rank,
                                         @Context Admin admin) {
     String userId = null;
     if (userName != null && !userName.isEmpty()) {

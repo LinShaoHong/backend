@@ -253,7 +253,7 @@ public class BasicSpider extends AbstractSpider {
   }
 
   private class Producer implements Runnable {
-    private AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     private void interrupt() {
       running.compareAndSet(true, false);
@@ -387,7 +387,7 @@ public class BasicSpider extends AbstractSpider {
   }
 
   private class Consumer implements Runnable {
-    private AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     private void interrupt() {
       running.compareAndSet(true, false);

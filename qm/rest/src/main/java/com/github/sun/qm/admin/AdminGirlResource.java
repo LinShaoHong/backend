@@ -1,6 +1,7 @@
 package com.github.sun.qm.admin;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.sun.foundation.boot.utility.Iterators;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.Pinyins;
 import com.github.sun.foundation.expression.Expression;
@@ -10,7 +11,7 @@ import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.Girl;
 import com.github.sun.qm.GirlMapper;
 import com.github.sun.qm.StorageService;
-import com.github.sun.qm.ViewStat;
+import com.github.sun.qm.ViewStatMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Builder;
@@ -23,6 +24,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,16 +36,18 @@ import java.util.stream.Stream;
 @Api(value = "Admin Girl Resource")
 public class AdminGirlResource extends AbstractResource {
   private final GirlMapper mapper;
+  private final ViewStatMapper viewStatMapper;
   private final StorageService storageService;
   private final GirlMapper.Category categoryMapper;
   private final SqlBuilder.Factory factory;
 
   @Inject
   public AdminGirlResource(GirlMapper mapper,
-                           StorageService storageService,
+                           ViewStatMapper viewStatMapper, StorageService storageService,
                            GirlMapper.Category categoryMapper,
                            @Named("mysql") SqlBuilder.Factory factory) {
     this.mapper = mapper;
+    this.viewStatMapper = viewStatMapper;
     this.storageService = storageService;
     this.categoryMapper = categoryMapper;
     this.factory = factory;
@@ -61,7 +65,7 @@ public class AdminGirlResource extends AbstractResource {
                                         @QueryParam("onService") Boolean onService,
                                         @QueryParam("start") int start,
                                         @QueryParam("count") int count,
-                                        @DefaultValue("updateTime") @QueryParam("rank") String rank,
+                                        @QueryParam("rank") @DefaultValue("updateTime") String rank,
                                         @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonEmpty(type).then(sb.field("type").eq(type))
@@ -193,10 +197,9 @@ public class AdminGirlResource extends AbstractResource {
   @GET
   @Path("/stat")
   @ApiOperation("统计访问量")
-  public SingleResponse<StatResp> statUser(@QueryParam("timeType") int timeType,
-                                           @QueryParam("type") String type,
-                                           @Context Admin admin) {
-    SqlBuilder sb = factory.create();
+  public ListResponse<StatResp> statUser(@QueryParam("timeType") int timeType,
+                                         @QueryParam("type") String type,
+                                         @Context Admin admin) {
     Calendar c = Calendar.getInstance();
     Date now = new Date();
     c.setTime(now);
@@ -217,30 +220,74 @@ public class AdminGirlResource extends AbstractResource {
         c.add(Calendar.YEAR, -1);
         break;
     }
-    SqlBuilder.Template template = sb.from(ViewStat.class)
-      .where(sb.field("date").ge(FORMATTER.format(c.getTime())))
-      .where(sb.field("type").eq(type))
-      .select(sb.field("type"), "type")
-      .select(sb.field("date"), "time")
-      .select(sb.field("visits"), "count")
-      .template();
-    List<Map<String, Object>> list = mapper.findByTemplateAsMap(template);
-    List<String> times = new ArrayList<>();
-    List<Integer> visits = new ArrayList<>();
-    for (Map<String, Object> map : list) {
-      times.add((String) map.get("time"));
-      Integer inc = ((Long) map.get("count")).intValue();
-      visits.add(inc);
+    List<Map<String, Object>> result = viewStatMapper.stat(FORMATTER.format(c.getTime()), type);
+    Map<String, Integer> total = new LinkedHashMap<>();
+    List<StatResp> ret = result.stream().collect(Collectors.groupingBy(v -> v.get("city")))
+      .entrySet()
+      .stream()
+      .map(e -> {
+        String city = (String) e.getKey();
+        List<Map<String, Object>> list = e.getValue();
+        List<String> times = new ArrayList<>();
+        List<Integer> visits = new ArrayList<>();
+        for (Map<String, Object> map : list) {
+          String date = (String) map.get("date");
+          times.add(date);
+          int inc = ((BigDecimal) map.get("count")).intValue();
+          visits.add(inc);
+          inc += total.computeIfAbsent(date, d -> 0);
+          total.put(date, inc);
+        }
+        return StatResp.builder()
+          .city(city)
+          .times(times)
+          .visits(visits)
+          .build();
+      }).collect(Collectors.toList());
+    if (ret.size() > 1) {
+      ret.removeIf(v -> "TOTAL".equals(v.getCity()));
+      List<String> times = new ArrayList<>();
+      List<Integer> visits = new ArrayList<>();
+      total.forEach((key, value) -> {
+        times.add(key);
+        visits.add(value);
+      });
+      int len = times.size();
+      ret.forEach(v -> {
+        List<String> oldTimes = v.getTimes();
+        List<Integer> oldVisits = v.getVisits();
+
+        List<String> newTimes = new ArrayList<>(times.size());
+        Iterators.slice(times.size()).forEach(j -> newTimes.add(""));
+
+        List<Integer> newVisits = new ArrayList<>(visits.size());
+        Iterators.slice(visits.size()).forEach(j -> newVisits.add(0));
+
+        v.setTimes(newTimes);
+        v.setVisits(newVisits);
+
+        for (int i = 0; i < len; i++) {
+          String date = times.get(i);
+          v.getTimes().set(i, date);
+          if (oldTimes.stream().anyMatch(t -> t.equals(date))) {
+            int j = oldTimes.indexOf(date);
+            v.getVisits().set(i, oldVisits.get(j));
+          }
+        }
+      });
+      ret.add(StatResp.builder()
+        .city("TOTAL")
+        .times(times)
+        .visits(visits)
+        .build());
     }
-    return responseOf(StatResp.builder()
-      .times(times)
-      .visits(visits)
-      .build());
+    return responseOf(ret);
   }
 
   @Data
   @Builder
   private static class StatResp {
+    private String city;
     private List<String> times;
     private List<Integer> visits;
   }

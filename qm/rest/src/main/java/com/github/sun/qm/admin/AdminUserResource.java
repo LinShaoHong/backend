@@ -42,7 +42,7 @@ public class AdminUserResource extends AbstractResource {
                                         @QueryParam("vip") Boolean vip,
                                         @QueryParam("start") int start,
                                         @QueryParam("count") int count,
-                                        @DefaultValue("createTime") @QueryParam("rank") String rank,
+                                        @QueryParam("rank") @DefaultValue("createTime") String rank,
                                         @Context Admin admin) {
     SqlBuilder sb = factory.create();
     Expression condition = Expression.nonEmpty(id).then(sb.field("id").eq(id))

@@ -22,7 +22,10 @@ public class ViewStat {
   private String date;
   private long visits;
 
-  public static String makeId(Girl.Type type, String date) {
-    return type.name() + ":" + date;
+  public static String makeId(Girl.Type type, String city, String date) {
+    if (city != null && !city.isEmpty()) {
+      return type.name() + ":" + city + ":" + date;
+    }
+    return type.name() + ":TOTAL:" + date;
   }
 }

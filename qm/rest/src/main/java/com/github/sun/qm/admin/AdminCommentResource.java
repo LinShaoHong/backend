@@ -34,7 +34,8 @@ public class AdminCommentResource extends AdminBasicResource {
   @Inject
   public AdminCommentResource(UserMapper userMapper,
                               GirlMapper girlMapper,
-                              CommentMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
+                              CommentMapper mapper,
+                              @Named("mysql") SqlBuilder.Factory factory) {
     super(userMapper, girlMapper);
     this.mapper = mapper;
     this.factory = factory;
@@ -49,7 +50,7 @@ public class AdminCommentResource extends AdminBasicResource {
                                         @QueryParam("system") boolean system,
                                         @QueryParam("start") int start,
                                         @QueryParam("count") int count,
-                                        @DefaultValue("time") @QueryParam("rank") String rank,
+                                        @QueryParam("rank") @DefaultValue("time") String rank,
                                         @Context Admin admin) {
     String commentatorId = null;
     if (commentatorName != null && !commentatorName.isEmpty()) {

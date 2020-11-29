@@ -45,7 +45,7 @@ public class AdminPromotionResource extends AdminBasicResource {
                                         @QueryParam("count") int count,
                                         @QueryParam("status") String status,
                                         @QueryParam("userName") String userName,
-                                        @DefaultValue("createTime") @QueryParam("rank") String rank,
+                                        @QueryParam("rank") @DefaultValue("createTime") String rank,
                                         @Context Admin admin) {
     String userId = null;
     if (userName != null && !userName.isEmpty()) {

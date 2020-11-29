@@ -96,7 +96,7 @@ public class EmailSender {
   }
 
   private static class HTMLDataSource implements DataSource {
-    private String html;
+    private final String html;
 
     private HTMLDataSource(String html) {
       this.html = html;

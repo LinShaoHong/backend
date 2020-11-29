@@ -12,9 +12,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class SessionService {
@@ -80,7 +83,7 @@ public class SessionService {
     }
     String username = user.getUsername();
     String email = user.getEmail();
-    String content = "邮箱: " + email;
+    StringBuilder content = new StringBuilder("邮箱: ").append(email);
     String today = FORMATTER.format(new Date());
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(User.class)
@@ -88,13 +91,19 @@ public class SessionService {
       .select(sb.field("id").distinct().count())
       .template();
     int todayRegister = ((Long) mapper.findOneByTemplateAsMap(template).values().iterator().next()).intValue();
-    content += "\n今日: " + todayRegister;
-    content += "\n总计: " + mapper.count();
-    ViewStat viewStat = viewStatMapper.findById("QM:" + today);
-    if (viewStat != null) {
-      content += "\n访问: " + viewStat.getVisits();
+    content.append("\n今日: ").append(todayRegister);
+    content.append("\n总计: ").append(mapper.count());
+    content.append("\n访问:");
+    int total = 0;
+    List<Map<String, Object>> sums = viewStatMapper.sum("QM", today);
+    for (Map<String, Object> sum : sums) {
+      content.append("\n - ").append(sum.get("city")).append(": ").append(sum.get("count"));
+      total += ((BigDecimal) sum.get("count")).intValue();
     }
-    mailService.sendMessage("寻芳阁注册", username, content, noticeMail);
+    if (sums.size() > 1) {
+      content.append("\n - ").append("总量").append(": ").append(total);
+    }
+    mailService.sendMessage("寻芳阁注册", username, content.toString(), noticeMail);
   }
 
   @Transactional

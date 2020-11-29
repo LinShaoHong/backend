@@ -32,7 +32,7 @@ public class StorageService {
     }
     OutputStream out = new FileOutputStream(file);
     byte[] bytes = new byte[2048];
-    int n = -1;
+    int n;
     while ((n = in.read(bytes, 0, bytes.length)) != -1) {
       out.write(bytes, 0, n);
     }

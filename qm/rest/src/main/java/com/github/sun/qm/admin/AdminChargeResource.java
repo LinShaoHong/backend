@@ -37,8 +37,7 @@ public class AdminChargeResource extends AdminBasicResource {
                              ChargeMapper mapper,
                              ChargeMapper.YQMapper yqMapper,
                              PayLogMapper payLogMapper,
-                             @Named("mysql") SqlBuilder.Factory factory,
-                             @Context Admin admin) {
+                             @Named("mysql") SqlBuilder.Factory factory) {
     super(userMapper, girlMapper);
     this.mapper = mapper;
     this.yqMapper = yqMapper;
@@ -71,20 +70,20 @@ public class AdminChargeResource extends AdminBasicResource {
     return responseOf(total, Collections.emptyList());
   }
 
-//  @GET
-//  @Path("/unused")
-//  @ApiOperation("分页获取")
-//  public void unused(@QueryParam("type") String type) {
-//    SqlBuilder sb = factory.create();
-//    SqlBuilder.Template template = sb.from(Charge.class)
-//      .where(sb.field("type").eq(type))
-//      .where(sb.field("used").eq(false))
-//      .template();
-//    System.out.println(mapper.findByTemplate(template)
-//      .stream()
-//      .map(Charge::getId)
-//      .collect(Collectors.joining("\n")));
-//  }
+  @GET
+  @Path("/unused")
+  @ApiOperation("分页获取")
+  public void unused(@QueryParam("type") String type) {
+    SqlBuilder sb = factory.create();
+    SqlBuilder.Template template = sb.from(Charge.class)
+      .where(sb.field("type").eq(type))
+      .where(sb.field("used").eq(false))
+      .template();
+    System.out.println(mapper.findByTemplate(template)
+      .stream()
+      .map(Charge::getId)
+      .collect(Collectors.joining("\n")));
+  }
 
   @POST
   @ApiOperation("添加")

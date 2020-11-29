@@ -104,7 +104,6 @@ public class SessionResource extends AbstractResource {
     } catch (Exception e) {
       ipAddress = "";
     }
-
     return ipAddress;
   }
 

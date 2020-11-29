@@ -91,15 +91,6 @@ public class ChargeService {
         .amount(price)
         .chargeType(charge.getType().name())
         .build());
-
-      if (user.isVip()) {
-        SqlBuilder sb = factory.create();
-        SqlBuilder.Template template = sb.from(Girl.class)
-          .update()
-          .set("payments", sb.field("payments").plus(1))
-          .template();
-        girlMapper.updateByTemplate(template);
-      }
       new Thread(() -> sendEmail(user, charge)).start();
     });
   }
