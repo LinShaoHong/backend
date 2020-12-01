@@ -24,7 +24,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -233,7 +232,7 @@ public class AdminGirlResource extends AbstractResource {
         for (Map<String, Object> map : list) {
           String date = (String) map.get("date");
           times.add(date);
-          int inc = ((BigDecimal) map.get("count")).intValue();
+          int inc = ((Long) map.get("visits")).intValue();
           visits.add(inc);
           inc += total.computeIfAbsent(date, d -> 0);
           total.put(date, inc);

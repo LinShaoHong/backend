@@ -23,11 +23,9 @@ public interface ViewStatMapper extends CompositeMapper<ViewStat> {
     "GROUP BY `id`")
   List<Map<String, Object>> sum(@Param("type") String type, @Param("date") String date);
 
-  @Select("SELECT SUBSTRING_INDEX(`id`, ':', -1) AS date," +
-    "SUBSTRING_INDEX(SUBSTRING_INDEX(`id`, ':', -2), ':', 1) AS city," +
-    "SUM(`visits`) AS count " +
+  @Select("SELECT `date`, `visits`, " +
+    "SUBSTRING_INDEX(SUBSTRING_INDEX(`id`, ':', -2), ':', 1) AS city " +
     "FROM `qm_view_stat` " +
-    "WHERE `type` = #{type} AND `date` >= #{startTime} " +
-    "GROUP BY `id`")
+    "WHERE `type` = #{type} AND `date` >= #{startTime}")
   List<Map<String, Object>> stat(@Param("startTime") String startTime, @Param("type") String type);
 }
