@@ -9,6 +9,7 @@ import lombok.Data;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
@@ -62,9 +63,9 @@ public class SessionResource extends AbstractResource {
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
   private static class RegisterReq {
-    @NotNull(message = "缺少用户")
+    @NotBlank(message = "缺少用户")
     private String username;
-    @NotNull(message = "缺少密码")
+    @NotBlank(message = "缺少密码")
     private String password;
     private String email;
   }
@@ -79,9 +80,9 @@ public class SessionResource extends AbstractResource {
 
   @Data
   private static class LoginReq {
-    @NotNull(message = "缺少用户")
+    @NotBlank(message = "缺少用户")
     private String username;
-    @NotNull(message = "缺少密码")
+    @NotBlank(message = "缺少密码")
     private String password;
   }
 
