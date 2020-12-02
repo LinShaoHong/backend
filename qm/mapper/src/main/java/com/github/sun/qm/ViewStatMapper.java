@@ -17,10 +17,9 @@ public interface ViewStatMapper extends CompositeMapper<ViewStat> {
   void insertOrUpdate(ViewStat v);
 
   @Select("SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(`id`, ':', -2), ':', 1) AS city, " +
-    "SUM(`visits`) AS count " +
+    "`visits` AS  visits " +
     "FROM `qm_view_stat` " +
-    "WHERE `type` = #{type} AND `date` = #{date} " +
-    "GROUP BY `id`")
+    "WHERE `type` = #{type} AND `date` = #{date}")
   List<Map<String, Object>> sum(@Param("type") String type, @Param("date") String date);
 
   @Select("SELECT `date`, `visits`, " +

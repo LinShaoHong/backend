@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -97,8 +96,8 @@ public class SessionService {
     int total = 0;
     List<Map<String, Object>> sums = viewStatMapper.sum("QM", today);
     for (Map<String, Object> sum : sums) {
-      content.append("\n - ").append(sum.get("city")).append(": ").append(sum.get("count"));
-      total += ((BigDecimal) sum.get("count")).intValue();
+      content.append("\n - ").append(sum.get("city")).append(": ").append(sum.get("visits"));
+      total += ((Long) sum.get("visits")).intValue();
     }
     if (sums.size() > 1) {
       content.append("\n - ").append("总量").append(": ").append(total);
