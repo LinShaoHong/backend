@@ -4,9 +4,9 @@ spring:
   application:
     name: QM-Server
   datasource:
-    url: jdbc:mysql://${MYSQL_SERVER:xfg:3306}/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
-    username: ${MYSQL_USER_OF_QM:lins_sun}
-    password: ${MYSQL_PASSWORD_OF_QM:GahV.iJRr]su8a6Gfpxsf2}
+    url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/sun?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
+    username: ${MYSQL_USER_OF_QM:root}
+    password: ${MYSQL_PASSWORD_OF_QM:root}
 
 admin.username: ${ADMIN_USERNAME:admin}
 admin.password: ${ADMIN_PASSWORD:admin123}
