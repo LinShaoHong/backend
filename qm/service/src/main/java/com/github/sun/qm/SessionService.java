@@ -44,7 +44,7 @@ public class SessionService {
   }
 
   @Transactional
-  public String register(String username, String password, String email, String ip) {
+  public String register(String username, String password, String email, String ip, String location) {
     if (mapper.countByUsername(username) > 0) {
       throw new Message(1001);
     }
@@ -59,6 +59,7 @@ public class SessionService {
       .password(User.hashPassword(password))
       .email(email)
       .lastLoginIp(ip)
+      .location(location)
       .lastLoginTime(new Date())
       .readSystemMessageIds(Collections.emptySet())
       .build();
@@ -102,11 +103,11 @@ public class SessionService {
     if (sums.size() > 1) {
       content.append("\n - ").append("总量").append(": ").append(total);
     }
-    mailService.sendMessage("寻芳阁注册", username, content.toString(), noticeMail);
+    mailService.sendMessage("XFG注册", username, content.toString(), noticeMail);
   }
 
   @Transactional
-  public String login(String username, String password, String ip) {
+  public String login(String username, String password, String ip, String location) {
     String hashPassword = User.hashPassword(password);
     User user = mapper.findByUsernameAndPassword(username, hashPassword);
     if (user == null) {
@@ -118,6 +119,7 @@ public class SessionService {
     }
     if (ip != null) {
       user.setLastLoginIp(ip);
+      user.setLocation(location);
     }
     user.setLastLoginTime(new Date());
     mapper.update(user);

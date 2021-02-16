@@ -1,7 +1,6 @@
 dependencies {
   compile project(":$rootName-mybatis")
-  compile project(":$rootName-qm-mapper")
-  compile project(":$rootName-common-service")
+  compile project(":$rootName-pn-contract")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

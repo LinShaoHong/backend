@@ -1,10 +1,12 @@
 package com.github.sun.qm;
 
 import com.github.sun.foundation.boot.exception.Message;
+import com.github.sun.foundation.boot.utility.IPs;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.resolver.MayLogin;
+import com.github.sun.qm.utility.Locations;
 import com.hankcs.hanlp.HanLP;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,6 +21,7 @@ import javax.inject.Named;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.math.BigDecimal;
@@ -43,6 +46,7 @@ public class GirlResource extends AbstractResource {
   private final CollectionMapper collectionMapper;
   private final FootprintService footprintService;
   private final ViewStatMapper statMapper;
+  private final ContainerRequestContext request;
 
   @Inject
   public GirlResource(GirlMapper mapper,
@@ -52,7 +56,8 @@ public class GirlResource extends AbstractResource {
                       @Named("mysql") SqlBuilder.Factory factory,
                       CollectionMapper collectionMapper,
                       FootprintService footprintService,
-                      ViewStatMapper statMapper) {
+                      ViewStatMapper statMapper,
+                      ContainerRequestContext request) {
     this.mapper = mapper;
     this.categoryMapper = categoryMapper;
     this.userMapper = userMapper;
@@ -61,6 +66,7 @@ public class GirlResource extends AbstractResource {
     this.collectionMapper = collectionMapper;
     this.footprintService = footprintService;
     this.statMapper = statMapper;
+    this.request = request;
   }
 
   @GET
@@ -207,11 +213,15 @@ public class GirlResource extends AbstractResource {
     if (girl == null || !girl.isOnService()) {
       throw new Message(2000);
     }
+    String ip = IPs.getRemoteIP(request);
+
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(Girl.class)
       .where(sb.field("id").eq(id))
       .update()
       .set("visits", sb.field("visits").plus(1))
+      .set("lastVisitIP", ip)
+      .set("lastVisitLo", Locations.fromIp(ip))
       .template();
     mapper.updateByTemplate(template);
     BigDecimal price = girl.getPrice() == null ? new BigDecimal(0) : girl.getPrice();

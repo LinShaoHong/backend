@@ -121,7 +121,7 @@ public class ChargeService {
     content += "\n今日: " + todayIncome;
     content += "\n本月: " + monthIncome;
     content += "\n总计: " + mapper.rechargeTotal().intValue();
-    mailService.sendMessage("寻芳阁充值", username, content, noticeMail);
+    mailService.sendMessage("XFG充值", username, content, noticeMail);
   }
 
   @Transactional
@@ -167,6 +167,6 @@ public class ChargeService {
     }
     content += "\n\n消耗金币: " + girl.getPrice().intValue();
     content += "\n剩余金币: " + user.getAmount().intValue();
-    mailService.sendMessage("寻芳阁购买", user.getUsername(), content, noticeMail);
+    mailService.sendMessage("XFG购买", user.getUsername(), content, noticeMail);
   }
 }

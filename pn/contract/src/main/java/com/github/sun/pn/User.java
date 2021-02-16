@@ -1,9 +1,7 @@
-package com.github.sun.qm;
+package com.github.sun.pn;
 
 import com.github.sun.foundation.boot.exception.UnexpectedException;
 import com.github.sun.foundation.boot.utility.Hex;
-import com.github.sun.foundation.modelling.Converter;
-import com.github.sun.foundation.modelling.JsonHandler;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,19 +11,17 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import java.util.Set;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "qm_user")
+@Table(name = "pn_user")
 public class User {
   @Id
   private String id;
@@ -34,17 +30,11 @@ public class User {
   private String password;
   private String avatar;
   private String email;
-  private BigDecimal amount;
   private boolean vip;
   private Date vipStartTime;
   private Date vipEndTime;
-  private Date signInTime;
-  private int signInCount;
   private Date lastLoginTime;
   private String lastLoginIp;
-  private String location;
-  @Converter(JsonHandler.SetStringHandler.class)
-  private Set<String> readSystemMessageIds;
   @Transient
   private Date createTime;
   @Transient

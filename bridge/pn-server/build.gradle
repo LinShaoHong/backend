@@ -1,7 +1,5 @@
 dependencies {
-  compile project(":$rootName-qm-rest")
-  compile project(":$rootName-qm-spider")
-  compile project(":$rootName-spider-rest")
+  compile project(":$rootName-pn-rest")
 }
 
 apply from: project.file("./docker.gradle")

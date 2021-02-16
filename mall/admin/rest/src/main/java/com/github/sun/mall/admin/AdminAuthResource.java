@@ -1,5 +1,6 @@
 package com.github.sun.mall.admin;
 
+import com.github.sun.foundation.boot.utility.IPs;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.mall.admin.api.AdminSessionService;
 import com.github.sun.mall.admin.entity.Admin;
@@ -41,7 +42,7 @@ public class AdminAuthResource extends AbstractResource {
   @Path("/login")
   @ApiOperation("登录")
   public javax.ws.rs.core.Response login(@Valid @NotNull(message = "require body") LoginReq req) {
-    String token = service.login(req.getUsername(), req.getPassword(), getIpAddr());
+    String token = service.login(req.getUsername(), req.getPassword(), IPs.getRemoteIP(request));
     NewCookie cookie = new NewCookie(TOKEN_NAME, token, "/", null, NewCookie.DEFAULT_VERSION, null, TOKEN_EXPIRED, null, false, true);
     return javax.ws.rs.core.Response
       .ok()
@@ -56,29 +57,6 @@ public class AdminAuthResource extends AbstractResource {
     private String username;
     @NotNull(message = "缺少密码")
     private String password;
-  }
-
-  private String getIpAddr() {
-    String ipAddress;
-    try {
-      ipAddress = request.getHeaderString("x-forwarded-for");
-      if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-        ipAddress = request.getHeaderString("Proxy-Client-IP");
-      }
-      if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-        ipAddress = request.getHeaderString("WL-Proxy-Client-IP");
-      }
-      // 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
-      if (ipAddress != null && ipAddress.length() > 15) { // "***.***.***.***".length()
-        if (ipAddress.indexOf(",") > 0) {
-          ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
-        }
-      }
-    } catch (Exception e) {
-      ipAddress = "";
-    }
-
-    return ipAddress;
   }
 
   @POST

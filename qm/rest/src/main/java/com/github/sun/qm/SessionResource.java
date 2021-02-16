@@ -1,13 +1,17 @@
 package com.github.sun.qm;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.github.sun.foundation.boot.utility.IPs;
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.resolver.Session;
+import com.github.sun.qm.utility.Locations;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -17,6 +21,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
+import java.util.List;
 
 import static com.github.sun.qm.SessionService.TOKEN_NAME;
 
@@ -42,7 +47,8 @@ public class SessionResource extends AbstractResource {
   @Path("/register")
   @ApiOperation("注册")
   public SingleResponse<String> register(@Valid @NotNull(message = "require body") RegisterReq req) {
-    String token = service.register(req.getUsername(), req.getPassword(), req.getEmail(), getIpAddr());
+    String ip = IPs.getRemoteIP(request);
+    String token = service.register(req.getUsername(), req.getPassword(), req.getEmail(), ip, Locations.fromIp(ip));
     return responseOf(token);
   }
 
@@ -74,7 +80,8 @@ public class SessionResource extends AbstractResource {
   @Path("/login")
   @ApiOperation("登录")
   public SingleResponse<String> login(@Valid @NotNull(message = "require body") LoginReq req) {
-    String token = service.login(req.getUsername(), req.getPassword(), getIpAddr());
+    String ip = IPs.getRemoteIP(request);
+    String token = service.login(req.getUsername(), req.getPassword(), ip, Locations.fromIp(ip));
     return responseOf(token);
   }
 
@@ -84,28 +91,6 @@ public class SessionResource extends AbstractResource {
     private String username;
     @NotBlank(message = "缺少密码")
     private String password;
-  }
-
-  private String getIpAddr() {
-    String ipAddress;
-    try {
-      ipAddress = request.getHeaderString("x-forwarded-for");
-      if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-        ipAddress = request.getHeaderString("Proxy-Client-IP");
-      }
-      if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-        ipAddress = request.getHeaderString("WL-Proxy-Client-IP");
-      }
-      // 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
-      if (ipAddress != null && ipAddress.length() > 15) { // "***.***.***.***".length()
-        if (ipAddress.indexOf(",") > 0) {
-          ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
-        }
-      }
-    } catch (Exception e) {
-      ipAddress = "";
-    }
-    return ipAddress;
   }
 
   @POST

@@ -1,6 +1,6 @@
 dependencies {
   compile project(":$rootName-mybatis")
-  compile project(":$rootName-qm-mapper")
+  compile project(":$rootName-pn-mapper")
   compile project(":$rootName-common-service")
 }
 

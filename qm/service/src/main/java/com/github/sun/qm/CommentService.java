@@ -75,7 +75,7 @@ public class CommentService {
         content += "\n\n消耗金币: " + paylog.getAmount().intValue();
         content += "\n购买时间: " + FORMATTER.format(paylog.getCreateTime());
       }
-      mailService.sendMessage("寻芳阁评论", user.getUsername(), content, noticeMail);
+      mailService.sendMessage("XFG评论", user.getUsername(), content, noticeMail);
     }
   }
 
