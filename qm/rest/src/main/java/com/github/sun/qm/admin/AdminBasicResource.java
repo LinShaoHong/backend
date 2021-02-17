@@ -53,12 +53,14 @@ public abstract class AdminBasicResource extends AbstractResource {
   private Map<String, String> join(String field, Set<String> ids) {
     if (!ids.isEmpty()) {
       if (field.equals("userId") || field.equals("commentatorId") || field.equals("replierId")) {
-        return userMapper.findByIds(ids).stream().collect(Collectors.toMap(User::getId, User::getUsername));
+        return userMapper.findByIds(ids).stream()
+          .collect(Collectors.toMap(User::getId, u -> u.isVip() ? u.getUsername() + "(VIP)" : u.getUsername()));
       } else if (field.equals("girlId")) {
         return girlMapper.findByIds(ids).stream().collect(Collectors.toMap(Girl::getId, g -> {
           String city = g.getCity();
           if (city != null && !city.isEmpty()) {
-            return city + " " + g.getName();
+            int amount = g.getPrice() == null ? 0 : g.getPrice().intValue();
+            return city + " " + g.getName() + (amount > 0 ? ("(" + amount + ")") : "");
           }
           return g.getName();
         }));
