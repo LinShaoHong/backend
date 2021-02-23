@@ -35,6 +35,7 @@ public class User {
   private Date vipEndTime;
   private Date lastLoginTime;
   private String lastLoginIp;
+  private String location;
   @Transient
   private Date createTime;
   @Transient

@@ -29,6 +29,7 @@ public class Item {
   private String categorySpell;
   private long visits;
   private String lastVisitIP;
+  private String lastVisitLo;
   @Transient
   private Date createTime;
   @Transient
@@ -39,7 +40,7 @@ public class Item {
   @NoArgsConstructor
   @AllArgsConstructor
   @NamingStrategy
-  @Table(name = "pn_girl_category")
+  @Table(name = "pn_item_category")
   public static class Category {
     @Id
     private String id;
