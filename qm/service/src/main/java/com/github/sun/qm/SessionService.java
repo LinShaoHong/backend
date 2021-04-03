@@ -51,6 +51,15 @@ public class SessionService {
     if (mapper.countByEmail(email) > 0) {
       throw new Message(1003);
     }
+    if (ip != null && !ip.isEmpty()) {
+      User user = mapper.findLatestByIp(ip);
+      if (user != null) {
+        Date date = user.getCreateTime();
+        if (System.currentTimeMillis() - date.getTime() < 24 * 3600 * 10000) {
+          throw new Message(1004);
+        }
+      }
+    }
     String id = IdGenerator.next();
     User user = User.builder()
       .id(id)

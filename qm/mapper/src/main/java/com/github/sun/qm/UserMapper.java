@@ -27,6 +27,9 @@ public interface UserMapper extends CompositeMapper<User> {
   @Select("SELECT COUNT(0) FROM qm_user WHERE email = #{email}")
   int countByEmail(@Param("email") String email);
 
+  @Select("SELECT * FROM qm_user WHERE lastLoginIp = #{ip} ORDER BY createTime DESC LIMIT 1")
+  User findLatestByIp(@Param("ip") String ip);
+
   @Select("SELECT id FROM qm_user WHERE username = #{username}")
   String findIdByUsername(@Param("username") String username);
 }

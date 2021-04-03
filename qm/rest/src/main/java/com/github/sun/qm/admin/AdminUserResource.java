@@ -39,6 +39,7 @@ public class AdminUserResource extends AbstractResource {
   public PageResponse<ObjectNode> paged(@QueryParam("id") String id,
                                         @QueryParam("username") String username,
                                         @QueryParam("email") String email,
+                                        @QueryParam("lastLoginIp") String lastLoginIp,
                                         @QueryParam("vip") Boolean vip,
                                         @QueryParam("start") int start,
                                         @QueryParam("count") int count,
@@ -48,6 +49,7 @@ public class AdminUserResource extends AbstractResource {
     Expression condition = Expression.nonEmpty(id).then(sb.field("id").eq(id))
       .and(username == null || username.isEmpty() ? null : sb.field("username").eq(username.trim()))
       .and(email == null || email.isEmpty() ? null : sb.field("email").eq(email))
+      .and(lastLoginIp == null || lastLoginIp.isEmpty() ? null : sb.field("lastLoginIp").eq(lastLoginIp))
       .and(vip == null ? null : sb.field("vip").eq(vip));
     int total = mapper.countByTemplate(sb.from(User.class).where(condition).count().template());
     if (start < total) {
