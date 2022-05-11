@@ -43,12 +43,12 @@ public class BasicSpider extends AbstractSpider {
   private volatile NodeHolder latestConsumed;
   private volatile Producer producer;
   private volatile CheckpointHandler checkpointHandler;
-  private volatile List<Throwable> errors = new ArrayList<>();
-  private volatile List<Progress> latest = new ArrayList<>();
-  private volatile List<Consumer> consumers = new ArrayList<>();
-  private AtomicInteger finished = new AtomicInteger(0);
-  private AtomicBoolean isRunning = new AtomicBoolean(false);
-  private ConcurrentLinkedQueue<NodeHolder> queue = new ConcurrentLinkedQueue<>();
+  private final List<Throwable> errors = new ArrayList<>();
+  private final List<Progress> latest = new ArrayList<>();
+  private final List<Consumer> consumers = new ArrayList<>();
+  private final AtomicInteger finished = new AtomicInteger(0);
+  private final AtomicBoolean isRunning = new AtomicBoolean(false);
+  private final ConcurrentLinkedQueue<NodeHolder> queue = new ConcurrentLinkedQueue<>();
 
   private void init() {
     if (setting == null) {
@@ -296,7 +296,7 @@ public class BasicSpider extends AbstractSpider {
                   break;
                 }
                 if (category != null && canSkipped) {
-                  if (!skip(uri)) {
+                  if (stop(uri)) {
                     canSkipped = false;
                   }
                   continue;
@@ -340,7 +340,7 @@ public class BasicSpider extends AbstractSpider {
                   break;
                 }
                 if (category != null && canSkipped) {
-                  if (!skip(uri)) {
+                  if (stop(uri)) {
                     canSkipped = false;
                   }
                   continue;
@@ -378,12 +378,12 @@ public class BasicSpider extends AbstractSpider {
     return false;
   }
 
-  private boolean skip(String uri) {
+  private boolean stop(String uri) {
     if (this.checkpoint != null) {
       String categoryUrl = this.checkpoint.getCategoryUrl();
-      return !uri.equals(categoryUrl);
+      return uri.equals(categoryUrl);
     }
-    return false;
+    return true;
   }
 
   private class Consumer implements Runnable {
