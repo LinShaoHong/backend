@@ -1,6 +1,6 @@
 dependencies {
-  compile project(":$rootName-rest")
-  compile project(":$rootName-image-service")
+  api project(":$rootName-rest")
+  api project(":$rootName-image-service")
 
   implementation "com.hankcs:hanlp:$vers.hanlp"
 }

@@ -1,6 +1,6 @@
 dependencies {
-  compile project(":$rootName-rest")
-  compile project(":$rootName-mall-core-service")
+  api project(":$rootName-rest")
+  api project(":$rootName-mall-core-service")
 
   implementation "com.github.ben-manes.caffeine:caffeine:$vers.caffeine"
 }

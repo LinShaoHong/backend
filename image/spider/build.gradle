@@ -1,6 +1,6 @@
 dependencies {
-  compile project(":$rootName-image-service")
-  compile project(":$rootName-spider-contract")
+  api project(":$rootName-image-service")
+  api project(":$rootName-spider-contract")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

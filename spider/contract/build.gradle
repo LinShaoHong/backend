@@ -1,5 +1,5 @@
 dependencies {
-  compile project(":$rootName-modelling")
+  api project(":$rootName-modelling")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

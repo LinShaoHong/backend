@@ -1,8 +1,8 @@
 dependencies {
-  compile project(":$rootName-image-rest")
-  compile project(":$rootName-layout-rest")
-  compile project(":$rootName-image-spider")
-  compile project(":$rootName-spider-rest")
+  api project(":$rootName-image-rest")
+  api project(":$rootName-layout-rest")
+  api project(":$rootName-image-spider")
+  api project(":$rootName-spider-rest")
 }
 
 apply from: project.file("./docker.gradle")

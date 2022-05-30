@@ -1,6 +1,6 @@
 dependencies {
-  compile project(":$rootName-mall-core-rest")
-  compile project(":$rootName-mall-admin-rest")
+  api project(":$rootName-mall-core-rest")
+  api project(":$rootName-mall-admin-rest")
 }
 
 apply from: project.file("./docker.gradle")

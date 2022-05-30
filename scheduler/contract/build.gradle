@@ -1,5 +1,5 @@
 dependencies {
-  compile project(":$rootName-mybatis")
+  api project(":$rootName-mybatis")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

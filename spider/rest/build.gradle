@@ -1,4 +1,4 @@
 dependencies {
-  compile project(":$rootName-rest")
-  compile project(":$rootName-spider-service")
+  api project(":$rootName-rest")
+  api project(":$rootName-spider-service")
 }

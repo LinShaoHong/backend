@@ -1,6 +1,6 @@
 dependencies {
-  compile project(":$rootName-mall-admin-service")
-  compile project(":$rootName-mall-admin-resolver")
+  api project(":$rootName-mall-admin-service")
+  api project(":$rootName-mall-admin-resolver")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

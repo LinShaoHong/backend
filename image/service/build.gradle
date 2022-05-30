@@ -1,7 +1,7 @@
 dependencies {
-  compile project(":$rootName-mybatis")
-  compile project(":$rootName-image-contract")
-  compile project(":$rootName-layout-contract")
+  api project(":$rootName-mybatis")
+  api project(":$rootName-image-contract")
+  api project(":$rootName-layout-contract")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

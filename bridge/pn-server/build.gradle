@@ -1,5 +1,5 @@
 dependencies {
-  compile project(":$rootName-pn-rest")
+  api project(":$rootName-pn-rest")
 }
 
 apply from: project.file("./docker.gradle")

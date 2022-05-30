@@ -1,5 +1,5 @@
 dependencies {
-  compile project(":$rootName-boot")
+  api project(":$rootName-boot")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

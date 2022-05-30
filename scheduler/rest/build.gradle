@@ -1,4 +1,4 @@
 dependencies {
-  compile project(":$rootName-rest")
-  compile project(":$rootName-scheduler-service")
+  api project(":$rootName-rest")
+  api project(":$rootName-scheduler-service")
 }

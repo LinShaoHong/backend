@@ -1,4 +1,4 @@
 dependencies {
-  compile project(":$rootName-rest")
-  compile project(":$rootName-mall-admin-service")
+  api project(":$rootName-rest")
+  api project(":$rootName-mall-admin-service")
 }

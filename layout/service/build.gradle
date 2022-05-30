@@ -1,5 +1,5 @@
 dependencies {
-  compile project(":$rootName-layout-contract")
+  api project(":$rootName-layout-contract")
   implementation "com.github.ben-manes.caffeine:caffeine:$vers.caffeine"
 }
 
