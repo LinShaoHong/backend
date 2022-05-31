@@ -1,8 +1,0 @@
-dependencies {
-  api project(":$rootName-rest")
-  api project(":$rootName-mall-core-service")
-
-  implementation "com.github.ben-manes.caffeine:caffeine:$vers.caffeine"
-}
-
-apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

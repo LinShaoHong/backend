@@ -1,6 +1,0 @@
-dependencies {
-  api project(":$rootName-mybatis")
-  api project(":$rootName-mall-core-mapper")
-}
-
-apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

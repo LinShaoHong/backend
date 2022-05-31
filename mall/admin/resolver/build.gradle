@@ -1,4 +1,0 @@
-dependencies {
-  api project(":$rootName-rest")
-  api project(":$rootName-mall-admin-service")
-}

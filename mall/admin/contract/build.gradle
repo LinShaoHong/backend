@@ -1,6 +1,0 @@
-dependencies {
-  api project(":$rootName-modelling")
-  api project(":$rootName-mall-core-contract")
-}
-
-apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

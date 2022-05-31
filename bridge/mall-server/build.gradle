@@ -1,7 +1,0 @@
-dependencies {
-  api project(":$rootName-mall-core-rest")
-  api project(":$rootName-mall-admin-rest")
-}
-
-apply from: project.file("./docker.gradle")
-apply from: rootProject.file("buildscript/gradle/sub_springjersey.gradle")
