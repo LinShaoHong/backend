@@ -1,8 +1,0 @@
-dependencies {
-  api project(":$rootName-rest")
-  api project(":$rootName-image-service")
-
-  implementation "com.hankcs:hanlp:$vers.hanlp"
-}
-
-apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")
