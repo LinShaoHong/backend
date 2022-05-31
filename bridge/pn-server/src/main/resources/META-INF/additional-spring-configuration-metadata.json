@@ -1,8 +1,0 @@
-{
-  "properties": [
-    {
-      "name": "admin.password",
-      "type": "java.lang.String",
-      "description": "Description for admin.password."
-  }
-] }
