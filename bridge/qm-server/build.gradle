@@ -1,8 +1,10 @@
+ext.mainClass = "com.github.sun.QMApp"
+
 dependencies {
   api project(":$rootName-qm-rest")
   api project(":$rootName-qm-spider")
   api project(":$rootName-spider-rest")
 }
 
-apply from: project.file("./docker.gradle")
+apply from: rootProject.file("buildscript/gradle/sub_docker.gradle")
 apply from: rootProject.file("buildscript/gradle/sub_springjersey.gradle")

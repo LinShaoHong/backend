@@ -1,7 +1,9 @@
+ext.mainClass = "com.github.sun.ConsoleApp"
+
 dependencies {
   api project(":$rootName-qm-scheduler")
   api project(":$rootName-scheduler-rest")
 }
 
-apply from: project.file("./docker.gradle")
+apply from: rootProject.file("buildscript/gradle/sub_docker.gradle")
 apply from: rootProject.file("buildscript/gradle/sub_springjersey.gradle")
