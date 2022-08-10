@@ -1,6 +1,6 @@
 apply plugin: "com.google.cloud.tools.jib"
 
-import org.gradle.util.VersionNumber
+import org.gradle.util.internal.VersionNumber
 
 def user = System.properties["aliRepoUser"]
 def pwd = System.properties["aliRepoPassword"]
