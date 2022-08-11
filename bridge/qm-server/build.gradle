@@ -1,5 +1,3 @@
-ext.mainClass = "com.github.sun.QMApp"
-
 dependencies {
   api project(":$rootName-qm-rest")
   api project(":$rootName-qm-spider")

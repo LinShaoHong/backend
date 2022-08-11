@@ -1,5 +1,3 @@
-ext.mainClass = "com.github.sun.ConsoleApp"
-
 dependencies {
   api project(":$rootName-qm-scheduler")
   api project(":$rootName-scheduler-rest")
