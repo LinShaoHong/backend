@@ -40,6 +40,19 @@ public class SpiderTest {
     progress(spider);
   }
 
+  @Test
+  public void test_pic_tuiimg() {
+    Spider spider = newSpider("pic_tuiimg");
+    spider.start();
+    progress(spider);
+  }
+
+  @Test
+  public void aa() {
+    String video = "11.dd";
+    System.out.println(video.substring(0, video.lastIndexOf(".")));
+  }
+
   private Spider newSpider(String file) {
     Spider spider = new BasicSpider();
     spider.setSetting(setting());
@@ -48,7 +61,7 @@ public class SpiderTest {
     return spider;
   }
 
-  private class ProcessorImpl implements Spider.Processor {
+  private static class ProcessorImpl implements Spider.Processor {
     @Override
     public int process(String source, List<JsonNode> values, Setting setting, Consumer<Throwable> func) {
       System.out.println(JSON.serialize(values));
@@ -67,12 +80,7 @@ public class SpiderTest {
   }
 
   private Setting setting() {
-    Setting setting = Setting.builder()
-      .parallelism(1)
-      .retryCount(2)
-      .retryDelays(2000)
-      .enable(true)
-      .build();
+    Setting setting = Setting.builder().parallelism(1).retryCount(2).retryDelays(2000).enable(true).build();
     setting.reCorrect();
     return setting;
   }

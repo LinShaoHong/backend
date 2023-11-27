@@ -80,4 +80,13 @@ public class Girl {
     @JsonIgnore
     private Date updateTime;
   }
+
+  public String getMainImage() {
+    if (type == Girl.Type.VIDEO && videos != null && !videos.isEmpty()) {
+      String video = videos.get(0);
+      String prefix = video.substring(0, video.lastIndexOf("."));
+      return prefix + "/post.jpg";
+    }
+    return mainImage;
+  }
 }

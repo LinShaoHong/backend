@@ -1,6 +1,8 @@
 dependencies {
   api project(":$rootName-qm-scheduler")
   api project(":$rootName-scheduler-rest")
+
+  implementation 'org.redisson:redisson:3.19.3'
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_docker.gradle")

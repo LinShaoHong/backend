@@ -1,0 +1,71 @@
+{
+  "source": "www.tuiimg.com",
+  "process": {
+    "type": "list",
+    "xpath": "//div[@class='beauty']/ul/li",
+    "fields": [
+      {
+        "name": "source",
+        "type": "text",
+        "value": "www.tuiimg.com"
+      },
+      {
+        "name": "type",
+        "type": "text",
+        "value": "meizi"
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "xpath": "./a[2]/text()",
+        "subXpath": true
+      },
+      {
+        "name": "originalUrl",
+        "type": "text",
+        "xpath": "./a[1]/img/@src"
+      },
+      {
+        "name": "details",
+        "type": "$sub",
+        "xpath": "./a[2]/@href",
+        "subType": "href",
+        "subProcess": {
+          "type": "single",
+          "fields": [
+            {
+              "name": "originalUrl",
+              "type": "text",
+              "xpath": {
+                "path": "//div[@id='content']/img/@src",
+                "script": "$value.substring(0, $value.lastIndexOf('/') + 1) + $currPage + '.jpg'"
+              }
+            },
+            {
+              "name": "category",
+              "type": "text",
+              "xpath": "string-join(//div[@class='info']/a/text(), '|')",
+              "parent": true
+            }
+          ],
+          "paging": {
+            "total": {
+              "path": "//i[@id='allbtn']/text()",
+              "script": "parseInt($value.substring($value.lastIndexOf('/')+1, $value.length()-1))"
+            },
+            "static": true,
+            "start": 1,
+            "exclusive": true
+          }
+        }
+      }
+    ],
+    "paging": {
+      "param": "list_%s.html",
+      "total": 140,
+      "start": 1,
+      "exclusive": true
+    },
+    "baseUrl": "https://www.tuiimg.com/meinv/"
+  }
+}

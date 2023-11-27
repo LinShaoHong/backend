@@ -108,7 +108,7 @@ public class PicProcessor implements Spider.Processor {
       String id = String.valueOf(p.getHashCode());
       String title = p.getCategory().replace("|", " ");
       String categorySpell = p.getCategory();
-      if (categorySpell != null && !categorySpell.isEmpty()) {
+      if (!categorySpell.isEmpty()) {
         categorySpell = Stream.of(categorySpell.split("\\|")).map(Pinyins::spell).collect(Collectors.joining("|"));
       }
       Girl girl = Girl.builder()

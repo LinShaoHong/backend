@@ -13,12 +13,14 @@ import java.util.Collections;
 import java.util.Map;
 
 public class JSoupFetcher implements Fetcher {
-  private static final String ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+  private static final String ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
   private static final String ACCEPT_CHARSET = "GB2312,utf-8;q=0.7,*;q=0.7";
-  private static final String ENCODING = "gzip, deflate";
+  private static final String ENCODING = "gzip,deflate,sdch";
   private static final String LANGUAGE = "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3";
   private static final String CONNECTION = "keep-alive";
   private static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
+  private static final String USER_AGENT =
+    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36";
 
   @Override
   public String fetch(String uri, int timeout, String method, JsonNode body, String charset) throws IOException {
@@ -32,7 +34,7 @@ public class JSoupFetcher implements Fetcher {
       .header("Content-Type", CONTENT_TYPE + ";" + charset)
       .header("Referer", uri)
       .header("Host", host)
-      .userAgent("Mozilla")
+      .userAgent(USER_AGENT)
       .timeout(timeout)
       .sslSocketFactory(SSL.getContext().getSocketFactory())
       .ignoreContentType(true);

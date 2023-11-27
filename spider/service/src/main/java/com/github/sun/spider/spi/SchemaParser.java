@@ -9,23 +9,15 @@ import org.w3c.dom.Node;
 import javax.script.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 abstract class SchemaParser {
   private static final ScriptEngineManager manager = new ScriptEngineManager();
   private static final int FETCH_TIME_OUT = 5000;
 
-  String parseUrl(String uri, Object replace, JSON.Valuer param) {
-    if (param.raw().isTextual()) {
-      return uri + String.format(param.asText(), replace);
-    } else {
-      String before = param.get("before").asText();
-      String after = param.get("after").asText();
-      return uri.substring(0, uri.indexOf(before)) + String.format(after, replace);
-    }
-  }
-
-  Paging parsePaging(Node node, JSON.Valuer process) {
+  Paging parsePaging(String baseUri, Node node, JSON.Valuer process) {
     JSON.Valuer paging = process.get("paging");
     if (paging.hasValue()) {
       int total = Integer.MAX_VALUE - 1;
@@ -43,6 +35,17 @@ abstract class SchemaParser {
           throw new SpiderException("paging.total is illegal: " + valuer.raw().toString());
         }
       }
+      String uri = baseUri;
+      valuer = paging.get("xpath");
+      if (valuer.raw().isTextual()) {
+        uri = XPaths.of(node, valuer.asText()).asText();
+      } else if (valuer.raw().isObject()) {
+        String path = valuer.get("path").asText();
+        String script = valuer.get("script").asText();
+        uri = js(script, XPaths.of(node, path).asText());
+      }
+
+      boolean isStatic = paging.get("static").asBoolean(false);
       boolean exclusive = paging.get("exclusive").asBoolean(false);
       int max = exclusive ? total : total + 1;
       int end = paging.get("end").asInt(max);
@@ -52,13 +55,17 @@ abstract class SchemaParser {
       start = Math.max(start, first);
       boolean includeFirst = paging.get("includeFirst").asBoolean(true);
       JSON.Valuer param = paging.get("param");
-      return new Paging(first, start, end, includeFirst, param);
+      return new Paging(node, uri, first, start, end, isStatic, includeFirst, param);
     }
     return null;
   }
 
-  @SuppressWarnings("unchecked")
   <T> T js(String script, Object arg) {
+    return js(script, 0, arg);
+  }
+
+  @SuppressWarnings("unchecked")
+  <T> T js(String script, int currPage, Object arg) {
     if (script == null) {
       return (T) arg;
     }
@@ -66,6 +73,7 @@ abstract class SchemaParser {
       ScriptEngine engine = manager.getEngineByName("JavaScript");
       ScriptContext context = new SimpleScriptContext();
       context.setAttribute("$value", arg, ScriptContext.ENGINE_SCOPE);
+      context.setAttribute("$currPage", currPage, ScriptContext.ENGINE_SCOPE);
       engine.setContext(context);
       return (T) engine.eval(script);
     } catch (ScriptException ex) {
@@ -223,19 +231,70 @@ abstract class SchemaParser {
     }
   }
 
-  static class Paging {
-    final int first;
-    final int start;
-    final int end;
-    final boolean includeFirst;
-    final JSON.Valuer param;
+  static class Paging implements Iterable<String> {
+    private final Node node;
+    private final String baseUri;
+    private final int first;
+    private final int start;
+    private final int end;
+    private final boolean isStatic;
+    private final int[] curr;
+    private final boolean includeFirst;
+    private final JSON.Valuer param;
 
-    private Paging(int first, int start, int end, boolean includeFirst, JSON.Valuer param) {
+    private Paging(Node node, String baseUri, int first, int start, int end, boolean isStatic, boolean includeFirst, JSON.Valuer param) {
+      this.node = node;
+      this.baseUri = baseUri;
       this.first = first;
       this.start = start;
       this.end = end;
+      this.isStatic = isStatic;
+      this.curr = new int[1];
       this.includeFirst = includeFirst;
       this.param = param;
+    }
+
+    public Node getNode() {
+      return node;
+    }
+
+    public int getCurrPage() {
+      return curr[0];
+    }
+
+    public boolean isStatic() {
+      return isStatic;
+    }
+
+    @Override
+    public Iterator<String> iterator() {
+      int[] cr = new int[1];
+      cr[0] = start - 1;
+
+      return new Iterator<>() {
+        @Override
+        public boolean hasNext() {
+          return cr[0] < end;
+        }
+
+        @Override
+        public String next() {
+          cr[0]++;
+          curr[0] = cr[0];
+          if (cr[0] == first && !includeFirst) {
+            return baseUri;
+          }
+          if (!param.hasValue()) {
+            return baseUri;
+          } else if (param.raw().isTextual()) {
+            return baseUri + String.format(param.asText(), cr[0]);
+          } else {
+            String before = param.get("before").asText();
+            String after = param.get("after").asText();
+            return baseUri.substring(0, baseUri.indexOf(before)) + String.format(after, cr[0]);
+          }
+        }
+      };
     }
   }
 

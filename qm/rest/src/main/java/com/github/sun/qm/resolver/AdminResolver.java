@@ -40,14 +40,16 @@ public class AdminResolver implements RequestScopeContextResolver<Admin> {
       }
     }
     if (token == null) {
-      throw new UnAuthorizedException("UnAuthorized");
+      StringBuilder sb = new StringBuilder();
+      request.getHeaders().forEach((k, v) -> sb.append(k).append("=").append(String.join(",", v)).append("&"));
+      throw new UnAuthorizedException("UnAuthorized: Missing Token For Request=" + sb);
     }
     String id = AES.decrypt(token, secretKey);
     String[] arr = id.split(":");
     if (arr.length > 1 && username.equals(arr[0]) && password.equals(arr[1])) {
       return new Admin(arr[0]);
     }
-    throw new UnAuthorizedException("UnAuthorized");
+    throw new UnAuthorizedException("UnAuthorized: Wrong Input For DecodeToken=" + id);
   }
 
   @Override

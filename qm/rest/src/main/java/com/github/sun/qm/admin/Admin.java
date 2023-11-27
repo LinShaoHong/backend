@@ -1,7 +1,7 @@
 package com.github.sun.qm.admin;
 
 public class Admin {
-  public static final String ADMIN_TOKEN_NAME = "ADMIN_QM_TOKEN";
+  public static final String ADMIN_TOKEN_NAME = "ADMIN-QM-TOKEN";
 
   public final String username;
 

@@ -23,9 +23,9 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
   private static final Fetcher fetcher = new JSoupFetcher();
   private final Cache<JSON.Valuer, List<Field>> fieldsCache = new Cache<>();
 
-  JsonNode crawl(Node node, JSON.Valuer process) {
+  JsonNode crawl(int currPage, Node node, JSON.Valuer process) {
     Map<Path, Map<Field, List<XPaths>>> parentPaths = new HashMap<>();
-    JsonNode value = crawl(0, null, node, process, parentPaths);
+    JsonNode value = crawl(currPage, 0, null, node, process, parentPaths);
     parentPaths.forEach((path, xps) -> {
       List<String> paths = paths(path);
       JSON.Valuer valuer = JSON.newValuer(value, paths.toArray(new String[0]));
@@ -33,24 +33,24 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
         xps.forEach((field, values) -> {
           int i = 0;
           for (JSON.Valuer v : valuer.asArray()) {
-            put(field, values.get(i++), (ObjectNode) v.raw());
+            put(field, values.get(i++), (ObjectNode) v.raw(), currPage);
           }
         });
       } else if (!xps.isEmpty()) {
-        xps.forEach((field, values) -> put(field, values.get(0), (ObjectNode) valuer.raw()));
+        xps.forEach((field, values) -> put(field, values.get(0), (ObjectNode) valuer.raw(), currPage));
       }
     });
     return value;
   }
 
-  private JsonNode crawl(int index, Path path, Node node, JSON.Valuer process, Map<Path, Map<Field, List<XPaths>>> parentPaths) {
+  private JsonNode crawl(int currPage, int index, Path path, Node node, JSON.Valuer process, Map<Path, Map<Field, List<XPaths>>> parentPaths) {
     String type = process.get("type").asText();
     String xpath = process.get("xpath").asText(null);
     List<Field> fields = fieldsCache.get(process, () -> parseFields(process));
     switch (type) {
       case "single":
         Node n = xpath == null ? node : XPaths.of(node, xpath).as();
-        return crawl(index, 0, path, node, n, fields, parentPaths);
+        return crawl(currPage, index, 0, path, node, n, fields, parentPaths);
       case "list":
         if (xpath == null) {
           throw new SpiderException("list type process require xpath");
@@ -60,7 +60,7 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
         List<JsonNode> list = new ArrayList<>();
         for (int i = 0; i < indexes.size(); i++) {
           Node subNode = nodes.get(indexes.get(i));
-          list.add(crawl(index, i, path, node, subNode, fields, parentPaths));
+          list.add(crawl(currPage, index, i, path, node, subNode, fields, parentPaths));
         }
         return JSON.getMapper().createArrayNode().addAll(list);
       default:
@@ -68,7 +68,7 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
     }
   }
 
-  private JsonNode crawl(int index, int subIndex, Path path, Node parent, Node node, List<Field> fields, Map<Path, Map<Field, List<XPaths>>> parentPaths) {
+  private JsonNode crawl(int currPage, int index, int subIndex, Path path, Node parent, Node node, List<Field> fields, Map<Path, Map<Field, List<XPaths>>> parentPaths) {
     ObjectNode value = JSON.getMapper().createObjectNode();
     if (path != null) {
       Map<Field, List<XPaths>> xps = parentPaths.computeIfAbsent(path.parent, r -> new HashMap<>());
@@ -83,78 +83,75 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
         });
       }
     }
-    fields.stream().filter(field -> !field.parent)
-      .forEach(field -> {
-        XPaths xPaths = field.value.hasValue() ? null : XPaths.of(field.subXpath ? node : parent, field.xpath.path.value);
-        switch (field.type) {
-          case "text":
-          case "int":
-          case "long":
-          case "double":
-          case "bool":
-            put(field, xPaths, value);
-            break;
-          case "$sub":
-            Path p = path == null ? new Path(field, null) : path.sub(field);
-            switch (field.subType) {
-              case "local":
-                value.putPOJO(field.name, crawl(subIndex, p, node, field.subProcess, parentPaths));
-                break;
-              case "href":
-                String baseUri = xPaths == null ? field.value.asText() : xPaths.asText();
-                String method = field.subProcess.get("method").asText("GET");
-                Category category = parseCategory(field.subProcess);
-                List<Request> requests = parseRequest(baseUri, field.subProcess);
-                switch (method.toUpperCase()) {
-                  case "GET":
-                    Request req = requests.get(0);
-                    Node subNode = get(req);
-                    Paging paging = parsePaging(subNode, field.subProcess);
-                    List<String> uris = category == null ? Collections.singletonList(baseUri) : categoryUrl(subNode, category);
-                    ArrayNode nodes = JSON.getMapper().createArrayNode();
-                    for (String uri : uris) {
-                      if (paging == null) {
-                        Node n = uri.equals(baseUri) ? subNode : get(req.set(uri));
-                        nodes.add(crawl(subIndex, p, n, field.subProcess, parentPaths));
-                      } else {
-                        Paging vp = uri.equals(baseUri) ? paging : parsePaging(get(req.set(uri)), field.subProcess);
-                        Iterators.slice(vp.start, vp.end).forEach(i -> {
-                          String url = pagingUrl(uri, i, vp);
-                          Node n = get(req.set(url));
-                          JsonNode values = crawl(subIndex, p, n, field.subProcess, parentPaths);
-                          if (values.isArray()) {
-                            nodes.addAll((ArrayNode) values);
-                          } else {
-                            nodes.add(values);
-                          }
-                        });
-                      }
+    fields.stream().filter(field -> !field.parent).forEach(field -> {
+      XPaths xPaths = field.value.hasValue() ? null : XPaths.of(field.subXpath ? node : parent, field.xpath.path.value);
+      switch (field.type) {
+        case "text":
+        case "int":
+        case "long":
+        case "double":
+        case "bool":
+          put(field, xPaths, value, currPage);
+          break;
+        case "$sub":
+          Path p = path == null ? new Path(field, null) : path.sub(field);
+          switch (field.subType) {
+            case "local":
+              value.putPOJO(field.name, crawl(currPage, subIndex, p, node, field.subProcess, parentPaths));
+              break;
+            case "href":
+              String baseUri = xPaths == null ? field.value.asText() : xPaths.asText();
+              String method = field.subProcess.get("method").asText("GET");
+              Category category = parseCategory(field.subProcess);
+              List<Request> requests = parseRequest(baseUri, field.subProcess);
+              switch (method.toUpperCase()) {
+                case "GET":
+                  Request req = requests.get(0);
+                  Node subNode = get(req);
+                  Paging paging = parsePaging(baseUri, subNode, field.subProcess);
+                  List<String> uris = category == null ? Collections.singletonList(baseUri) : categoryUrl(subNode, category);
+                  ArrayNode nodes = JSON.getMapper().createArrayNode();
+                  for (String uri : uris) {
+                    if (paging == null) {
+                      Node n = uri.equals(baseUri) ? subNode : get(req.set(uri));
+                      nodes.add(crawl(currPage, subIndex, p, n, field.subProcess, parentPaths));
+                    } else {
+                      Paging vp = uri.equals(baseUri) ? paging : parsePaging(uri, get(req.set(uri)), field.subProcess);
+                      vp.forEach(url -> {
+                        Node n = vp.isStatic() ? vp.getNode() : get(req.set(url));
+                        JsonNode values = crawl(vp.getCurrPage(), subIndex, p, n, field.subProcess, parentPaths);
+                        if (values.isArray()) {
+                          nodes.addAll((ArrayNode) values);
+                        } else {
+                          nodes.add(values);
+                        }
+                      });
                     }
-                    value.putPOJO(field.name, (category == null && paging == null) ? nodes.get(0) : nodes);
-                    break;
-                  case "POST":
-                    uris = category == null ?
-                      Collections.singletonList(baseUri) : categoryUrl(get(baseUri), category);
-                    nodes = JSON.getMapper().createArrayNode();
-                    uris.forEach(uri -> parseRequest(uri, field.subProcess).forEach(r -> {
-                      Node n = get(r);
-                      JsonNode v = crawl(subIndex, p, n, field.subProcess, parentPaths);
-                      nodes.add(v);
-                    }));
-                    value.putPOJO(field.name, category == null ? nodes.get(0) : nodes);
-                    break;
-                  default:
-                    throw new SpiderException("Unknown method: " + method);
-                }
-                break;
-              default:
-                throw new SpiderException("unknown field subType of " + field.name + " with '" + field.subType + "'");
-            }
-            break;
-          default:
-            throw new SpiderException("unknown field type of " + field.name + " with '" + field.name + "'");
-        }
-      });
+                  }
+                  value.putPOJO(field.name, (category == null && paging == null) ? nodes.get(0) : nodes);
+                  break;
+                case "POST":
+                  uris = category == null ? Collections.singletonList(baseUri) : categoryUrl(get(baseUri), category);
+                  nodes = JSON.getMapper().createArrayNode();
+                  uris.forEach(uri -> parseRequest(uri, field.subProcess).forEach(r -> {
+                    Node n = get(r);
+                    JsonNode v = crawl(currPage, subIndex, p, n, field.subProcess, parentPaths);
+                    nodes.add(v);
+                  }));
+                  value.putPOJO(field.name, category == null ? nodes.get(0) : nodes);
+                  break;
+                default:
+                  throw new SpiderException("Unknown method: " + method);
+              }
+              break;
+            default:
+              throw new SpiderException("unknown field subType of " + field.name + " with '" + field.subType + "'");
+          }
+          break;
+        default:
+          throw new SpiderException("unknown field type of " + field.name + " with '" + field.name + "'");
+      }
+    });
     return value;
   }
 
@@ -171,8 +168,7 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
 
   Node get(String url) {
     try {
-      return Retry.execute(getSetting().getRetryCount(), getSetting().getRetryDelays(),
-        () -> new DomSerializer(new CleanerProperties()).createDOM(hc.clean(fetcher.fetch(url))));
+      return Retry.execute(getSetting().getRetryCount(), getSetting().getRetryDelays(), () -> new DomSerializer(new CleanerProperties()).createDOM(hc.clean(fetcher.fetch(url))));
     } catch (Exception ex) {
       throw new SpiderException("Error get html from url: " + url, ex);
     }
@@ -189,31 +185,26 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
     }
   }
 
-  private void put(Field field, XPaths xPaths, ObjectNode node) {
+  private void put(Field field, XPaths xPaths, ObjectNode node, int currPage) {
     switch (field.type) {
       case "text":
-        String t = field.value.hasValue() ?
-          field.value.asText() : js(field.xpath.script, get(xPaths, field.xpath.path.type));
+        String t = field.value.hasValue() ? field.value.asText() : js(field.xpath.script, currPage, get(xPaths, field.xpath.path.type));
         node.put(field.name, t);
         break;
       case "int":
-        int i = field.value.hasValue() ?
-          field.value.asInt() : ((Number) js(field.xpath.script, get(xPaths, field.xpath.path.type))).intValue();
+        int i = field.value.hasValue() ? field.value.asInt() : ((Number) js(field.xpath.script, currPage, get(xPaths, field.xpath.path.type))).intValue();
         node.put(field.name, i);
         break;
       case "long":
-        long l = field.value.hasValue() ?
-          field.value.asLong() : ((Number) js(field.xpath.script, get(xPaths, field.xpath.path.type))).longValue();
+        long l = field.value.hasValue() ? field.value.asLong() : ((Number) js(field.xpath.script, currPage, get(xPaths, field.xpath.path.type))).longValue();
         node.put(field.name, l);
         break;
       case "double":
-        double d = field.value.hasValue() ?
-          field.value.asDouble() : ((Number) js(field.xpath.script, get(xPaths, field.xpath.path.type))).doubleValue();
+        double d = field.value.hasValue() ? field.value.asDouble() : ((Number) js(field.xpath.script, currPage, get(xPaths, field.xpath.path.type))).doubleValue();
         node.put(field.name, d);
         break;
       case "bool":
-        boolean b = field.value.hasValue() ?
-          field.value.asBoolean() : js(field.xpath.script, get(xPaths, field.xpath.path.type));
+        boolean b = field.value.hasValue() ? field.value.asBoolean() : js(field.xpath.script, currPage, get(xPaths, field.xpath.path.type));
         node.put(field.name, b);
         break;
       default:
@@ -256,13 +247,12 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
 
   List<String> categoryUrl(Node node, Category category) {
     List<String> total = new ArrayList<>();
-    XPaths.of(node, category.xpath.path.value).asArray()
-      .forEach(n -> {
-        XPaths xPaths = XPaths.of(n, category.subXpath.path.value);
-        Object value = get(xPaths, category.subXpath.path.type);
-        String url = js(category.subXpath.script, value);
-        total.add(url);
-      });
+    XPaths.of(node, category.xpath.path.value).asArray().forEach(n -> {
+      XPaths xPaths = XPaths.of(n, category.subXpath.path.value);
+      Object value = get(xPaths, category.subXpath.path.type);
+      String url = js(category.subXpath.script, value);
+      total.add(url);
+    });
     if (category.indexes != null) {
       List<String> urls = new ArrayList<>();
       category.indexes.forEach(i -> {
@@ -273,12 +263,5 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
       return urls;
     }
     return total;
-  }
-
-  String pagingUrl(String uri, int page, Paging paging) {
-    if (page == paging.first && !paging.includeFirst) {
-      return uri;
-    }
-    return parseUrl(uri, page, paging.param);
   }
 }

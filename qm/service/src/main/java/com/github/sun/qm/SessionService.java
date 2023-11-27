@@ -112,7 +112,7 @@ public class SessionService {
     if (sums.size() > 1) {
       content.append("\n - ").append("总量").append(": ").append(total);
     }
-    mailService.sendMessage("XFG注册", username, content.toString(), noticeMail);
+    mailService.sendMessage("QM 注册", username, content.toString(), noticeMail);
   }
 
   @Transactional

@@ -76,8 +76,7 @@ public class BasicSpider extends AbstractSpider {
       for (; ; ) {
         if (producer.interrupted() && consumers.stream().allMatch(Consumer::interrupted)) {
           break;
-        } else if (setting.getExecuteTime() > 0
-          && (System.currentTimeMillis() - startTime.getTime() >= setting.getExecuteTime())) {
+        } else if (setting.getExecuteTime() > 0 && (System.currentTimeMillis() - startTime.getTime() >= setting.getExecuteTime())) {
           break;
         } else {
           sleep(setting.getMonitorInterval());
@@ -229,9 +228,7 @@ public class BasicSpider extends AbstractSpider {
 
   @Override
   public void remove() {
-    Consumer consumer = consumers.stream()
-      .filter(c -> !c.interrupted())
-      .findAny().orElse(null);
+    Consumer consumer = consumers.stream().filter(c -> !c.interrupted()).findAny().orElse(null);
     if (consumer != null) {
       consumer.interrupt();
       consumers.remove(consumer);
@@ -280,15 +277,14 @@ public class BasicSpider extends AbstractSpider {
             try {
               req = parseRequest(baseUrl, process).get(0);
               root = get(req);
-              paging = parsePaging(root, process);
+              paging = parsePaging(baseUrl, root, process);
             } catch (SpiderException ex) {
               pushError(ex);
               log.warn(ex.getMessage(), ex.getCause());
               return;
             }
             try {
-              List<String> uris = category == null ?
-                Collections.singletonList(baseUrl) : categoryUrl(root, category);
+              List<String> uris = category == null ? Collections.singletonList(baseUrl) : categoryUrl(root, category);
               int index = 0;
               boolean canSkipped = true;
               for (String uri : uris) {
@@ -304,21 +300,20 @@ public class BasicSpider extends AbstractSpider {
                 if (paging == null) {
                   Node node = uri.equals(baseUrl) ? root : get(req.set(uri));
                   total += getEntityNum(type, xpath, node, process);
-                  queue.add(NodeHolder.from(index++, node, category == null ? null : uri));
+                  queue.add(NodeHolder.from(index++, node, 0, category == null ? null : uri));
                 } else {
-                  Paging vp = uri.equals(baseUrl) ? paging : parsePaging(get(req.set(uri)), process);
-                  for (int page = vp.start; page < vp.end; page++) {
+                  Paging pg = uri.equals(baseUrl) ? paging : parsePaging(uri, get(req.set(uri)), process);
+                  for (String url : pg) {
                     if (interrupted()) {
                       break;
                     }
-                    if (skip(page)) {
+                    if (skip(pg.getCurrPage())) {
                       continue;
                     }
-                    String url = pagingUrl(uri, page, vp);
                     Node node;
                     node = get(req.set(url));
                     total += getEntityNum(type, xpath, node, process);
-                    queue.add(NodeHolder.from(index++, node, category == null ? null : uri, page));
+                    queue.add(NodeHolder.from(index++, node, pg.getCurrPage(), category == null ? null : uri, pg.getCurrPage()));
                     sleep(setting.getTaskInterval());
                   }
                 }
@@ -332,8 +327,7 @@ public class BasicSpider extends AbstractSpider {
           case "POST":
             try {
               int index = 0;
-              List<String> uris = category == null ?
-                Collections.singletonList(baseUrl) : categoryUrl(get(baseUrl), category);
+              List<String> uris = category == null ? Collections.singletonList(baseUrl) : categoryUrl(get(baseUrl), category);
               boolean canSkipped = true;
               for (String uri : uris) {
                 if (interrupted()) {
@@ -351,7 +345,7 @@ public class BasicSpider extends AbstractSpider {
                   }
                   Node node = get(r);
                   total += getEntityNum(type, xpath, node, process);
-                  queue.add(NodeHolder.from(index, node, category == null ? null : uri, null));
+                  queue.add(NodeHolder.from(index, node, 0, category == null ? null : uri, null));
                   sleep(setting.getTaskInterval());
                 }
               }
@@ -421,15 +415,14 @@ public class BasicSpider extends AbstractSpider {
         }
         if (holder != null) {
           try {
-            JsonNode value = crawl(holder.node, process);
+            JsonNode value = crawl(holder.currPage, holder.node, process);
             List<JsonNode> nodes = Iterators.asList(value);
             if (!nodes.isEmpty()) {
               int count = processor.process(source, nodes, setting, BasicSpider.this::pushError);
               finished.addAndGet(count);
             }
             synchronized (BasicSpider.this) {
-              if (BasicSpider.this.latestConsumed == null ||
-                BasicSpider.this.latestConsumed.index < holder.index) {
+              if (BasicSpider.this.latestConsumed == null || BasicSpider.this.latestConsumed.index < holder.index) {
                 BasicSpider.this.latestConsumed = holder;
               }
             }
@@ -452,20 +445,22 @@ public class BasicSpider extends AbstractSpider {
   private static class NodeHolder {
     private final int index;
     private final Node node;
+    private final int currPage;
     private final Checkpoint checkpoint;
 
-    private NodeHolder(int index, Node node, Checkpoint checkpoint) {
+    private NodeHolder(int index, Node node, int currPage, Checkpoint checkpoint) {
       this.index = index;
       this.node = node;
+      this.currPage = currPage;
       this.checkpoint = checkpoint;
     }
 
-    private static NodeHolder from(int index, Node node, String category) {
-      return from(index, node, category, null);
+    private static NodeHolder from(int index, Node node, int currPage, String category) {
+      return from(index, node, currPage, category, null);
     }
 
-    private static NodeHolder from(int index, Node node, String category, Integer pageNum) {
-      return new NodeHolder(index, node, new Checkpoint(category, pageNum));
+    private static NodeHolder from(int index, Node node, int currPage, String category, Integer pageNum) {
+      return new NodeHolder(index, node, currPage, new Checkpoint(category, pageNum));
     }
   }
 

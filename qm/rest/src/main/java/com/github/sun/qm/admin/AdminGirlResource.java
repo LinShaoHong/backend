@@ -157,6 +157,8 @@ public class AdminGirlResource extends AbstractResource {
         storageService.delete(girl.getMainImage());
       }
       girl.getDetailImages().forEach(storageService::delete);
+      girl.getContactImages().forEach(storageService::delete);
+      girl.getVideos().forEach(storageService::delete);
       mapper.deleteById(id);
     }
     return responseOf();

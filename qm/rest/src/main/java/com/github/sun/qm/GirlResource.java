@@ -308,6 +308,11 @@ public class GirlResource extends AbstractResource {
         videos = new ArrayList<>();
       }
       videos.removeIf(video -> video == null || video.isEmpty());
+      if (v.getType() == Girl.Type.VIDEO && !videos.isEmpty()) {
+        String video = videos.get(0);
+        String prefix = video.substring(0, video.lastIndexOf("."));
+        videos = Collections.singletonList(prefix + (accessible ? "/index.m3u8" : "/review.m3u8"));
+      }
       return DetailResp.builder()
         .id(v.getId())
         .type(v.getType())
