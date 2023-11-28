@@ -1,0 +1,6 @@
+dependencies {
+  api project(":$rootName-quartz")
+  api project(":$rootName-scheduler-mapper")
+}
+
+apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")
