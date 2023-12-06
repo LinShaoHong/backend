@@ -1,6 +1,5 @@
 dependencies {
   api project(":$rootName-squirrel-rest")
-  api project(":$rootName-squirrel-spider")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_docker.gradle")
