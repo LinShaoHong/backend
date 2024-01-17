@@ -1,0 +1,6 @@
+dependencies {
+  api project(":$rootName-sms-rest")
+}
+
+apply from: rootProject.file("buildscript/gradle/sub_docker.gradle")
+apply from: rootProject.file("buildscript/gradle/sub_springjersey.gradle")
