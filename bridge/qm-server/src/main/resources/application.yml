@@ -33,7 +33,7 @@ logging:
     port: ${LOGGING_EMAIL_PORT:587}
     username: ${LOGGING_EMAIL_USERNAME:340417867@qq.com}
     password: ${LOGGING_EMAIL_PASSWORD:uspjcloxqxrfbgbd}
-    from: ${LOGGING_EMAIL_FROM:尋芳閣错误日志 <340417867@qq.com>}
+    from: ${LOGGING_EMAIL_FROM:MQ <340417867@qq.com>}
     to: ${LOGGING_EMAIL_TO:lin3404@126.com}
 
 notice.mail: ${NOTICE_MAIL:lin3404@126.com}
