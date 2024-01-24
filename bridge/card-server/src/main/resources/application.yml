@@ -8,6 +8,10 @@ spring:
     username: ${MYSQL_USER_OF_QM:root}
     password: ${MYSQL_PASSWORD_OF_QM:root}
 
+wx:
+  appId: xxxxx
+  secret: xxxxx
+
 logging:
   config: classpath:logback-spring.xml
   email:
