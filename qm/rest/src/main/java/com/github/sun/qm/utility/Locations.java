@@ -11,7 +11,7 @@ public class Locations {
     String location = null;
     if (ip != null && !ip.isEmpty()) {
       try {
-        JsonNode node = JerseyClient.build()
+        JsonNode node = JerseyClient.of()
           .property(ClientProperties.READ_TIMEOUT, 500)
           .property(ClientProperties.CONNECT_TIMEOUT, 500)
           .target("http://ip-api.com/json/" + ip + "?lang=zh-CN&fields=status,country,city")
