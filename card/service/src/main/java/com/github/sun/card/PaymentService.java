@@ -1,5 +1,9 @@
 package com.github.sun.card;
 
-public class PaymentService {
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
+public class PaymentService {
 }
