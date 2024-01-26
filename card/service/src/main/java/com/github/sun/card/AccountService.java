@@ -3,11 +3,13 @@ package com.github.sun.card;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.client.Client;
 
 @Service
+@RefreshScope
 @RequiredArgsConstructor
 public class AccountService {
   private static final String WX_URI = "https://api.weixin.qq.com/sns/jscode2session";

@@ -3,21 +3,5 @@ server.port: 9929
 spring:
   application:
     name: Card-Server
-  datasource:
-    url: jdbc:mysql://${MYSQL_SERVER:localhost:3306}/card?useUnicode=true&characterEncoding=UTF8&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
-    username: ${MYSQL_USER_OF_QM:root}
-    password: ${MYSQL_PASSWORD_OF_QM:root}
-
-wx:
-  appId: xxxxx
-  secret: xxxxx
-
-logging:
-  config: classpath:logback-spring.xml
-  email:
-    host: ${LOGGING_EMAIL_HOST:smtp.qq.com}
-    port: ${LOGGING_EMAIL_PORT:587}
-    username: ${LOGGING_EMAIL_USERNAME:340417867@qq.com}
-    password: ${LOGGING_EMAIL_PASSWORD:uspjcloxqxrfbgbd}
-    from: ${LOGGING_EMAIL_FROM:Card <340417867@qq.com>}
-    to: ${LOGGING_EMAIL_TO:lin3404@126.com}
+  profiles:
+    active: dev
