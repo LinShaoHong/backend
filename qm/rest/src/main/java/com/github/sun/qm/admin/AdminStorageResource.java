@@ -2,8 +2,6 @@ package com.github.sun.qm.admin;
 
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.qm.StorageService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -24,7 +22,6 @@ import java.io.InputStream;
 @Path("/v1/qm/admin/store")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Admin Store Resource")
 public class AdminStorageResource extends AbstractResource {
   private final StorageService service;
 
@@ -33,9 +30,11 @@ public class AdminStorageResource extends AbstractResource {
     this.service = service;
   }
 
+  /**
+   * 上传
+   */
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
-  @ApiOperation("上传")
   public SingleResponse<String> uploadImage(@FormDataParam("file") InputStream in,
                                             @FormDataParam("file") FormDataContentDisposition meta,
                                             @Context Admin admin) {
@@ -46,9 +45,11 @@ public class AdminStorageResource extends AbstractResource {
     }
   }
 
+  /**
+   * 删除
+   */
   @POST
   @Path("/delete")
-  @ApiOperation("删除")
   public Response deleteImage(@Valid @NotNull DeleteReq path,
                               @Context Admin admin) {
     service.delete(path.getPath());

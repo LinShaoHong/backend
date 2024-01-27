@@ -7,8 +7,6 @@ import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.User;
 import com.github.sun.qm.UserMapper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.Builder;
 import lombok.Data;
 
@@ -23,7 +21,6 @@ import java.util.*;
 @Path("/v1/qm/admin/user")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Admin User Resource")
 public class AdminUserResource extends AbstractResource {
   private final UserMapper mapper;
   private final SqlBuilder.Factory factory;
@@ -34,8 +31,10 @@ public class AdminUserResource extends AbstractResource {
     this.factory = factory;
   }
 
+  /**
+   * 分页获取用户信息
+   */
   @GET
-  @ApiOperation("分页获取用户信息")
   public PageResponse<ObjectNode> paged(@QueryParam("id") String id,
                                         @QueryParam("username") String username,
                                         @QueryParam("email") String email,
@@ -65,9 +64,11 @@ public class AdminUserResource extends AbstractResource {
     return responseOf(total, Collections.emptyList());
   }
 
+  /**
+   * 更改用户
+   */
   @PUT
   @Path("/${id}")
-  @ApiOperation("更改用户")
   public Response update(@PathParam("id") String id,
                          UserReq req,
                          @Context Admin admin) {
@@ -84,9 +85,11 @@ public class AdminUserResource extends AbstractResource {
     private BigDecimal amount;
   }
 
+  /**
+   * 统计用户
+   */
   @GET
   @Path("/stat")
-  @ApiOperation("统计用户")
   public SingleResponse<StatResp> statUser(@QueryParam("timeType") int timeType,
                                            @Context Admin admin) {
     SqlBuilder sb = factory.create();

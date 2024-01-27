@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.sun.common.EmailSender;
 import com.github.sun.foundation.boot.exception.Message;
 import com.github.sun.foundation.rest.AbstractResource;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -22,7 +20,6 @@ import java.util.Objects;
 @Path("/v1/qm/retrievePass")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Retrieve Password Resource")
 public class RetrievePassResource extends AbstractResource {
   private static final String key = "retrieve.password.key";
   private static final int expire = 5;
@@ -39,9 +36,11 @@ public class RetrievePassResource extends AbstractResource {
     this.mailService = mailService;
   }
 
+  /**
+   * 生成验证链接
+   */
   @POST
   @Path("/url")
-  @ApiOperation("生成验证链接")
   public Response genUrl(@NotNull(message = "缺乏实体") GenReq req) {
     User user = userMapper.findByEmail(req.getEmail());
     if (user == null) {
@@ -65,9 +64,11 @@ public class RetrievePassResource extends AbstractResource {
     private String email;
   }
 
+  /**
+   * 校验
+   */
   @POST
   @Path("/check")
-  @ApiOperation("校验")
   public Response check(@NotNull(message = "缺乏实体") CheckReq req) {
     String KEY = env.getProperty(key);
     String sign = User.hashPassword(req.getId() + ":" + req.getTimestamp() + ":" + KEY);
@@ -89,9 +90,11 @@ public class RetrievePassResource extends AbstractResource {
     private long timestamp;
   }
 
+  /**
+   * 更改
+   */
   @PUT
   @Path("/change")
-  @ApiOperation("更改")
   public Response change(@NotNull(message = "缺乏实体") ChangeReq req) {
     User user = userMapper.findById(req.getId());
     if (user != null) {

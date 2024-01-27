@@ -5,8 +5,6 @@ import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 
 import javax.inject.Inject;
@@ -21,7 +19,6 @@ import java.util.List;
 @Path("/v1/qm/admin/promotion")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Admin Promotion Resource")
 public class AdminPromotionResource extends AdminBasicResource {
   private final PromotionMapper mapper;
   private final PayLogMapper payLogMapper;
@@ -39,8 +36,10 @@ public class AdminPromotionResource extends AdminBasicResource {
     this.factory = factory;
   }
 
+  /**
+   * 推广列表
+   */
   @GET
-  @ApiOperation("推广列表")
   public PageResponse<ObjectNode> paged(@QueryParam("start") int start,
                                         @QueryParam("count") int count,
                                         @QueryParam("status") String status,
@@ -69,9 +68,11 @@ public class AdminPromotionResource extends AdminBasicResource {
     return responseOf(total, Collections.emptyList());
   }
 
+  /**
+   * 拒绝
+   */
   @PUT
   @Path("/${id}/reject")
-  @ApiOperation("拒绝")
   public Response reject(@PathParam("id") String id,
                          @Context Admin admin) {
     Promotion p = mapper.findById(id);
@@ -82,9 +83,11 @@ public class AdminPromotionResource extends AdminBasicResource {
     return responseOf();
   }
 
+  /**
+   * 通过
+   */
   @PUT
   @Path("/${id}/pass")
-  @ApiOperation("通过")
   public Response pass(@PathParam("id") String id,
                        PassReq req,
                        @Context Admin admin) {

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.Builder;
 import lombok.Data;
 
@@ -24,7 +22,6 @@ import java.util.stream.Stream;
 @Path("/v1/qm/admin/charge")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Admin Charge Resource")
 public class AdminChargeResource extends AdminBasicResource {
   private final ChargeMapper mapper;
   private final PayLogMapper payLogMapper;
@@ -45,8 +42,10 @@ public class AdminChargeResource extends AdminBasicResource {
     this.payLogMapper = payLogMapper;
   }
 
+  /**
+   * 分页获取
+   */
   @GET
-  @ApiOperation("分页获取")
   public PageResponse<Charge> paged(@QueryParam("start") int start,
                                     @QueryParam("count") int count,
                                     @QueryParam("type") String type,
@@ -70,9 +69,11 @@ public class AdminChargeResource extends AdminBasicResource {
     return responseOf(total, Collections.emptyList());
   }
 
+  /**
+   * 分页获取
+   */
   @GET
   @Path("/unused")
-  @ApiOperation("分页获取")
   public void unused(@QueryParam("type") String type) {
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(Charge.class)
@@ -85,8 +86,10 @@ public class AdminChargeResource extends AdminBasicResource {
       .collect(Collectors.joining("\n")));
   }
 
+  /**
+   * 添加
+   */
   @POST
-  @ApiOperation("添加")
   public Response add(@Valid ChargeReq req,
                       @Context Admin admin) {
     List<Charge> vs = Stream.of(req.getCards().replaceAll(" ", "").split("\n"))
@@ -107,9 +110,11 @@ public class AdminChargeResource extends AdminBasicResource {
     private String cards;
   }
 
+  /**
+   * 删除
+   */
   @DELETE
   @Path("/${id}")
-  @ApiOperation("删除")
   public Response delete(@PathParam("id") String id,
                          @Context Admin admin) {
     mapper.deleteById(id);
@@ -184,9 +189,11 @@ public class AdminChargeResource extends AdminBasicResource {
     return responseOf(total, Collections.emptyList());
   }
 
+  /**
+   * 统计充值金额
+   */
   @GET
   @Path("/stat")
-  @ApiOperation("统计充值金额")
   public SingleResponse<StatResp> statRecharge(@QueryParam("groupType") String groupType,
                                                @QueryParam("timeType") int timeType,
                                                @Context Admin admin) {

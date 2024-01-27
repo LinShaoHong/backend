@@ -3,8 +3,6 @@ package com.github.sun.qm;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +24,6 @@ import java.util.stream.Collectors;
 @Path("/v1/qm/charge")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Charge Resource")
 public class ChargeResource extends AbstractResource {
   private final ChargeService service;
   private final ChargeMapper.YQMapper yqMapper;
@@ -47,9 +44,11 @@ public class ChargeResource extends AbstractResource {
     this.factory = factory;
   }
 
+  /**
+   * 充值
+   */
   @POST
   @Path("/recharge")
-  @ApiOperation("充值")
   public Response recharge(@Valid @NotNull(message = "require body") RechargeReq req,
                            @Context User user) {
     service.recharge(req.getCardNo().replaceAll(" ", ""), user);
@@ -63,9 +62,11 @@ public class ChargeResource extends AbstractResource {
     private Charge.Type type;
   }
 
+  /**
+   * 消费
+   */
   @POST
   @Path("/consume")
-  @ApiOperation("消费")
   public Response consume(@Valid @NotNull(message = "require body") ConsumeReq req,
                           @Context User user) {
     service.consume(req.getGirlId(), user);
@@ -80,9 +81,11 @@ public class ChargeResource extends AbstractResource {
 
   private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+  /**
+   * 付款流水
+   */
   @GET
   @Path("/flow")
-  @ApiOperation("付款流水")
   public PageResponse<FlowRes> flow(@QueryParam("start") int start,
                                     @QueryParam("count") int count,
                                     @QueryParam("type") String type,
@@ -158,9 +161,11 @@ public class ChargeResource extends AbstractResource {
     }
   }
 
+  /**
+   * 易千支付
+   */
   @GET
   @Path("/yq")
-  @ApiOperation("易千支付")
   public ListResponse<Charge.YQ> qyAll(@Context User user) {
     return responseOf(yqMapper.findAll());
   }

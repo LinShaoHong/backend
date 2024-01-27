@@ -8,8 +8,6 @@ import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.resolver.MayLogin;
 import com.github.sun.qm.utility.Locations;
 import com.hankcs.hanlp.HanLP;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,7 +33,6 @@ import static com.github.sun.foundation.expression.Expression.EMPTY;
 @Path("/v1/qm/girls")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Girl Resource")
 public class GirlResource extends AbstractResource {
   private final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
   private final GirlMapper mapper;
@@ -69,8 +66,10 @@ public class GirlResource extends AbstractResource {
     this.request = request;
   }
 
+  /**
+   * 分页获取
+   */
   @GET
-  @ApiOperation("分页获取")
   public PageResponse<GirlResp> paged(@QueryParam("start") int start,
                                       @QueryParam("count") int count,
                                       @QueryParam("type") String type,
@@ -151,9 +150,11 @@ public class GirlResource extends AbstractResource {
     }
   }
 
+  /**
+   * 首页
+   */
   @GET
   @Path("/index")
-  @ApiOperation("首页")
   public ListResponse<IndexResp> index(@QueryParam("types") List<String> types,
                                        @QueryParam("start") int start,
                                        @QueryParam("count") int count,
@@ -204,9 +205,11 @@ public class GirlResource extends AbstractResource {
     return girls.stream().map(GirlResp::from).collect(Collectors.toList());
   }
 
+  /**
+   * 看详情
+   */
   @GET
   @Path("/${id}")
-  @ApiOperation("看详情")
   public SingleResponse<DetailResp> get(@PathParam("id") String id,
                                         @Context MayLogin mayLogin) {
     Girl girl = mapper.findById(id);
@@ -336,9 +339,11 @@ public class GirlResource extends AbstractResource {
     }
   }
 
+  /**
+   * 点赞
+   */
   @PUT
   @Path("/like/${id}")
-  @ApiOperation("点赞")
   public Response like(@PathParam("id") String id,
                        @QueryParam("like") boolean like) {
     SqlBuilder sb = factory.create();
@@ -351,9 +356,11 @@ public class GirlResource extends AbstractResource {
     return responseOf();
   }
 
+  /**
+   * 获取推荐列表
+   */
   @GET
   @Path("/recommendation/${id}")
-  @ApiOperation("获取推荐列表")
   public ListResponse<GirlResp> recommend(@PathParam("id") String id,
                                           @QueryParam("count") int count) {
     Girl girl = mapper.findById(id);
@@ -380,9 +387,11 @@ public class GirlResource extends AbstractResource {
     return responseOf(girls.stream().map(GirlResp::from).collect(Collectors.toList()));
   }
 
+  /**
+   * 搜索
+   */
   @GET
   @Path("/search")
-  @ApiOperation("搜索")
   public SingleResponse<SearchResp> search(@QueryParam("type") String type,
                                            @QueryParam("city") String city,
                                            @NotNull @QueryParam("q") String q) {
@@ -431,9 +440,11 @@ public class GirlResource extends AbstractResource {
     private List<String> keyWords;
   }
 
+  /**
+   * 获取城市
+   */
   @GET
   @Path("/city")
-  @ApiOperation("获取城市")
   public ListResponse<String> city(@QueryParam("type") String type) {
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(Girl.class)
@@ -449,9 +460,11 @@ public class GirlResource extends AbstractResource {
 
   private static final List<String> ignores = Arrays.asList("网", "馆", "社", "院", "荟");
 
+  /**
+   * 获取目录
+   */
   @GET
   @Path("/category")
-  @ApiOperation("获取目录")
   public ListResponse<CategoryResp> category(@NotEmpty(message = "缺少类型") @QueryParam("type") String type) {
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(Girl.Category.class)

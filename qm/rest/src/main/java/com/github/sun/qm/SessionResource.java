@@ -3,15 +3,11 @@ package com.github.sun.qm;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.sun.foundation.boot.utility.IPs;
 import com.github.sun.foundation.rest.AbstractResource;
-import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.resolver.Session;
 import com.github.sun.qm.utility.Locations;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -21,14 +17,12 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
-import java.util.List;
 
 import static com.github.sun.qm.SessionService.TOKEN_NAME;
 
 @Path("/v1/qm/session")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Session Resource")
 public class SessionResource extends AbstractResource {
   private final UserMapper mapper;
   private final SessionService service;
@@ -43,25 +37,31 @@ public class SessionResource extends AbstractResource {
     this.request = request;
   }
 
+  /**
+   * 注册
+   */
   @POST
   @Path("/register")
-  @ApiOperation("注册")
   public SingleResponse<String> register(@Valid @NotNull(message = "require body") RegisterReq req) {
     String ip = IPs.getRemoteIP(request);
     String token = service.register(req.getUsername(), req.getPassword(), req.getEmail(), ip, Locations.fromIp(ip));
     return responseOf(token);
   }
 
+  /**
+   * 校验用户名是否已存在
+   */
   @GET
   @Path("/checkName")
-  @ApiOperation("校验用户名是否已存在")
   public SingleResponse<Boolean> checkName(@NotEmpty(message = "缺少用户名") @QueryParam("name") String name) {
     return responseOf(mapper.countByUsername(name) > 0);
   }
 
+  /**
+   * 校验邮箱是否已存在
+   */
   @GET
   @Path("/checkEmail")
-  @ApiOperation("校验邮箱是否已存在")
   public SingleResponse<Boolean> checkEmail(@NotEmpty(message = "缺少邮箱") @QueryParam("email") String email) {
     return responseOf(mapper.countByEmail(email) > 0);
   }
@@ -76,9 +76,11 @@ public class SessionResource extends AbstractResource {
     private String email;
   }
 
+  /**
+   * 登录
+   */
   @POST
   @Path("/login")
-  @ApiOperation("登录")
   public SingleResponse<String> login(@Valid @NotNull(message = "require body") LoginReq req) {
     String ip = IPs.getRemoteIP(request);
     String token = service.login(req.getUsername(), req.getPassword(), ip, Locations.fromIp(ip));
@@ -93,9 +95,11 @@ public class SessionResource extends AbstractResource {
     private String password;
   }
 
+  /**
+   * 登出
+   */
   @POST
   @Path("/logout")
-  @ApiOperation("登出")
   public javax.ws.rs.core.Response logout(@Context Session session) {
     NewCookie cookie = new NewCookie(TOKEN_NAME, "", "/", null, "", 0, false, true);
     return javax.ws.rs.core.Response

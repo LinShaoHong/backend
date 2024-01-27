@@ -4,8 +4,6 @@ import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +23,6 @@ import java.util.stream.Collectors;
 @Path("/v1/qm/collection")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Collection Resource")
 public class CollectionResource extends AbstractResource {
   private final CollectionMapper mapper;
   private final CollectionService service;
@@ -43,8 +40,10 @@ public class CollectionResource extends AbstractResource {
     this.factory = factory;
   }
 
+  /**
+   * 获取我的收藏
+   */
   @GET
-  @ApiOperation("获取我的收藏")
   public PageResponse<CollectionRes> list(@QueryParam("start") int start,
                                           @QueryParam("count") int count,
                                           @Context User user) {
@@ -96,8 +95,10 @@ public class CollectionResource extends AbstractResource {
     private boolean onService;
   }
 
+  /**
+   * 添加
+   */
   @POST
-  @ApiOperation("添加")
   public Response add(@Valid @NotNull(message = "require body") CollectionReq req,
                       @Context User user) {
     service.add(user.getId(), req.getGirlId());
@@ -110,18 +111,22 @@ public class CollectionResource extends AbstractResource {
     private String girlId;
   }
 
+  /**
+   * 添加
+   */
   @DELETE
   @Path("/byGirlId")
-  @ApiOperation("添加")
   public Response delete(@Valid @NotNull(message = "require body") CollectionReq req,
                          @Context User user) {
     mapper.deleteByUserIdAndGirlId(user.getId(), req.getGirlId());
     return responseOf();
   }
 
+  /**
+   * 删除
+   */
   @DELETE
   @Path("/${id}")
-  @ApiOperation("删除")
   public Response delete(@PathParam("id") String id,
                          @Context User user) {
     mapper.deleteById(id);

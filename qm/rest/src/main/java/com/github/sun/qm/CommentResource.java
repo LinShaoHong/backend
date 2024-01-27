@@ -6,8 +6,6 @@ import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.resolver.MayLogin;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,7 +28,6 @@ import java.util.stream.Stream;
 @Path("/v1/qm/comment")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Comment Resource")
 public class CommentResource extends AbstractResource {
   private final CommentMapper mapper;
   private final CommentService service;
@@ -48,8 +45,10 @@ public class CommentResource extends AbstractResource {
     this.factory = factory;
   }
 
+  /**
+   * 获取评论
+   */
   @GET
-  @ApiOperation("获取评论")
   public SingleResponse<CommentRes> list(@QueryParam("start") int start,
                                          @QueryParam("count") int count,
                                          @QueryParam("commentId") String commentId,
@@ -209,9 +208,10 @@ public class CommentResource extends AbstractResource {
     private boolean read;
   }
 
-
+  /**
+   * 评论
+   */
   @POST
-  @ApiOperation("评论")
   public SingleResponse<String> comment(@Valid @NotNull(message = "require body") CommentReq req,
                                         @Context User user) {
     return responseOf(service.comment(user.getId(), req.getGirlId(), req.getContent()));
@@ -225,9 +225,11 @@ public class CommentResource extends AbstractResource {
     private String content;
   }
 
+  /**
+   * 回复
+   */
   @POST
   @Path("/reply/${id}")
-  @ApiOperation("回复")
   public SingleResponse<String> reply(@PathParam("id") String id,
                                       @Valid @NotNull(message = "require body") ReplyReq req,
                                       @Context User user) {
@@ -240,9 +242,11 @@ public class CommentResource extends AbstractResource {
     private String content;
   }
 
+  /**
+   * 获取回复消息
+   */
   @GET
   @Path("/reply/message")
-  @ApiOperation("获取回复消息")
   public SingleResponse<MessageRes> getReplyInfo(@QueryParam("start") int start,
                                                  @QueryParam("count") int count,
                                                  @QueryParam("isComment") boolean isComment,
@@ -374,34 +378,42 @@ public class CommentResource extends AbstractResource {
     private boolean system;
   }
 
+  /**
+   * 读回复
+   */
   @PUT
   @Path("/read/${id}")
-  @ApiOperation("读回复")
   public Response read(@PathParam("id") String id,
                        @Context User user) {
     service.read(user, id);
     return responseOf();
   }
 
+  /**
+   * 全部已读
+   */
   @PUT
   @Path("/readAll")
-  @ApiOperation("全部已读")
   public Response readAll(@Context User user) {
     service.readAll(user);
     return responseOf();
   }
 
+  /**
+   * 赞评论
+   */
   @PUT
   @Path("/like/${id}")
-  @ApiOperation("赞评论")
   public Response like(@PathParam("id") String id) {
     mapper.incLikes(id);
     return responseOf();
   }
 
+  /**
+   * 踩评论
+   */
   @PUT
   @Path("/hate/${id}")
-  @ApiOperation("踩评论")
   public Response hate(@PathParam("id") String id) {
     mapper.incHates(id);
     return responseOf();

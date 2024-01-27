@@ -4,8 +4,6 @@ import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.expression.Expression;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.SqlBuilder;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +20,6 @@ import java.util.stream.Collectors;
 @Path("/v1/qm/footprint")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Footprint Resource")
 public class FootprintResource extends AbstractResource {
   private final FootprintMapper mapper;
   private final GirlMapper girlMapper;
@@ -37,8 +34,10 @@ public class FootprintResource extends AbstractResource {
     this.factory = factory;
   }
 
+  /**
+   * 获取我的足迹
+   */
   @GET
-  @ApiOperation("获取我的足迹")
   public PageResponse<FootprintRes> list(@QueryParam("start") int start,
                                          @QueryParam("count") int count,
                                          @Context User user) {

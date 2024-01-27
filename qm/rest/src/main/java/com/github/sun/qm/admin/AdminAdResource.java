@@ -1,8 +1,6 @@
 package com.github.sun.qm.admin;
 
 import com.github.sun.foundation.rest.AbstractResource;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -15,11 +13,12 @@ import java.util.Random;
 @Path("/v1/qm/admin/ad")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Admin Advertise Resource")
 public class AdminAdResource extends AbstractResource {
+  /**
+   * 随机获取英文短句文案
+   */
   @GET
   @Path("/gen/sentence")
-  @ApiOperation("随机获取英文短句文案")
   public SingleResponse<String> genSentence(@Context Admin admin) {
     String[] arr = {
       "The sound of birds singing in the morning was like a symphony of nature.",

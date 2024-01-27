@@ -7,8 +7,6 @@ import com.github.sun.qm.Collection;
 import com.github.sun.qm.CollectionMapper;
 import com.github.sun.qm.GirlMapper;
 import com.github.sun.qm.UserMapper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -21,7 +19,6 @@ import java.util.List;
 @Path("/v1/qm/admin/collects")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Admin Message Resource")
 public class AdminCollectResource extends AdminBasicResource {
   private final CollectionMapper mapper;
   private final SqlBuilder.Factory factory;
@@ -36,8 +33,10 @@ public class AdminCollectResource extends AdminBasicResource {
     this.factory = factory;
   }
 
+  /**
+   * 分页获取浏览记录
+   */
   @GET
-  @ApiOperation("分页获取浏览记录")
   public PageResponse<ObjectNode> paged(@QueryParam("start") int start,
                                         @QueryParam("count") int count,
                                         @QueryParam("userName") String userName,

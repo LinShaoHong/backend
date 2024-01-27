@@ -8,8 +8,6 @@ import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.qm.Comment;
 import com.github.sun.qm.CommentMapper;
 import com.github.sun.qm.UserMapper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 
 import javax.inject.Inject;
@@ -26,7 +24,6 @@ import java.util.stream.Stream;
 @Path("/v1/qm/admin/message")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Admin Message Resource")
 public class AdminMessageResource extends AbstractResource {
   private final CommentMapper mapper;
   private final UserMapper userMapper;
@@ -44,8 +41,10 @@ public class AdminMessageResource extends AbstractResource {
     this.factory = factory;
   }
 
+  /**
+   * 分页获取消息
+   */
   @GET
-  @ApiOperation("分页获取消息")
   public PageResponse<Comment> paged(@QueryParam("start") int start,
                                      @QueryParam("count") int count,
                                      @QueryParam("rank") @DefaultValue("time") String rank,
@@ -67,8 +66,10 @@ public class AdminMessageResource extends AbstractResource {
     return responseOf(total, Collections.emptyList());
   }
 
+  /**
+   * 添加
+   */
   @POST
-  @ApiOperation("添加")
   public Response add(MessageReq req,
                       @Context Admin admin) {
     Comment comment = Comment.builder()
@@ -81,9 +82,11 @@ public class AdminMessageResource extends AbstractResource {
     return responseOf();
   }
 
+  /**
+   * 更新
+   */
   @PUT
   @Path("/${id}")
-  @ApiOperation("更新")
   public Response update(@PathParam("id") String id, MessageReq req,
                          @Context Admin admin) {
     Comment comment = mapper.findById(id);
@@ -97,18 +100,22 @@ public class AdminMessageResource extends AbstractResource {
     private String content;
   }
 
+  /**
+   * 删除
+   */
   @DELETE
   @Path("/${id}")
-  @ApiOperation("删除")
   public Response delete(@PathParam("id") String id,
                          @Context Admin admin) {
     mapper.deleteById(id);
     return responseOf();
   }
 
+  /**
+   * 发送邮件
+   */
   @POST
   @Path("/email")
-  @ApiOperation("发送邮件")
   public Response email(EmailReq req, @Context Admin admin) {
     Set<String> emails = Stream.of(req.getTo().replaceAll(" ", "").split(",")).collect(Collectors.toSet());
     if (emails.size() == 1 && emails.iterator().next().equals("@all")) {

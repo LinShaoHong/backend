@@ -12,8 +12,6 @@ import com.github.sun.qm.Girl;
 import com.github.sun.qm.GirlMapper;
 import com.github.sun.qm.StorageService;
 import com.github.sun.qm.ViewStatMapper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.Builder;
 import lombok.Data;
 
@@ -32,7 +30,6 @@ import java.util.stream.Stream;
 @Path("/v1/qm/admin/girl")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Admin Girl Resource")
 public class AdminGirlResource extends AbstractResource {
   private final GirlMapper mapper;
   private final ViewStatMapper viewStatMapper;
@@ -52,8 +49,10 @@ public class AdminGirlResource extends AbstractResource {
     this.factory = factory;
   }
 
+  /**
+   * 分页获取
+   */
   @GET
-  @ApiOperation("分页获取")
   public PageResponse<ObjectNode> paged(@QueryParam("id") String id,
                                         @QueryParam("type") String type,
                                         @QueryParam("city") String city,
@@ -89,8 +88,10 @@ public class AdminGirlResource extends AbstractResource {
     return responseOf(total, Collections.emptyList());
   }
 
+  /**
+   * 添加
+   */
   @POST
-  @ApiOperation("添加")
   public Response create(@Valid @NotNull(message = "缺少实体") Girl v,
                          @Context Admin admin) {
     v.setId(IdGenerator.next());
@@ -125,17 +126,21 @@ public class AdminGirlResource extends AbstractResource {
     }
   }
 
+  /**
+   * 详情
+   */
   @GET
   @Path("/${id}")
-  @ApiOperation("详情")
   public SingleResponse<Girl> create(@PathParam("id") String id,
                                      @Context Admin admin) {
     return responseOf(mapper.findById(id));
   }
 
+  /**
+   * 下架
+   */
   @PUT
   @Path("/unShelve/${id}")
-  @ApiOperation("下架")
   public Response unShelve(@PathParam("id") String id,
                            @Context Admin admin) {
     Girl girl = mapper.findById(id);
@@ -146,9 +151,11 @@ public class AdminGirlResource extends AbstractResource {
     return responseOf();
   }
 
+  /**
+   * 删除
+   */
   @DELETE
   @Path("/${id}")
-  @ApiOperation("删除")
   public Response delete(@PathParam("id") String id,
                          @Context Admin admin) {
     Girl girl = mapper.findById(id);
@@ -164,9 +171,11 @@ public class AdminGirlResource extends AbstractResource {
     return responseOf();
   }
 
+  /**
+   * 上课
+   */
   @PUT
   @Path("/publish/${id}")
-  @ApiOperation("上课")
   public Response publish(@PathParam("id") String id,
                           @Context Admin admin) {
     Girl girl = mapper.findById(id);
@@ -177,9 +186,11 @@ public class AdminGirlResource extends AbstractResource {
     return responseOf();
   }
 
+  /**
+   * 修改
+   */
   @PUT
   @Path("/${id}")
-  @ApiOperation("修改")
   public Response create(@PathParam("id") String id,
                          @Valid @NotNull(message = "缺少实体") Girl v,
                          @Context Admin admin) {
@@ -195,9 +206,11 @@ public class AdminGirlResource extends AbstractResource {
 
   private final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
 
+  /**
+   * 统计访问量
+   */
   @GET
   @Path("/stat")
-  @ApiOperation("统计访问量")
   public ListResponse<StatResp> statUser(@QueryParam("timeType") int timeType,
                                          @QueryParam("type") String type,
                                          @Context Admin admin) {

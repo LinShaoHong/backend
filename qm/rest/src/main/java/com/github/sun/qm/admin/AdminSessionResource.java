@@ -3,8 +3,6 @@ package com.github.sun.qm.admin;
 import com.github.sun.foundation.boot.exception.UnAuthorizedException;
 import com.github.sun.foundation.boot.utility.AES;
 import com.github.sun.foundation.rest.AbstractResource;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import org.springframework.core.env.Environment;
 
@@ -20,7 +18,6 @@ import javax.ws.rs.core.MediaType;
 @Path("/v1/qm/admin/session")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Admin Session Resource")
 public class AdminSessionResource extends AbstractResource {
   private final String secretKey;
   private final String username;
@@ -33,9 +30,11 @@ public class AdminSessionResource extends AbstractResource {
     this.secretKey = env.getProperty("base64.secret.key");
   }
 
+  /**
+   * 登录
+   */
   @POST
   @Path("/login")
-  @ApiOperation("登录")
   public SingleResponse<String> login(@Valid @NotNull(message = "require body") LoginReq req) {
     if (username.equals(req.getUsername()) && password.equals(req.getPassword())) {
       return responseOf(AES.encrypt(username + ":" + password, secretKey));

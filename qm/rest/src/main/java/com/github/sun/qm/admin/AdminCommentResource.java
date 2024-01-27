@@ -8,8 +8,6 @@ import com.github.sun.qm.Comment;
 import com.github.sun.qm.CommentMapper;
 import com.github.sun.qm.GirlMapper;
 import com.github.sun.qm.UserMapper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 
 import javax.inject.Inject;
@@ -26,7 +24,6 @@ import java.util.stream.Stream;
 @Path("/v1/qm/admin/comment")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Admin Comment Resource")
 public class AdminCommentResource extends AdminBasicResource {
   private final CommentMapper mapper;
   private final SqlBuilder.Factory factory;
@@ -41,8 +38,10 @@ public class AdminCommentResource extends AdminBasicResource {
     this.factory = factory;
   }
 
+  /**
+   * 分页获取评论
+   */
   @GET
-  @ApiOperation("分页获取评论")
   public PageResponse<ObjectNode> paged(@QueryParam("id") String id,
                                         @QueryParam("commentatorName") String commentatorName,
                                         @QueryParam("replierName") String replierName,
@@ -89,26 +88,32 @@ public class AdminCommentResource extends AdminBasicResource {
     return responseOf(total, Collections.emptyList());
   }
 
+  /**
+   * 删除
+   */
   @DELETE
   @Path("/${id}")
-  @ApiOperation("删除")
   public Response delete(@PathParam("id") String id,
                          @Context Admin admin) {
     mapper.deleteById(id);
     return responseOf();
   }
 
+  /**
+   * 禁开
+   */
   @PUT
   @Path("/private/${id}")
-  @ApiOperation("禁开")
   public Response privately(@PathParam("id") String id,
                             @Context Admin admin) {
     mapper.publicity(id);
     return responseOf();
   }
 
+  /**
+   * 通知
+   */
   @POST
-  @ApiOperation("通知")
   public Response notice(NoticeReq req, @Context Admin admin) {
     Set<String> userIds = Stream.of(req.getUsername().replaceAll(" ", "").split(",")).collect(Collectors.toSet());
     if (userIds.size() == 1 && userIds.iterator().next().equals("@all")) {

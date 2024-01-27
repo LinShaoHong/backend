@@ -3,8 +3,6 @@ package com.github.sun.qm;
 import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.foundation.sql.IdGenerator;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +23,6 @@ import java.util.stream.Collectors;
 @Path("/v1/qm/promotion")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Promotion Resource")
 public class PromotionResource extends AbstractResource {
   private final PromotionMapper mapper;
 
@@ -37,8 +34,10 @@ public class PromotionResource extends AbstractResource {
     this.mapper = mapper;
   }
 
+  /**
+   * 查询推广记录
+   */
   @GET
-  @ApiOperation("查询推广记录")
   public ListResponse<PromotionRes> get(@Context User user) {
     List<Promotion> list = mapper.findByUserId(user.getId());
     return responseOf(list.stream().map(v -> PromotionRes.builder()
@@ -49,9 +48,11 @@ public class PromotionResource extends AbstractResource {
       .build()).collect(Collectors.toList()));
   }
 
+  /**
+   * 获取推广文案
+   */
   @GET
   @Path("/treatment")
-  @ApiOperation("获取推广文案")
   public SingleResponse<String> getTreatment(@Context User user) {
     return responseOf(env.getProperty("promotion.treatment"));
   }
@@ -67,8 +68,10 @@ public class PromotionResource extends AbstractResource {
     private boolean passed;
   }
 
+  /**
+   * 提交推广
+   */
   @POST
-  @ApiOperation("提交推广")
   public Response create(@Valid @NotNull(message = "缺少实体") PromotionReq req,
                          @Context User user) {
     Promotion p = Promotion.builder()

@@ -2,8 +2,6 @@ package com.github.sun.qm;
 
 import com.github.sun.foundation.boot.exception.Message;
 import com.github.sun.foundation.rest.AbstractResource;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -21,7 +19,6 @@ import java.io.InputStream;
 @Path("/v1/qm/storage")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Storage Resource")
 public class StorageResource extends AbstractResource {
   private final StorageService storageService;
 
@@ -30,10 +27,12 @@ public class StorageResource extends AbstractResource {
     this.storageService = storageService;
   }
 
+  /**
+   * 上传文件
+   */
   @POST
   @Path("/upload")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
-  @ApiOperation("上传文件")
   public SingleResponse<String> upload(@FormDataParam("file") InputStream in,
                                        @FormDataParam("file") FormDataContentDisposition meta,
                                        @Context User user) {
@@ -46,8 +45,10 @@ public class StorageResource extends AbstractResource {
     }
   }
 
+  /**
+   * 删除文件
+   */
   @DELETE
-  @ApiOperation("删除文件")
   public Response delete(@Valid DeleteReq path) {
     final String p = path.getPath();
     if (p != null && !p.isEmpty()) {
