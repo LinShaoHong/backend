@@ -15,17 +15,19 @@ public class ConfigResource extends AbstractResource {
   @GET
   public SingleResponse<Config> get(@QueryParam("code") String code) {
     return responseOf(Config.builder()
+      .cardCount(5)
       .playLimit(5)
       .price("2.99")
-      .willPrice("19.99")
+      .payText("<div>aaaaa<div>")
       .build());
   }
 
   @Data
   @Builder
   public static class Config {
+    private int cardCount;
     private int playLimit;
     private String price;
-    private String willPrice;
+    private String payText;
   }
 }

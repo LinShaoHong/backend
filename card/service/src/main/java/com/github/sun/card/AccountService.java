@@ -1,6 +1,7 @@
 package com.github.sun.card;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.sun.foundation.boot.utility.JSON;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -20,7 +21,7 @@ public class AccountService {
   private final Client client;
 
   public JsonNode wxLogin(String code) {
-    return client
+    String resp = client
       .target(WX_URI)
       .queryParam("appid", wxAppId)
       .queryParam("secret", wxSecret)
@@ -28,6 +29,7 @@ public class AccountService {
       .queryParam("grant_type", "authorization_code")
       .request()
       .get()
-      .readEntity(JsonNode.class);
+      .readEntity(String.class);
+    return JSON.asJsonNode(resp);
   }
 }

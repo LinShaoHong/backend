@@ -2,6 +2,8 @@ package com.github.sun.card;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.rest.AbstractResource;
+import lombok.Builder;
+import lombok.Data;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -25,5 +27,34 @@ public class AccountResource extends AbstractResource {
   @Path("/wx/login")
   public SingleResponse<JsonNode> getOpenIdByCode(@QueryParam("code") String code) {
     return responseOf(service.wxLogin(code));
+  }
+
+  @GET
+  @Path("/byId")
+  public SingleResponse<UserResp> byId(@QueryParam("id") String id) {
+    return responseOf(UserResp.builder()
+      .id(id)
+      .code("code123")
+      .openId("openId123")
+      .nickname("Lins")
+      .playCount(2)
+      .build());
+  }
+
+  @GET
+  @Path("/inc")
+  public Response inc(@QueryParam("id") String id) {
+    return responseOf();
+  }
+
+  @Data
+  @Builder
+  public static class UserResp {
+    private String id;
+    private String code;
+    private String openId;
+    private String nickname;
+    private int playCount;
+    private boolean vip;
   }
 }
