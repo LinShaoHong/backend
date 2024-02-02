@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
@@ -45,6 +46,18 @@ public class AccountResource extends AbstractResource {
   @Path("/inc")
   public Response inc(@QueryParam("id") String id) {
     return responseOf();
+  }
+
+  @POST
+  @Path("/updateNickname")
+  public Response inc(@Valid UpdateNicknameReq q) {
+    return responseOf();
+  }
+
+  @Data
+  public static class UpdateNicknameReq {
+    private String id;
+    private String nickname;
   }
 
   @Data
