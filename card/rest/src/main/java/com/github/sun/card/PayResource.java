@@ -12,6 +12,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MediaType;
 
 @Path("/pay")
@@ -19,16 +20,18 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class PayResource extends AbstractResource {
   private final PaymentService service;
+  private final ContainerRequestContext ctx;
 
   @Inject
-  public PayResource(PaymentService service) {
+  public PayResource(PaymentService service, ContainerRequestContext ctx) {
     this.service = service;
+    this.ctx = ctx;
   }
 
   @POST
   @Path("/wx")
   public SingleResponse<PaymentService.PayResp> wxPay(@Valid PayReq q) {
-    return responseOf(service.wxPay(q.getUserId(), q.getAmount()));
+    return responseOf(service.wxPay(q.getUserId(), q.getAmount(), ctx));
   }
 
   @Data

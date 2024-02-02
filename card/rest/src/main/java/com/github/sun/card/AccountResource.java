@@ -1,8 +1,6 @@
 package com.github.sun.card;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.rest.AbstractResource;
-import lombok.Builder;
 import lombok.Data;
 
 import javax.inject.Inject;
@@ -21,36 +19,29 @@ public class AccountResource extends AbstractResource {
     this.service = service;
   }
 
-  /**
-   * 微信登录获取用户OpenId
-   */
   @GET
   @Path("/wx/login")
-  public SingleResponse<JsonNode> getOpenIdByCode(@QueryParam("code") String code) {
+  public SingleResponse<AccountService.UserResp> getOpenIdByCode(@QueryParam("code") String code) {
     return responseOf(service.wxLogin(code));
   }
 
   @GET
   @Path("/byId")
-  public SingleResponse<UserResp> byId(@QueryParam("id") String id) {
-    return responseOf(UserResp.builder()
-      .id(id)
-      .code("code123")
-      .openId("openId123")
-      .nickname("Lins")
-      .playCount(2)
-      .build());
+  public SingleResponse<AccountService.UserResp> byId(@QueryParam("id") String id) {
+    return responseOf(service.byId(id));
   }
 
   @GET
   @Path("/inc")
   public Response inc(@QueryParam("id") String id) {
+    service.inc(id);
     return responseOf();
   }
 
   @POST
   @Path("/updateNickname")
-  public Response inc(@Valid UpdateNicknameReq q) {
+  public Response updateNickname(@Valid UpdateNicknameReq q) {
+    service.updateNickname(q.getId(), q.getNickname());
     return responseOf();
   }
 
@@ -58,16 +49,5 @@ public class AccountResource extends AbstractResource {
   public static class UpdateNicknameReq {
     private String id;
     private String nickname;
-  }
-
-  @Data
-  @Builder
-  public static class UserResp {
-    private String id;
-    private String code;
-    private String openId;
-    private String nickname;
-    private int playCount;
-    private boolean vip;
   }
 }
