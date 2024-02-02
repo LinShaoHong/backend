@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 @Mapper
-public interface UserMapper extends CompositeMapper<CardUser> {
+public interface CardUserMapper extends CompositeMapper<CardUser> {
   @Select("select * from card_user where openId=#{openId}")
   CardUser byOpenId(@Param("openId") String openId);
 

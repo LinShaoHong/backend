@@ -33,7 +33,7 @@ public class PaymentService {
   private String wxKeyPath;
   @Value("${wx.pay.notifyUrl}")
   private String wxNotifyUrl;
-  private final UserMapper mapper;
+  private final CardUserMapper mapper;
 
   public PayResp wxPay(String userId, String amount, ContainerRequestContext ctx) {
     CardUser user = mapper.findById(userId);

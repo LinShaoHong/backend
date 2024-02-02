@@ -19,11 +19,11 @@ import java.util.List;
 @Path("/config")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ConfigResource extends AbstractResource {
+public class CardConfigResource extends AbstractResource {
   private final Config config;
 
   @Inject
-  public ConfigResource(Config config) {
+  public CardConfigResource(Config config) {
     this.config = config;
   }
 

@@ -24,7 +24,7 @@ public class AccountService {
   @Value("${wx.secret}")
   private String wxSecret;
   private final Client client;
-  private final UserMapper mapper;
+  private final CardUserMapper mapper;
 
   public UserResp wxLogin(String code) {
     String resp = client

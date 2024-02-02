@@ -11,11 +11,11 @@ import javax.ws.rs.core.MediaType;
 @Path("/account")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class AccountResource extends AbstractResource {
+public class CardAccountResource extends AbstractResource {
   private final AccountService service;
 
   @Inject
-  public AccountResource(AccountService service) {
+  public CardAccountResource(AccountService service) {
     this.service = service;
   }
 
