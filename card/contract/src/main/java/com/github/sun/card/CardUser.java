@@ -17,10 +17,13 @@ import java.util.Date;
 @AllArgsConstructor
 @NamingStrategy
 @Table(name = "card_user")
-public class User {
+public class CardUser {
   @Id
   private String id;
   private String openId;
+  private String nickname;
+  private int playCount;
+  private boolean vip;
   @Transient
   private Date createTime;
   @Transient

@@ -1,53 +1,62 @@
 package com.github.sun.card;
 
 import com.github.sun.foundation.rest.AbstractResource;
-import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import javax.ws.rs.*;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Path("/config")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class ConfigResource extends AbstractResource {
-  @GET
-  public SingleResponse<Config> get(@QueryParam("code") String code) {
-    Banner banner1 = Banner.builder()
-      .src("/static/banner/1.jpg")
-      .qr("/static/qr.jpg")
-      .title("公众号二维码")
-      .label("长按识别二维码，打开公众号")
-      .build();
-    Banner banner2 = Banner.builder()
-      .src("/static/banner/2.jpg")
-      .qr("/static/qr.jpg")
-      .title("公众号二维码")
-      .label("长按识别二维码，打开公众号")
-      .build();
-    return responseOf(Config.builder()
-      .cardCount(5)
-      .playLimit(5)
-      .price("2.99")
-      .payText("<div>aaaaa<div>")
-      .banners(Arrays.asList(banner1,banner2))
-      .build());
+  private final Config config;
+
+  @Inject
+  public ConfigResource(Config config) {
+    this.config = config;
   }
 
+  @GET
+  public SingleResponse<Config> get() {
+    return responseOf(config);
+  }
+
+  @Slf4j
+  @Configuration
+  public static class CardConfiguration {
+    @Bean
+    @ConfigurationProperties("config")
+    public Config config() {
+      return new Config();
+    }
+  }
+
+
   @Data
-  @Builder
   public static class Config {
     private int cardCount;
     private int playLimit;
     private String price;
     private String payText;
     private List<Banner> banners;
+
+    public List<Banner> getBanners() {
+      return banners == null ? Collections.emptyList() : banners;
+    }
   }
 
   @Data
-  @Builder
   public static class Banner {
     private String src;
     private String qr;
