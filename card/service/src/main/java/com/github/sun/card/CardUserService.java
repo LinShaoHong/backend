@@ -49,6 +49,7 @@ public class CardUserService {
           .id(IdGenerator.next())
           .code("wx_" + code)
           .avatar(1)
+          .vip(0)
           .nickname("微信用户-" + code)
           .openId(n.asText())
           .build();
@@ -66,6 +67,11 @@ public class CardUserService {
 
   public void inc(String id) {
     mapper.inc(id);
+  }
+
+  @Transactional
+  public void vip(String id, int vip) {
+    mapper.updateVip(id, vip);
   }
 
   @Transactional
@@ -87,7 +93,7 @@ public class CardUserService {
     private int avatar;
     private String nickname;
     private int playCount;
-    private boolean vip;
+    private int vip;
 
     public static UserResp from(CardUser user) {
       return UserResp.builder()
@@ -97,7 +103,7 @@ public class CardUserService {
         .avatar(user.getAvatar())
         .nickname(user.getNickname())
         .playCount(user.getPlayCount())
-        .vip(user.isVip())
+        .vip(user.getVip())
         .build();
     }
   }
