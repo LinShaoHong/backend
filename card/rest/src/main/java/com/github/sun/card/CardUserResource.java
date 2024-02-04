@@ -31,13 +31,6 @@ public class CardUserResource extends AbstractResource {
     return responseOf(service.byId(id));
   }
 
-  @POST
-  @Path("/updateVip")
-  public Response updateVip(@Valid UpdateVipReq q) {
-    service.vip(q.getId(), q.getVip());
-    return responseOf();
-  }
-
   @GET
   @Path("/inc")
   public Response inc(@QueryParam("id") String id) {

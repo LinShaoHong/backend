@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import java.math.BigDecimal;
@@ -35,7 +36,8 @@ public class CardPayService {
   private String wxNotifyUrl;
   private final CardUserMapper mapper;
 
-  public PayResp wxPay(String userId, String amount, ContainerRequestContext ctx) {
+  @Transactional
+  public PayResp wxPay(String userId, String amount, int vip, ContainerRequestContext ctx) {
     CardUser user = mapper.findById(userId);
     if (user == null) {
       throw new NotFoundException("用户不存在");
@@ -55,6 +57,7 @@ public class CardPayService {
     } catch (WxPayException ex) {
       throw new RuntimeException("支付失败");
     }
+    String prepayId = result.getPrepayId();
     long time = System.currentTimeMillis();
     String timeStamp = Long.toString(time / 1000);
     String nonceStr = String.valueOf(time);
@@ -69,6 +72,8 @@ public class CardPayService {
     map.put("package", pkg);
     String paySign = SignUtils.createSign(map, signType, wxMchKey, new String[]{});
 
+    user.setPrepayId(prepayId);
+    user.setVip(vip);
     return PayResp.builder()
       .timeStamp(timeStamp)
       .nonceStr(nonceStr)

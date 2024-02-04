@@ -70,11 +70,6 @@ public class CardUserService {
   }
 
   @Transactional
-  public void vip(String id, int vip) {
-    mapper.updateVip(id, vip);
-  }
-
-  @Transactional
   public void updateNickname(String id, String nickname) {
     mapper.updateNickname(id, nickname);
   }

@@ -26,6 +26,7 @@ public class CardUser {
   private String nickname;
   private int playCount;
   private int vip;
+  private String prepayId;
   @Transient
   private Date createTime;
   @Transient
