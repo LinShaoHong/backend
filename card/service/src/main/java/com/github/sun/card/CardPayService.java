@@ -22,7 +22,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class PaymentService {
+public class CardPayService {
   @Value("${wx.appId}")
   private String wxAppId;
   @Value("${wx.pay.mchId}")

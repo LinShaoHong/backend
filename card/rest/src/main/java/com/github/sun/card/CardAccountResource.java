@@ -12,22 +12,22 @@ import javax.ws.rs.core.MediaType;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class CardAccountResource extends AbstractResource {
-  private final AccountService service;
+  private final CardUserService service;
 
   @Inject
-  public CardAccountResource(AccountService service) {
+  public CardAccountResource(CardUserService service) {
     this.service = service;
   }
 
   @GET
   @Path("/wx/login")
-  public SingleResponse<AccountService.UserResp> getOpenIdByCode(@QueryParam("code") String code) {
+  public SingleResponse<CardUserService.UserResp> getOpenIdByCode(@QueryParam("code") String code) {
     return responseOf(service.wxLogin(code));
   }
 
   @GET
   @Path("/byId")
-  public SingleResponse<AccountService.UserResp> byId(@QueryParam("id") String id) {
+  public SingleResponse<CardUserService.UserResp> byId(@QueryParam("id") String id) {
     return responseOf(service.byId(id));
   }
 
@@ -45,9 +45,22 @@ public class CardAccountResource extends AbstractResource {
     return responseOf();
   }
 
+  @POST
+  @Path("/updateAvatar")
+  public Response updateAvatar(@Valid UpdateAvatarReq q) {
+    service.updateAvatar(q.getId(), q.getAvatar());
+    return responseOf();
+  }
+
   @Data
   public static class UpdateNicknameReq {
     private String id;
     private String nickname;
+  }
+
+  @Data
+  public static class UpdateAvatarReq {
+    private String id;
+    private int avatar;
   }
 }

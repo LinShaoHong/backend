@@ -16,4 +16,7 @@ public interface CardUserMapper extends CompositeMapper<CardUser> {
 
   @Update("update card_user set nickname=#{nickname} where id=#{id}")
   void updateNickname(@Param("id") String id, @Param("nickname") String nickname);
+
+  @Update("update card_user set avatar=#{avatar} where id=#{id}")
+  void updateAvatar(@Param("id") String id, @Param("avatar") int avatar);
 }

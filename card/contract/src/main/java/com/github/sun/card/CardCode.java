@@ -8,26 +8,16 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-import java.util.Date;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "card_user")
-public class CardUser {
+@Table(name = "card_code")
+public class CardCode {
   @Id
   private String id;
-  private String code;
-  private String openId;
-  private int avatar;
-  private String nickname;
-  private int playCount;
-  private boolean vip;
-  @Transient
-  private Date createTime;
-  @Transient
-  private Date updateTime;
+  private String type;
+  private Long code;
 }

@@ -19,18 +19,18 @@ import javax.ws.rs.core.MediaType;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class CardPayResource extends AbstractResource {
-  private final PaymentService service;
+  private final CardPayService service;
   private final ContainerRequestContext ctx;
 
   @Inject
-  public CardPayResource(PaymentService service, ContainerRequestContext ctx) {
+  public CardPayResource(CardPayService service, ContainerRequestContext ctx) {
     this.service = service;
     this.ctx = ctx;
   }
 
   @POST
   @Path("/wx")
-  public SingleResponse<PaymentService.PayResp> wxPay(@Valid PayReq q) {
+  public SingleResponse<CardPayService.PayResp> wxPay(@Valid PayReq q) {
     return responseOf(service.wxPay(q.getUserId(), q.getAmount(), ctx));
   }
 

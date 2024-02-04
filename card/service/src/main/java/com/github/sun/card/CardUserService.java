@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.ws.rs.BadRequestException;
@@ -17,7 +18,7 @@ import javax.ws.rs.client.Client;
 @Service
 @RefreshScope
 @RequiredArgsConstructor
-public class AccountService {
+public class CardUserService {
   private static final String WX_URI = "https://api.weixin.qq.com/sns/jscode2session";
   @Value("${wx.appId}")
   private String wxAppId;
@@ -25,6 +26,7 @@ public class AccountService {
   private String wxSecret;
   private final Client client;
   private final CardUserMapper mapper;
+  private final CardCodeService codeService;
 
   public UserResp wxLogin(String code) {
     String resp = client
@@ -42,9 +44,12 @@ public class AccountService {
       String openId = n.asText();
       CardUser user = mapper.byOpenId(openId);
       if (user == null) {
+        code = codeService.genCode("USER");
         user = CardUser.builder()
           .id(IdGenerator.next())
-          .nickname("微信用户")
+          .code("wx_" + code)
+          .avatar(1)
+          .nickname("微信用户-" + code)
           .openId(n.asText())
           .build();
         mapper.insert(user);
@@ -63,15 +68,23 @@ public class AccountService {
     mapper.inc(id);
   }
 
+  @Transactional
   public void updateNickname(String id, String nickname) {
     mapper.updateNickname(id, nickname);
+  }
+
+  @Transactional
+  public void updateAvatar(String id, int avatar) {
+    mapper.updateAvatar(id, avatar);
   }
 
   @Data
   @Builder
   public static class UserResp {
     private String id;
+    private String code;
     private String openId;
+    private int avatar;
     private String nickname;
     private int playCount;
     private boolean vip;
@@ -79,7 +92,9 @@ public class AccountService {
     public static UserResp from(CardUser user) {
       return UserResp.builder()
         .id(user.getId())
+        .code(user.getCode())
         .openId(user.getOpenId())
+        .avatar(user.getAvatar())
         .nickname(user.getNickname())
         .playCount(user.getPlayCount())
         .vip(user.isVip())
