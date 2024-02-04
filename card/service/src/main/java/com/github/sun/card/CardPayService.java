@@ -42,10 +42,9 @@ public class CardPayService {
     if (user == null) {
       throw new NotFoundException("用户不存在");
     }
-    String order = "";
     WxPayUnifiedOrderRequest request = WxPayUnifiedOrderRequest.newBuilder()
       .openid(user.getOpenId())
-      .outTradeNo(order)
+      .outTradeNo(userId)
       .totalFee(new BigDecimal(amount).multiply(new BigDecimal(100)).intValue())
       .body("订单信息")
       .spbillCreateIp(IPs.getRemoteIP(ctx))

@@ -14,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MediaType;
+import java.util.Map;
 
 @Path("/pay")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -32,6 +33,12 @@ public class CardPayResource extends AbstractResource {
   @Path("/wx")
   public SingleResponse<CardPayService.PayResp> wxPay(@Valid PayReq q) {
     return responseOf(service.wxPay(q.getUserId(), q.getAmount(), q.getVip(), ctx));
+  }
+
+  @POST
+  @Path("/wx/notify")
+  public String wxPayNotify(Map<String, Object> map) {
+    return "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
   }
 
   @Data
