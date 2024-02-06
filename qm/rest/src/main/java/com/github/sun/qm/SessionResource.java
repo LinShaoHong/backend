@@ -8,6 +8,7 @@ import com.github.sun.qm.utility.Locations;
 import lombok.Data;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -26,15 +27,14 @@ import static com.github.sun.qm.SessionService.TOKEN_NAME;
 public class SessionResource extends AbstractResource {
   private final UserMapper mapper;
   private final SessionService service;
-  private final ContainerRequestContext request;
+  @Context
+  private HttpServletRequest request;
 
   @Inject
   public SessionResource(UserMapper mapper,
-                         SessionService service,
-                         ContainerRequestContext request) {
+                         SessionService service) {
     this.mapper = mapper;
     this.service = service;
-    this.request = request;
   }
 
   /**

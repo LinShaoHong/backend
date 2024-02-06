@@ -7,12 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 @Path("/pay")
@@ -20,12 +21,12 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class CardPayResource extends AbstractResource {
   private final CardPayService service;
-  private final ContainerRequestContext ctx;
+  @Context
+  private HttpServletRequest ctx;
 
   @Inject
-  public CardPayResource(CardPayService service, ContainerRequestContext ctx) {
+  public CardPayResource(CardPayService service) {
     this.service = service;
-    this.ctx = ctx;
   }
 
   @POST

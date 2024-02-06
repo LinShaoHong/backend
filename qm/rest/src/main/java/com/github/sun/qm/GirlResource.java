@@ -16,10 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.math.BigDecimal;
@@ -43,7 +43,8 @@ public class GirlResource extends AbstractResource {
   private final CollectionMapper collectionMapper;
   private final FootprintService footprintService;
   private final ViewStatMapper statMapper;
-  private final ContainerRequestContext request;
+  @Context
+  private HttpServletRequest request;
 
   @Inject
   public GirlResource(GirlMapper mapper,
@@ -53,8 +54,7 @@ public class GirlResource extends AbstractResource {
                       @Named("mysql") SqlBuilder.Factory factory,
                       CollectionMapper collectionMapper,
                       FootprintService footprintService,
-                      ViewStatMapper statMapper,
-                      ContainerRequestContext request) {
+                      ViewStatMapper statMapper) {
     this.mapper = mapper;
     this.categoryMapper = categoryMapper;
     this.userMapper = userMapper;
@@ -63,7 +63,6 @@ public class GirlResource extends AbstractResource {
     this.collectionMapper = collectionMapper;
     this.footprintService = footprintService;
     this.statMapper = statMapper;
-    this.request = request;
   }
 
   /**
