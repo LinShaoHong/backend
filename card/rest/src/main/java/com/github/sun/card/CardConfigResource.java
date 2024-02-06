@@ -50,6 +50,8 @@ public class CardConfigResource extends AbstractResource {
     private int playLimit;
     private String price;
     private String payText;
+    private String shareTitle;
+    private String logo;
     private List<Banner> banners;
 
     public List<Banner> getBanners() {

@@ -7,13 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 @Path("/pay")
@@ -21,8 +19,6 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class CardPayResource extends AbstractResource {
   private final CardPayService service;
-  @Context
-  private HttpServletRequest ctx;
 
   @Inject
   public CardPayResource(CardPayService service) {
@@ -32,7 +28,7 @@ public class CardPayResource extends AbstractResource {
   @POST
   @Path("/wx")
   public SingleResponse<CardPayService.PayResp> wxPay(@Valid PayReq q) {
-    return responseOf(service.wxPay(q.getUserId(), q.getAmount(), q.getVip(), ctx));
+    return responseOf(service.wxPay(q.getUserId(), q.getAmount()));
   }
 
   @POST
@@ -48,6 +44,5 @@ public class CardPayResource extends AbstractResource {
   public static class PayReq {
     private String userId;
     private String amount;
-    private int vip;
   }
 }

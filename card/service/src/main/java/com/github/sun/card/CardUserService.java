@@ -1,6 +1,7 @@
 package com.github.sun.card;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.sun.foundation.boot.exception.NotFoundException;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.sql.IdGenerator;
 import lombok.Builder;
@@ -14,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Client;
+import java.util.Objects;
 
 @Service
 @RefreshScope
@@ -65,8 +67,21 @@ public class CardUserService {
     return UserResp.from(user);
   }
 
+  @Transactional
   public void inc(String id) {
     mapper.inc(id);
+  }
+
+  @Transactional
+  public void vip(String id, String prepayId, int vip) {
+    CardUser user = mapper.findById(id);
+    if (user == null) {
+      throw new NotFoundException("找不到用户");
+    }
+    if (!Objects.equals(prepayId, user.getPrepayId())) {
+      throw new BadRequestException("用户未支付");
+    }
+    mapper.vip(id, vip);
   }
 
   @Transactional

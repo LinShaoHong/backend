@@ -2,12 +2,10 @@ package com.github.sun.card;
 
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderV3Request;
 import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderV3Result;
-import com.github.binarywang.wxpay.bean.result.enums.TradeTypeEnum;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
-import com.github.binarywang.wxpay.util.SignUtils;
 import com.github.sun.foundation.boot.exception.NotFoundException;
 import lombok.Builder;
 import lombok.Data;
@@ -16,14 +14,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import static com.github.binarywang.wxpay.bean.result.enums.TradeTypeEnum.JSAPI;
 
 @Service
 @RequiredArgsConstructor
 public class CardPayService {
+  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyMMddHHmmss");
+
   @Value("${wx.appId}")
   private String wxAppId;
   @Value("${wx.pay.mchId}")
@@ -39,13 +40,14 @@ public class CardPayService {
   private final CardUserMapper mapper;
 
   @Transactional
-  public PayResp wxPay(String userId, String amount, int vip, HttpServletRequest ctx) {
+  public PayResp wxPay(String userId, String amount) {
     CardUser user = mapper.findById(userId);
     if (user == null) {
       throw new NotFoundException("用户不存在");
     }
     WxPayUnifiedOrderV3Request request = new WxPayUnifiedOrderV3Request();
-    request.setOutTradeNo(user.getOpenId());
+    String date = FORMATTER.format(new Date());
+    request.setOutTradeNo((date + userId.hashCode()).replace("-", ""));
     WxPayUnifiedOrderV3Request.Amount fen = new WxPayUnifiedOrderV3Request.Amount();
     fen.setTotal(new BigDecimal(amount).multiply(new BigDecimal(100)).intValue());
     request.setAmount(fen);
@@ -55,35 +57,22 @@ public class CardPayService {
     payer.setOpenid(user.getOpenId());
     request.setPayer(payer);
 
-    WxPayUnifiedOrderV3Result result;
+    WxPayUnifiedOrderV3Result.JsapiResult jsapi;
     try {
-      result = newWxPayService().unifiedOrderV3(TradeTypeEnum.JSAPI, request);
+      jsapi = newWxPayService().createOrderV3(JSAPI, request);
     } catch (WxPayException ex) {
       throw new RuntimeException("支付失败");
     }
-    String prepayId = result.getPrepayId();
-    long time = System.currentTimeMillis();
-    String timeStamp = Long.toString(time / 1000);
-    String nonceStr = String.valueOf(time);
-    String pkg = "prepay_id" + result.getPrepayId();
-    String signType = "MD5";
 
-    Map<String, String> map = new HashMap<>();
-    map.put("appId", wxAppId);
-    map.put("timeStamp", timeStamp);
-    map.put("nonceStr", nonceStr);
-    map.put("signType", signType);
-    map.put("package", pkg);
-    String paySign = SignUtils.createSign(map, signType, wxApi3Key, new String[]{});
-
+    String prepayId = jsapi.getPackageValue();
     user.setPrepayId(prepayId);
-    user.setVip(vip);
+    mapper.update(user);
     return PayResp.builder()
-      .timeStamp(timeStamp)
-      .nonceStr(nonceStr)
-      .pkg(pkg)
-      .paySign(paySign)
-      .signType(signType)
+      .timeStamp(jsapi.getTimeStamp())
+      .nonceStr(jsapi.getNonceStr())
+      .pkg(prepayId)
+      .paySign(jsapi.getPaySign())
+      .signType(jsapi.getSignType())
       .build();
   }
 

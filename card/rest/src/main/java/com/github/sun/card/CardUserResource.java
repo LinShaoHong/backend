@@ -39,6 +39,13 @@ public class CardUserResource extends AbstractResource {
   }
 
   @POST
+  @Path("/vip")
+  public Response vip(@Valid UpdateVipReq q) {
+    service.vip(q.getId(), q.getPrepayId(), q.getVip());
+    return responseOf();
+  }
+
+  @POST
   @Path("/updateNickname")
   public Response updateNickname(@Valid UpdateNicknameReq q) {
     service.updateNickname(q.getId(), q.getNickname());
@@ -55,6 +62,7 @@ public class CardUserResource extends AbstractResource {
   @Data
   public static class UpdateVipReq {
     private String id;
+    private String prepayId;
     private int vip;
   }
 
