@@ -2,10 +2,10 @@ spring:
   cloud:
     nacos:
       username: nacos
-      password: Lins@0411
+      password: nacos123
       config:
-        server-addr: 116.62.154.118:8848
+        server-addr: 127.0.0.1:8848
         prefix: card
         file-extension: yaml
       discovery:
-        server-addr: 116.62.154.118:8848
+        server-addr: 127.0.0.1:8848
