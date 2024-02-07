@@ -13,9 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.core.Context;
 import java.util.Objects;
+import java.util.Random;
 
 @Service
 @RefreshScope
@@ -29,6 +33,8 @@ public class CardUserService {
   private final Client client;
   private final CardUserMapper mapper;
   private final CardCodeService codeService;
+  @Context
+  private HttpServletRequest request;
 
   public UserResp wxLogin(String code) {
     String resp = client
@@ -50,7 +56,7 @@ public class CardUserService {
         user = CardUser.builder()
           .id(IdGenerator.next())
           .code("wx_" + code)
-          .avatar(1)
+          .avatar(new Random().nextInt(40) + 1)
           .vip(0)
           .nickname("微信用户-" + code)
           .openId(n.asText())
