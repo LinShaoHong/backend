@@ -1,11 +1,15 @@
 package com.github.sun.card;
 
+import com.github.sun.foundation.boot.utility.IPs;
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.foundation.rest.Locations;
 import lombok.Data;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 @Path("/account")
@@ -13,6 +17,8 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class CardUserResource extends AbstractResource {
   private final CardUserService service;
+  @Context
+  private HttpServletRequest request;
 
   @Inject
   public CardUserResource(CardUserService service) {
@@ -22,7 +28,9 @@ public class CardUserResource extends AbstractResource {
   @GET
   @Path("/wx/login")
   public SingleResponse<CardUserService.UserResp> getOpenIdByCode(@QueryParam("code") String code) {
-    return responseOf(service.wxLogin(code));
+    String ip = IPs.getRemoteIP(request);
+    String location = Locations.fromIp(ip);
+    return responseOf(service.wxLogin(code, location));
   }
 
   @GET

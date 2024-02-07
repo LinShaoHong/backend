@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Client;
@@ -33,10 +32,9 @@ public class CardUserService {
   private final Client client;
   private final CardUserMapper mapper;
   private final CardCodeService codeService;
-  @Context
-  private HttpServletRequest request;
 
-  public UserResp wxLogin(String code) {
+  @Transactional
+  public UserResp wxLogin(String code, String location) {
     String resp = client
       .target(WX_URI)
       .queryParam("appid", wxAppId)
@@ -60,6 +58,7 @@ public class CardUserService {
           .vip(0)
           .nickname("微信用户-" + code)
           .openId(n.asText())
+          .location(location)
           .build();
         mapper.insert(user);
       }

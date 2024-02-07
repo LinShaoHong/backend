@@ -3,8 +3,8 @@ package com.github.sun.qm;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.sun.foundation.boot.utility.IPs;
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.foundation.rest.Locations;
 import com.github.sun.qm.resolver.Session;
-import com.github.sun.qm.utility.Locations;
 import lombok.Data;
 
 import javax.inject.Inject;
@@ -14,7 +14,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
