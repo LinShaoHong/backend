@@ -30,7 +30,7 @@ public class CardUserResource extends AbstractResource {
   public SingleResponse<CardUserService.UserResp> getOpenIdByCode(@QueryParam("code") String code) {
     String ip = IPs.getRemoteIP(request);
     String location = Locations.fromIp(ip);
-    return responseOf(service.wxLogin(code, location));
+    return responseOf(service.wxLogin(code, ip, location));
   }
 
   @GET
