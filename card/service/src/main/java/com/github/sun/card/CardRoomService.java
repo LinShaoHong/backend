@@ -346,12 +346,12 @@ public class CardRoomService {
       }
       if (!clients.isEmpty()) {
         if (player == null) {
-          CardUser user = userMapper.findById(holder.clients.get(0).getUserId());
+          CardUser user = userMapper.findById(clients.get(0).getUserId());
           player = Player.from(mainUserId, user);
         } else {
           String playerId = player.getUserId();
-          if (holder.clients.stream().noneMatch(v -> Objects.equals(v.getUserId(), playerId))) {
-            CardUser user = userMapper.findById(holder.clients.get(0).getUserId());
+          if (clients.stream().noneMatch(v -> Objects.equals(v.getUserId(), playerId))) {
+            CardUser user = userMapper.findById(clients.get(0).getUserId());
             player = Player.from(mainUserId, user);
           }
         }
