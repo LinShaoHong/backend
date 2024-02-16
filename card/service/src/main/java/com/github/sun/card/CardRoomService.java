@@ -2,6 +2,7 @@ package com.github.sun.card;
 
 import com.github.sun.card.event.RoomEvent;
 import com.github.sun.foundation.boot.exception.NotFoundException;
+import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.sql.IdGenerator;
 import lombok.Builder;
@@ -140,6 +141,7 @@ public class CardRoomService {
         .userId(userId)
         .sink(sink)
         .sse(sse)
+        .time(new Date())
         .build());
       CardRoomService.this.join(mainUserId, userId);
     }
@@ -151,6 +153,7 @@ public class CardRoomService {
     private String userId;
     private SseEventSink sink;
     private Sse sse;
+    private Date time;
   }
 
   @Transactional
@@ -289,7 +292,19 @@ public class CardRoomService {
         .map(Client::getUserId).collect(Collectors.toSet());
       if (!userIds.isEmpty()) {
         List<CardUser> users = userMapper.findByIds(userIds);
-        return users.stream().map(v -> Player.from(mainUserId, v)).collect(Collectors.toList());
+        List<Player> players = users.stream().map(v -> Player.from(mainUserId, v))
+          .collect(Collectors.toList());
+        Map<String, Client> map = holder.clients.stream().collect(Collectors.toMap(Client::getUserId, v -> v));
+        players.sort((p1, p2) -> {
+          if (Objects.equals(mainUserId, p1.getUserId())) {
+            return -1;
+          }
+          Client client1 = map.get(p1.getUserId());
+          Client client2 = map.get(p2.getUserId());
+          return (client1 == null ? new Date() : client1.getTime())
+            .compareTo((client2 == null ? new Date() : client2.getTime()));
+        });
+        return players;
       }
     }
     return Collections.emptyList();
@@ -348,7 +363,7 @@ public class CardRoomService {
             .mainUserId(v.getMainUserId())
             .nickname(user.getNickname())
             .avatar(user.getAvatar())
-            .time(formatter.format(v.getEnterTime()))
+            .time(Dates.simpleTime(v.getEnterTime()))
             .build();
         })
         .collect(Collectors.toList());

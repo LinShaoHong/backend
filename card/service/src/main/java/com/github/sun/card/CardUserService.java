@@ -71,7 +71,7 @@ public class CardUserService {
 
   public UserResp byId(String id) {
     CardUser user = mapper.findById(id);
-    return UserResp.from(user);
+    return user == null ? null : UserResp.from(user);
   }
 
   @Transactional
