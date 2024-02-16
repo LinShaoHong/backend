@@ -218,6 +218,7 @@ public class CardRoomService {
     Holder holder = holders.get(mainUserId);
     if (holder != null) {
       List<Client> clients = new ArrayList<>(holder.clients);
+      clients.removeIf(v -> v.getSink().isClosed());
       clients.sort(Comparator.comparing(Client::getTime));
       Client main = clients.stream().filter(v -> Objects.equals(v.getUserId(), mainUserId)).findFirst().orElse(null);
       if (main != null) {
