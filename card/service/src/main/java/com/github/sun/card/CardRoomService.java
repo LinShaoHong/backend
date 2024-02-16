@@ -300,7 +300,7 @@ public class CardRoomService {
         Map<String, Client> map = holder.clients.stream().collect(Collectors.toMap(Client::getUserId, v -> v));
         players.sort((p1, p2) -> {
           if (Objects.equals(mainUserId, p1.getUserId())) {
-            return -1;
+            return -Integer.MAX_VALUE;
           }
           Client client1 = map.get(p1.getUserId());
           Client client2 = map.get(p2.getUserId());
