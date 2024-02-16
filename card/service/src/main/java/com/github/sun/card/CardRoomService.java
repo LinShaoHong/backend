@@ -218,6 +218,12 @@ public class CardRoomService {
     Holder holder = holders.get(mainUserId);
     if (holder != null) {
       List<Client> clients = new ArrayList<>(holder.clients);
+      clients.sort(Comparator.comparing(Client::getTime));
+      Client main = clients.stream().filter(v -> Objects.equals(v.getUserId(), mainUserId)).findFirst().orElse(null);
+      if (main != null) {
+        clients.remove(main);
+        clients.add(0, main);
+      }
       int j = -1;
       for (int i = 0; i < clients.size(); i++) {
         Client client = clients.get(i);
@@ -295,18 +301,21 @@ public class CardRoomService {
         .map(Client::getUserId).collect(Collectors.toSet());
       if (!userIds.isEmpty()) {
         List<CardUser> users = userMapper.findByIds(userIds);
-        List<Player> players = users.stream().map(v -> Player.from(mainUserId, v))
+        List<Player> players = users.stream()
+          .map(v -> Player.from(mainUserId, v))
           .collect(Collectors.toList());
         Map<String, Client> map = holder.clients.stream().collect(Collectors.toMap(Client::getUserId, v -> v));
         players.sort((p1, p2) -> {
-          if (Objects.equals(mainUserId, p1.getUserId())) {
-            return -Integer.MAX_VALUE;
-          }
           Client client1 = map.get(p1.getUserId());
           Client client2 = map.get(p2.getUserId());
           return (client1 == null ? new Date() : client1.getTime())
             .compareTo((client2 == null ? new Date() : client2.getTime()));
         });
+        Player main = players.stream().filter(v -> Objects.equals(v.getUserId(), mainUserId)).findFirst().orElse(null);
+        if (main != null) {
+          players.remove(main);
+          players.add(0, main);
+        }
         return players;
       }
     }
