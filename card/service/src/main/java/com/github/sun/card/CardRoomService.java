@@ -274,12 +274,15 @@ public class CardRoomService {
       holder.clients.forEach(client -> {
         if (!client.getSink().isClosed() && Objects.equals(client.getUserId(), userId)) {
           CardUser player = userMapper.findById(userId);
-          addEvent(RoomEvent.NextEvent.builder()
-            .mainUserId(mainUserId)
-            .userId(player.getId())
-            .nickname(player.getNickname())
-            .avatar(player.getAvatar())
-            .build());
+          if (player != null) {
+            holder.setPlayer(Player.from(mainUserId, player));
+            addEvent(RoomEvent.NextEvent.builder()
+              .mainUserId(mainUserId)
+              .userId(player.getId())
+              .nickname(player.getNickname())
+              .avatar(player.getAvatar())
+              .build());
+          }
         }
       });
     }
