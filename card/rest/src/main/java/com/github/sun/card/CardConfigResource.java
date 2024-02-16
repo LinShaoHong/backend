@@ -45,9 +45,9 @@ public class CardConfigResource extends AbstractResource {
 
   @Data
   public static class Config {
-    private int cardCount;
     private int avaCount;
     private int playLimit;
+    private int battleLimit;
     private String price;
     private String payText;
     private String shareTitle;
