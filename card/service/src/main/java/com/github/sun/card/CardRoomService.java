@@ -128,7 +128,9 @@ public class CardRoomService {
       while (it.hasNext()) {
         Client client = it.next();
         if (Objects.equals(client.getUserId(), userId)) {
-          client.getSink().close();
+          if (!client.getSink().isClosed()) {
+            client.getSink().close();
+          }
           it.remove();
           break;
         }
@@ -214,36 +216,39 @@ public class CardRoomService {
     addEvent(RoomEvent.CloseEvent.builder().mainUserId(mainUserId).build());
   }
 
+  @SuppressWarnings("Duplicates")
   public void next(String mainUserId, String playerId) {
     Holder holder = holders.get(mainUserId);
     if (holder != null) {
       List<Client> clients = new ArrayList<>(holder.clients);
       clients.removeIf(v -> v.getSink().isClosed());
-      clients.sort(Comparator.comparing(Client::getTime));
-      Client main = clients.stream().filter(v -> Objects.equals(v.getUserId(), mainUserId)).findFirst().orElse(null);
-      if (main != null) {
-        clients.remove(main);
-        clients.add(0, main);
-      }
-      int j = -1;
-      for (int i = 0; i < clients.size(); i++) {
-        Client client = clients.get(i);
-        if (Objects.equals(client.getUserId(), playerId)) {
-          j = i;
-          break;
+      if (!clients.isEmpty()) {
+        clients.sort(Comparator.comparing(Client::getTime));
+        Client main = clients.stream().filter(v -> Objects.equals(v.getUserId(), mainUserId)).findFirst().orElse(null);
+        if (main != null) {
+          clients.remove(main);
+          clients.add(0, main);
         }
+        int j = -1;
+        for (int i = 0; i < clients.size(); i++) {
+          Client client = clients.get(i);
+          if (Objects.equals(client.getUserId(), playerId)) {
+            j = i;
+            break;
+          }
+        }
+        j += 1;
+        Client client = clients.get(j % clients.size());
+        String userId = client.getUserId();
+        CardUser player = userMapper.findById(userId);
+        holder.setPlayer(Player.from(mainUserId, player));
+        addEvent(RoomEvent.NextEvent.builder()
+          .mainUserId(mainUserId)
+          .userId(player.getId())
+          .nickname(player.getNickname())
+          .avatar(player.getAvatar())
+          .build());
       }
-      j += 1;
-      Client client = clients.get(j % clients.size());
-      String userId = client.getUserId();
-      CardUser player = userMapper.findById(userId);
-      holder.setPlayer(Player.from(mainUserId, player));
-      addEvent(RoomEvent.NextEvent.builder()
-        .mainUserId(mainUserId)
-        .userId(player.getId())
-        .nickname(player.getNickname())
-        .avatar(player.getAvatar())
-        .build());
     }
   }
 
@@ -259,7 +264,9 @@ public class CardRoomService {
         Client client = it.next();
         if (Objects.equals(client.getUserId(), userId)) {
           SseEventSink sink = client.getSink();
-          sink.close();
+          if (!sink.isClosed()) {
+            sink.close();
+          }
           it.remove();
           break;
         }
@@ -323,26 +330,41 @@ public class CardRoomService {
     return Collections.emptyList();
   }
 
+  @SuppressWarnings("Duplicates")
   public Player player(String mainUserId) {
     Holder holder = holders.get(mainUserId);
+    Player player;
     if (holder != null) {
-      Player player = holder.player;
-      if (player == null) {
-        CardUser user = userMapper.findById(mainUserId);
-        return Player.from(mainUserId, user);
-      } else {
-        String playerId = player.getUserId();
-        if (holder.clients.stream().noneMatch(v -> Objects.equals(v.getUserId(), playerId))) {
-          CardUser user = userMapper.findById(holder.clients.get(0).getUserId());
-          return Player.from(mainUserId, user);
-        } else {
-          return player;
-        }
+      player = holder.player;
+      List<Client> clients = new ArrayList<>(holder.clients);
+      clients.removeIf(v -> v.getSink().isClosed());
+      clients.sort(Comparator.comparing(Client::getTime));
+      Client main = clients.stream().filter(v -> Objects.equals(v.getUserId(), mainUserId)).findFirst().orElse(null);
+      if (main != null) {
+        clients.remove(main);
+        clients.add(0, main);
       }
+      if (!clients.isEmpty()) {
+        if (player == null) {
+          CardUser user = userMapper.findById(holder.clients.get(0).getUserId());
+          player = Player.from(mainUserId, user);
+        } else {
+          String playerId = player.getUserId();
+          if (holder.clients.stream().noneMatch(v -> Objects.equals(v.getUserId(), playerId))) {
+            CardUser user = userMapper.findById(holder.clients.get(0).getUserId());
+            player = Player.from(mainUserId, user);
+          }
+        }
+      } else {
+        CardUser user = userMapper.findById(mainUserId);
+        player = Player.from(mainUserId, user);
+      }
+      holder.setPlayer(player);
     } else {
       CardUser user = userMapper.findById(mainUserId);
-      return Player.from(mainUserId, user);
+      player = Player.from(mainUserId, user);
     }
+    return player;
   }
 
   @Data
