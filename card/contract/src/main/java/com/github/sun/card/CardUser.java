@@ -22,6 +22,7 @@ public class CardUser {
   private String id;
   private String code;
   private String openId;
+  private String os;
   private int avatar;
   private String nickname;
   private int playCount;

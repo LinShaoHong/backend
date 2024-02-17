@@ -105,7 +105,9 @@ public class CardRoomService {
                       && !"CloseEvent".equals(event.getName())) {
                       Thread.sleep(250);
                     }
-                    client.getSink().send(e);
+                    if (!client.getSink().isClosed()) {
+                      client.getSink().send(e);
+                    }
                   } catch (InterruptedException ex) {
                     throw new RuntimeException(ex);
                   }

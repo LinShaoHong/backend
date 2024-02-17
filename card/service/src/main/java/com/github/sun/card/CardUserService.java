@@ -33,7 +33,7 @@ public class CardUserService {
   private final CardUserDefService defService;
 
   @Transactional
-  public UserResp wxLogin(String code, String ip, String location) {
+  public UserResp wxLogin(String code, String os, String ip, String location) {
     String resp = client
       .target(WX_URI)
       .queryParam("appid", wxAppId)
@@ -54,6 +54,7 @@ public class CardUserService {
         user = CardUser.builder()
           .id(userId)
           .code("wx_" + code)
+          .os(os)
           .avatar(new Random().nextInt(40) + 1)
           .vip(0)
           .nickname("微信用户-" + code)
@@ -63,14 +64,23 @@ public class CardUserService {
           .build();
         defService.init(userId);
         mapper.insert(user);
+      } else {
+        if (StringUtils.hasText(os) && !Objects.equals(user.getOs(), os)) {
+          user.setOs(os);
+          mapper.update(user);
+        }
       }
       return UserResp.from(user);
     }
     throw new BadRequestException("获取OpenId失败");
   }
 
-  public UserResp byId(String id) {
+  public UserResp byId(String id, String os) {
     CardUser user = mapper.findById(id);
+    if (user != null && !StringUtils.hasText(user.getOs()) && StringUtils.hasText(os)) {
+      user.setOs(os);
+      mapper.update(user);
+    }
     return user == null ? null : UserResp.from(user);
   }
 

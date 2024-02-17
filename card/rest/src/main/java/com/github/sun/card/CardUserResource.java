@@ -27,16 +27,18 @@ public class CardUserResource extends AbstractResource {
 
   @GET
   @Path("/wx/login")
-  public SingleResponse<CardUserService.UserResp> getOpenIdByCode(@QueryParam("code") String code) {
+  public SingleResponse<CardUserService.UserResp> getOpenIdByCode(@QueryParam("code") String code,
+                                                                  @QueryParam("os") String os) {
     String ip = IPs.getRemoteIP(request);
     String location = Locations.fromIp(ip);
-    return responseOf(service.wxLogin(code, ip, location));
+    return responseOf(service.wxLogin(code, os, ip, location));
   }
 
   @GET
   @Path("/byId")
-  public SingleResponse<CardUserService.UserResp> byId(@QueryParam("id") String id) {
-    return responseOf(service.byId(id));
+  public SingleResponse<CardUserService.UserResp> byId(@QueryParam("id") String id,
+                                                       @QueryParam("os") String os) {
+    return responseOf(service.byId(id, os));
   }
 
   @GET
