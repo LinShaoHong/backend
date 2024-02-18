@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.ws.rs.sse.OutboundSseEvent;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,7 +26,6 @@ import java.util.stream.Collectors;
 @RefreshScope
 @RequiredArgsConstructor
 public class CardRoomService {
-  private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
   private static final Map<String, Holder> holders = new ConcurrentHashMap<>();
   private static final ExecutorService executor = Executors.newFixedThreadPool(20);
   private final CardRoomMapper mapper;
