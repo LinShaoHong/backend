@@ -55,11 +55,21 @@ public class CardUserService {
       String openId = n.asText();
       CardUser user = mapper.byOpenId(openId);
       if (user == null) {
+        CardUser shareUser = null;
+        if (StringUtils.hasText(shareUserId)) {
+          shareUser = mapper.findById(shareUserId);
+          if (shareUser != null) {
+            shareUser.setPlayCount(shareUser.getPlayCount() - iosGrantCount);
+            mapper.update(shareUser);
+          }
+        }
+
         code = codeService.genCode("USER");
         String userId = IdGenerator.next();
         user = CardUser.builder()
           .id(userId)
           .code("wx_" + code)
+          .shareCode(shareUser == null ? null : shareUser.getCode())
           .os(os)
           .avatar(new Random().nextInt(40) + 1)
           .vip(0)
@@ -70,14 +80,6 @@ public class CardUserService {
           .build();
         defService.init(userId);
         mapper.insert(user);
-
-        if (StringUtils.hasText(shareUserId)) {
-          CardUser shareUser = mapper.findById(shareUserId);
-          if (shareUser != null) {
-            shareUser.setPlayCount(shareUser.getPlayCount() - iosGrantCount);
-            mapper.update(shareUser);
-          }
-        }
       } else {
         if (StringUtils.hasText(os) && !Objects.equals(user.getOs(), os)) {
           user.setOs(os);
@@ -130,6 +132,7 @@ public class CardUserService {
   public static class UserResp {
     private String id;
     private String code;
+    private String shareCode;
     private String openId;
     private int avatar;
     private String nickname;
@@ -140,6 +143,7 @@ public class CardUserService {
       return UserResp.builder()
         .id(user.getId())
         .code(user.getCode())
+        .shareCode(user.getShareCode())
         .openId(user.getOpenId())
         .avatar(user.getAvatar())
         .nickname(user.getNickname())

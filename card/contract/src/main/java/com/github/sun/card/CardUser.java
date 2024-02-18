@@ -21,6 +21,7 @@ public class CardUser {
   @Id
   private String id;
   private String code;
+  private String shareCode;
   private String openId;
   private String os;
   private int avatar;
