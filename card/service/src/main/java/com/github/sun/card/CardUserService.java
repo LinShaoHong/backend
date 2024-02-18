@@ -33,7 +33,12 @@ public class CardUserService {
   private final CardUserDefService defService;
 
   @Transactional
-  public UserResp wxLogin(String code, String os, String ip, String location) {
+  public UserResp wxLogin(String code,
+                          String shareUserId,
+                          String shareId,
+                          String os,
+                          String ip,
+                          String location) {
     String resp = client
       .target(WX_URI)
       .queryParam("appid", wxAppId)
