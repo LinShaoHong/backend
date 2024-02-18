@@ -29,11 +29,10 @@ public class CardUserResource extends AbstractResource {
   @Path("/wx/login")
   public SingleResponse<CardUserService.UserResp> getOpenIdByCode(@QueryParam("code") String code,
                                                                   @QueryParam("shareUserId") String shareUserId,
-                                                                  @QueryParam("shareId") String shareId,
                                                                   @QueryParam("os") String os) {
     String ip = IPs.getRemoteIP(request);
     String location = Locations.fromIp(ip);
-    return responseOf(service.wxLogin(code, shareUserId, shareId, os, ip, location));
+    return responseOf(service.wxLogin(code, shareUserId, os, ip, location));
   }
 
   @GET

@@ -35,7 +35,6 @@ public class CardUserService {
   @Transactional
   public UserResp wxLogin(String code,
                           String shareUserId,
-                          String shareId,
                           String os,
                           String ip,
                           String location) {
