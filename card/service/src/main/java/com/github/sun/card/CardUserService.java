@@ -30,6 +30,8 @@ public class CardUserService {
   private String wxAppId;
   @Value("${wx.secret}")
   private String wxSecret;
+  @Value("${config.iosLimit}")
+  private int iosLimit;
   @Value("${config.iosGrantCount}")
   private int iosGrantCount;
   private final Client client;
@@ -62,6 +64,9 @@ public class CardUserService {
         if (StringUtils.hasText(shareUserId)) {
           shareUser = mapper.findById(shareUserId);
           if (shareUser != null) {
+            if (shareUser.getPlayCount() > iosLimit) {
+              shareUser.setPlayCount(iosLimit);
+            }
             shareUser.setPlayCount(shareUser.getPlayCount() - iosGrantCount);
             mapper.update(shareUser);
           }
