@@ -48,7 +48,6 @@ public class CardConfigResource extends AbstractResource {
     private int avaCount;
     private int playLimit;
     private int iosLimit;
-    private boolean canBattle;
     private boolean iosCanMore;
     private int iosGrantCount;
     private String iosText;
