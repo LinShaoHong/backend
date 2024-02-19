@@ -6,10 +6,15 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 @Mapper
 public interface CardUserMapper extends CompositeMapper<CardUser> {
   @Select("select * from card_user where openId=#{openId}")
   CardUser byOpenId(@Param("openId") String openId);
+
+  @Select("select * from card_user where shareCode=#{shareCode} order by createTime desc")
+  List<CardUser> byShareCode(@Param("shareCode") String shareCode);
 
   @Update("update card_user set playCount=playCount+1 where id=#{id}")
   void inc(@Param("id") String id);

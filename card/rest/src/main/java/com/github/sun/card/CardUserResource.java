@@ -43,6 +43,12 @@ public class CardUserResource extends AbstractResource {
   }
 
   @GET
+  @Path("/invited")
+  public ListResponse<CardUserService.UserResp> invited(@QueryParam("code") String code) {
+    return responseOf(service.invited(code));
+  }
+
+  @GET
   @Path("/inc")
   public Response inc(@QueryParam("id") String id) {
     service.inc(id);

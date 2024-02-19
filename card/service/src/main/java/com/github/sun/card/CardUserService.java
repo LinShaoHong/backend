@@ -15,8 +15,11 @@ import org.springframework.util.StringUtils;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Client;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @RefreshScope
@@ -125,6 +128,13 @@ public class CardUserService {
   @Transactional
   public void updateAvatar(String id, int avatar) {
     mapper.updateAvatar(id, avatar);
+  }
+
+  public List<UserResp> invited(String code) {
+    if (StringUtils.hasText(code)) {
+      return mapper.byShareCode(code).stream().map(UserResp::from).collect(Collectors.toList());
+    }
+    return Collections.emptyList();
   }
 
   @Data
