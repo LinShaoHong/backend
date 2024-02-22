@@ -70,6 +70,7 @@ public class CardPayService {
     user.setPrepayId(prepayId);
     mapper.update(user);
     return PayResp.builder()
+      .appId(h5 ? h5AppId : wxAppId)
       .timeStamp(jsapi.getTimeStamp())
       .nonceStr(jsapi.getNonceStr())
       .pkg(prepayId)
@@ -96,6 +97,7 @@ public class CardPayService {
   @Data
   @Builder
   public static class PayResp {
+    private String appId;
     private String timeStamp;
     private String nonceStr;
     private String pkg;
