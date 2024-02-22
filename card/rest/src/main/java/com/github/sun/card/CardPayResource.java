@@ -28,7 +28,7 @@ public class CardPayResource extends AbstractResource {
   @POST
   @Path("/wx")
   public SingleResponse<CardPayService.PayResp> wxPay(@Valid PayReq q) {
-    return responseOf(service.wxPay(q.getUserId(), q.getAmount()));
+    return responseOf(service.wxPay(q.getUserId(), q.getAmount(), q.isH5()));
   }
 
   @POST
@@ -44,5 +44,6 @@ public class CardPayResource extends AbstractResource {
   public static class PayReq {
     private String userId;
     private String amount;
+    private boolean h5;
   }
 }

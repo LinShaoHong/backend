@@ -27,6 +27,8 @@ public class CardPayService {
 
   @Value("${wx.appId}")
   private String wxAppId;
+  @Value("${wx.h5.appId}")
+  private String h5AppId;
   @Value("${wx.pay.mchId}")
   private String wxMchId;
   @Value("${wx.pay.api3Key}")
@@ -40,7 +42,7 @@ public class CardPayService {
   private final CardUserMapper mapper;
 
   @Transactional
-  public PayResp wxPay(String userId, String amount) {
+  public PayResp wxPay(String userId, String amount, boolean h5) {
     CardUser user = mapper.findById(userId);
     if (user == null) {
       throw new NotFoundException("用户不存在");
@@ -59,7 +61,7 @@ public class CardPayService {
 
     WxPayUnifiedOrderV3Result.JsapiResult jsapi;
     try {
-      jsapi = newWxPayService().createOrderV3(JSAPI, request);
+      jsapi = newWxPayService(h5).createOrderV3(JSAPI, request);
     } catch (WxPayException ex) {
       throw new RuntimeException("支付失败");
     }
@@ -76,9 +78,9 @@ public class CardPayService {
       .build();
   }
 
-  private WxPayService newWxPayService() {
+  private WxPayService newWxPayService(boolean h5) {
     WxPayConfig config = new WxPayConfig();
-    config.setAppId(wxAppId);
+    config.setAppId(h5 ? h5AppId : wxAppId);
     config.setMchId(wxMchId);
     config.setApiV3Key(wxApi3Key);
     config.setSignType("MD5");
