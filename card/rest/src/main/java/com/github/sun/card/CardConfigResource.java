@@ -48,8 +48,7 @@ public class CardConfigResource extends AbstractResource {
     private int avaCount;
     private int playLimit;
     private int iosLimit;
-    private boolean iosCanMore;
-    private int iosGrantCount;
+    private boolean iosCanPay;
     private String iosText;
     private String price;
     private String payText;
