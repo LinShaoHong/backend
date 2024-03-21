@@ -1,6 +1,0 @@
-dependencies {
-  api project(":$rootName-rest")
-  api project(":$rootName-sms-service")
-}
-
-apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")
