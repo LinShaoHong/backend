@@ -25,14 +25,12 @@ public class CardUserResource extends AbstractResource {
     this.service = service;
   }
 
-  @GET
+  @POST
   @Path("/wx/login")
-  public SingleResponse<CardUserService.UserResp> getOpenIdByCode(@QueryParam("code") String code,
-                                                                  @QueryParam("shareUserId") String shareUserId,
-                                                                  @QueryParam("os") String os) {
+  public SingleResponse<CardUserService.UserResp> getOpenIdByCode(@Valid LoginReq req) {
     String ip = IPs.getRemoteIP(request);
     String location = Locations.fromIp(ip);
-    return responseOf(service.wxLogin(code, shareUserId, os, ip, location));
+    return responseOf(service.wxLogin(req.getCode(), req.getShareUserId(), req.getOs(), ip, location));
   }
 
   @GET
@@ -74,6 +72,13 @@ public class CardUserResource extends AbstractResource {
   public Response updateAvatar(@Valid UpdateAvatarReq q) {
     service.updateAvatar(q.getId(), q.getAvatar());
     return responseOf();
+  }
+
+  @Data
+  public static class LoginReq {
+    private String code;
+    private String os;
+    private String shareUserId;
   }
 
   @Data

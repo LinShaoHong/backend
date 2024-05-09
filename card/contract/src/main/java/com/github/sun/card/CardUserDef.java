@@ -26,6 +26,7 @@ public class CardUserDef {
   private String userId;
   @Converter(DefsHandler.class)
   private List<Def> defs;
+  @Transient
   private Date createTime;
   @Transient
   private Date updateTime;
