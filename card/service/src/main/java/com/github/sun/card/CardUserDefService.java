@@ -24,7 +24,7 @@ public class CardUserDefService {
   }
 
   @Transactional
-  public void edit(String userId, String itemId, String title, String content) {
+  public void edit(String userId, String itemId, String title, String content,String picPath) {
     CardUserDef value = byUserId(userId);
     List<CardUserDef.Def> defs = value.getDefs();
     CardUserDef.Def def = defs.get(0);
@@ -32,6 +32,7 @@ public class CardUserDefService {
       if (Objects.equals(item.getId(), itemId)) {
         item.setTitle(title);
         item.setContent(content);
+        item.setPicPath(picPath);
         mapper.update(value);
         break;
       }
@@ -39,13 +40,14 @@ public class CardUserDefService {
   }
 
   @Transactional
-  public void add(String userId, String title, String content) {
+  public void add(String userId, String title, String content,String picPath) {
     CardUserDef def = byUserId(userId);
     List<CardUserDef.Def> defs = def.getDefs();
     CardUserDef.Item item = new CardUserDef.Item();
     item.setId(IdGenerator.next());
     item.setTitle(title);
     item.setContent(content);
+    item.setPicPath(picPath);
     item.setEnable(true);
     item.setDefaulted(false);
     item.setSrc(null);

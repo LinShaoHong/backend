@@ -39,14 +39,14 @@ public class CardUserDefResource extends AbstractResource {
   @POST
   @Path("/add")
   public Response add(@Valid AddDefReq q) {
-    service.add(q.getUserId(), q.getTitle(), q.getContent());
+    service.add(q.getUserId(), q.getTitle(), q.getContent(), q.getPicPath());
     return responseOf();
   }
 
   @POST
   @Path("/edit")
   public Response edit(@Valid EditDefReq q) {
-    service.edit(q.getUserId(), q.getItemId(), q.getTitle(), q.getContent());
+    service.edit(q.getUserId(), q.getItemId(), q.getTitle(), q.getContent(), q.getPicPath());
     return responseOf();
   }
 
@@ -69,6 +69,7 @@ public class CardUserDefResource extends AbstractResource {
     private String userId;
     private String title;
     private String content;
+    private String picPath;
   }
 
   @Data
@@ -77,6 +78,7 @@ public class CardUserDefResource extends AbstractResource {
     private String itemId;
     private String title;
     private String content;
+    private String picPath;
   }
 
   @Data

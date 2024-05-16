@@ -42,6 +42,7 @@ public class CardUserDef {
     private String id;
     private String title;
     private String content;
+    private String picPath;
     private String src;
     private boolean defaulted;
     private boolean enable;

@@ -15,6 +15,7 @@ public class StorageService {
   @Value("${image.store.dir}")
   private String basePath;
 
+  @SuppressWarnings("Duplicates")
   public String upload(InputStream in, String name) throws IOException {
     int i = name.lastIndexOf(".");
     String ext = ".jpg";
