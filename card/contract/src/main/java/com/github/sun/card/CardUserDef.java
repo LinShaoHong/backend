@@ -1,5 +1,7 @@
 package com.github.sun.card;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.sun.foundation.modelling.Converter;
 import com.github.sun.foundation.modelling.JsonHandler;
 import com.github.sun.foundation.modelling.NamingStrategy;
@@ -38,11 +40,11 @@ public class CardUserDef {
   }
 
   @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Item {
     private String id;
     private String title;
     private String content;
-    private String picPath;
     private String src;
     private boolean defaulted;
     private boolean enable;

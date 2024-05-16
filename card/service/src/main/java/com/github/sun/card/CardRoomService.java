@@ -330,6 +330,12 @@ public class CardRoomService {
     return Collections.emptyList();
   }
 
+  public int total(String mainUserId) {
+    CardUserDef def = defMapper.byUserId(mainUserId);
+    long total = def.getDefs().get(0).getItems().stream().filter(CardUserDef.Item::isEnable).count();
+    return ((Long) total).intValue();
+  }
+
   @SuppressWarnings("Duplicates")
   public Player player(String mainUserId) {
     Holder holder = holders.get(mainUserId);

@@ -81,6 +81,12 @@ public class CardRoomResource extends AbstractResource {
   }
 
   @GET
+  @Path("/total")
+  public SingleResponse<Integer> total(@QueryParam("mainUserId") String mainUserId) {
+    return responseOf(service.total(mainUserId));
+  }
+
+  @GET
   @Path("/joined")
   public ListResponse<CardRoomService.JoinedRoom> joined(@QueryParam("userId") String userId) {
     return responseOf(service.joined(userId));
