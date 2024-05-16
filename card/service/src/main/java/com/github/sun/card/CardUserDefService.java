@@ -14,6 +14,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class CardUserDefService {
   private final CardUserDefMapper mapper;
+  private final CardStoreService storeService;
 
   public CardUserDef byUserId(String userId) {
     CardUserDef def = mapper.byUserId(userId);
@@ -60,14 +61,21 @@ public class CardUserDefService {
     List<CardUserDef.Def> defs = value.getDefs();
     CardUserDef.Def def = defs.get(0);
     Iterator<CardUserDef.Item> it = def.getItems().iterator();
+    CardUserDef.Item item = null;
     while (it.hasNext()) {
-      CardUserDef.Item item = it.next();
+      item = it.next();
       if (Objects.equals(item.getId(), itemId)) {
         it.remove();
         break;
       }
     }
     mapper.update(value);
+    if (item != null &&
+      !item.isDefaulted() &&
+      item.getSrc() != null &&
+      !item.getSrc().isEmpty()) {
+      storeService.remove(item.getSrc());
+    }
   }
 
   @Transactional

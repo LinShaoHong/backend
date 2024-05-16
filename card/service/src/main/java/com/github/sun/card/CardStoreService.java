@@ -52,4 +52,11 @@ public class CardStoreService {
       throw new RuntimeException(ex);
     }
   }
+
+  public void remove(String path) {
+    File file = new File(basePath + path);
+    if (file.exists()) {
+      file.delete();
+    }
+  }
 }
