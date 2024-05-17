@@ -177,7 +177,7 @@ public class CardUserDefService {
     "    \"content\": \"抽到该牌则给下一个玩家发小红包，不低于5.2\"\n" +
     "  },\n" +
     "  {\n" +
-    "    \"title\": \"打起\",\n" +
+    "    \"title\": \"打气\",\n" +
     "    \"content\": \"自己喝一杯酒其他人必须鼓掌活跃气氛\"\n" +
     "  },\n" +
     "  {\n" +
@@ -238,7 +238,7 @@ public class CardUserDefService {
     "  },\n" +
     "  {\n" +
     "    \"title\": \"双重麻烦\",\n" +
-    "    \"content\": \"喝一杯酒又选玩真心话或大冒险\"\n" +
+    "    \"content\": \"喝一杯酒选玩真心话或大冒险\"\n" +
     "  },\n" +
     "  {\n" +
     "    \"title\": \"天涯若比邻\",\n" +
@@ -270,7 +270,7 @@ public class CardUserDefService {
     "  },\n" +
     "  {\n" +
     "    \"title\": \"银色赠礼\",\n" +
-    "    \"content\": \"指定一位异性给自己必须说自己一个有点\"\n" +
+    "    \"content\": \"指定一位异性给自己必须说自己一个优点\"\n" +
     "  },\n" +
     "  {\n" +
     "    \"title\": \"羽量级选手\",\n" +
