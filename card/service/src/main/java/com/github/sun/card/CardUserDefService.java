@@ -34,10 +34,18 @@ public class CardUserDefService {
     CardUserDef.Def def = defs.get(0);
     for (CardUserDef.Item item : def.getItems()) {
       if (Objects.equals(item.getId(), itemId)) {
+        String prevSrc = item.getSrc();
         item.setTitle(title);
         item.setContent(content);
         item.setSrc(src);
         mapper.update(value);
+        if (!Objects.equals(prevSrc, src)) {
+          if (!item.isDefaulted() &&
+            prevSrc != null &&
+            !prevSrc.isEmpty()) {
+            storeService.remove(prevSrc);
+          }
+        }
         break;
       }
     }
