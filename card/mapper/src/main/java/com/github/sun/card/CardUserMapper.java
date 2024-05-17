@@ -1,10 +1,8 @@
 package com.github.sun.card;
 
 import com.github.sun.foundation.mybatis.CompositeMapper;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.cursor.Cursor;
 
 import java.util.List;
 
@@ -27,4 +25,8 @@ public interface CardUserMapper extends CompositeMapper<CardUser> {
 
   @Update("update card_user set avatar=#{avatar} where id=#{id}")
   void updateAvatar(@Param("id") String id, @Param("avatar") int avatar);
+
+  @Options(fetchSize = 100)
+  @Select("select * from card_user order by id")
+  Cursor<CardUser> all();
 }

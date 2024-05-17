@@ -64,6 +64,13 @@ public class CardUserDefResource extends AbstractResource {
     return responseOf();
   }
 
+  @POST
+  @Path("/fresh")
+  public Response fresh() {
+    service.fresh();
+    return responseOf();
+  }
+
   @Data
   public static class AddDefReq {
     private String userId;
