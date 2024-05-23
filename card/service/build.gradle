@@ -1,4 +1,5 @@
 dependencies {
+  api project(":$rootName-ai")
   api project(":$rootName-mybatis")
   api project(":$rootName-card-mapper")
   implementation 'com.github.binarywang:weixin-java-pay:4.6.0'
