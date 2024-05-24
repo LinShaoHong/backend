@@ -102,14 +102,14 @@ public class CardUserService {
           .location(location)
           .build();
         defService.init(userId);
-        mapper.insert(user);
+        mapper.replace(user);
       } else {
         if ((StringUtils.hasText(os) && !Objects.equals(user.getOs(), os)) || (user.getVip() != vip)) {
           user.setOs(os);
           if (vip > 0) {
             user.setVip(vip);
           }
-          mapper.update(user);
+          mapper.replace(user);
         }
       }
       return UserResp.from(user);
