@@ -106,7 +106,9 @@ public class CardUserService {
       } else {
         if ((StringUtils.hasText(os) && !Objects.equals(user.getOs(), os)) || (user.getVip() != vip)) {
           user.setOs(os);
-          user.setVip(vip);
+          if (vip > 0) {
+            user.setVip(vip);
+          }
           mapper.update(user);
         }
       }
