@@ -109,7 +109,7 @@ public class CardUserService {
           if (vip > 0) {
             user.setVip(vip);
           }
-          mapper.replace(user);
+          mapper.update(user);
         }
       }
       return UserResp.from(user);
