@@ -7,8 +7,12 @@ import com.github.sun.foundation.sql.IdGenerator;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -40,12 +44,14 @@ public class CardUserService {
   private final CardUserMapper mapper;
   private final CardCodeService codeService;
   private final CardUserDefService defService;
+  private final CardConfig config;
 
   @Transactional
   public UserResp wxLogin(String code,
                           String shareUserId,
                           String os,
                           String ip,
+                          String partner,
                           String location) {
     String resp = client
       .target(WX_URI)
@@ -60,18 +66,25 @@ public class CardUserService {
     JsonNode n = node.get("openid");
     if (n != null && StringUtils.hasText(n.asText())) {
       String openId = n.asText();
+      int vip = 0;
+      if (StringUtils.hasText(partner)) {
+        if (config.getPartners().stream().anyMatch(v -> Objects.equals(v.getName(), partner))) {
+          vip = 1;
+        }
+      }
       CardUser user = mapper.byOpenId(openId);
       if (user == null) {
         CardUser shareUser = null;
-        if (StringUtils.hasText(shareUserId) && !iosCanPay) {
+        if (StringUtils.hasText(shareUserId)) {
+//        if (StringUtils.hasText(shareUserId) && !iosCanPay) {
           shareUser = mapper.findById(shareUserId);
-          if (shareUser != null) {
-            if (shareUser.getPlayCount() > iosLimit) {
-              shareUser.setPlayCount(iosLimit);
-            }
-            shareUser.setPlayCount(shareUser.getPlayCount() - iosGrantCount);
-            mapper.update(shareUser);
-          }
+//          if (shareUser != null) {
+//            if (shareUser.getPlayCount() > iosLimit) {
+//              shareUser.setPlayCount(iosLimit);
+//            }
+//            shareUser.setPlayCount(shareUser.getPlayCount() - iosGrantCount);
+//            mapper.update(shareUser);
+//          }
         }
 
         code = codeService.genCode("USER");
@@ -82,7 +95,7 @@ public class CardUserService {
           .shareCode(shareUser == null ? null : shareUser.getCode())
           .os(os)
           .avatar(new Random().nextInt(40) + 1)
-          .vip(0)
+          .vip(vip)
           .nickname("微信用户-" + code)
           .openId(n.asText())
           .ip(ip)
@@ -91,8 +104,9 @@ public class CardUserService {
         defService.init(userId);
         mapper.insert(user);
       } else {
-        if (StringUtils.hasText(os) && !Objects.equals(user.getOs(), os)) {
+        if ((StringUtils.hasText(os) && !Objects.equals(user.getOs(), os)) || (user.getVip() != vip)) {
           user.setOs(os);
+          user.setVip(vip);
           mapper.update(user);
         }
       }
@@ -167,6 +181,16 @@ public class CardUserService {
         .playCount(user.getPlayCount())
         .vip(user.getVip())
         .build();
+    }
+  }
+
+  @Slf4j
+  @Configuration
+  public static class CardConfiguration {
+    @Bean
+    @ConfigurationProperties("config")
+    public CardConfig config() {
+      return new CardConfig();
     }
   }
 }

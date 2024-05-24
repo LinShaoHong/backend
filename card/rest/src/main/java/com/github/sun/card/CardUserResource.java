@@ -30,7 +30,7 @@ public class CardUserResource extends AbstractResource {
   public SingleResponse<CardUserService.UserResp> getOpenIdByCode(@Valid LoginReq req) {
     String ip = IPs.getRemoteIP(request);
     String location = Locations.fromIp(ip);
-    return responseOf(service.wxLogin(req.getCode(), req.getShareUserId(), req.getOs(), ip, location));
+    return responseOf(service.wxLogin(req.getCode(), req.getShareUserId(), req.getOs(), ip, req.getPartner(), location));
   }
 
   @GET
@@ -79,6 +79,7 @@ public class CardUserResource extends AbstractResource {
     private String code;
     private String os;
     private String shareUserId;
+    private String partner;
   }
 
   @Data
