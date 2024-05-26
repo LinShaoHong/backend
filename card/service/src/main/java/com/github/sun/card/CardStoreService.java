@@ -17,7 +17,7 @@ import java.util.Date;
 @RefreshScope
 @RequiredArgsConstructor
 public class CardStoreService {
-  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM");
 
   @Value("${image.store.dir}")
   private String basePath;
@@ -31,8 +31,8 @@ public class CardStoreService {
         ext = name.substring(i + 1);
       }
       String id = IdGenerator.next();
-      String day = FORMATTER.format(new Date());
-      String path = basePath + "/" + day + "/" + id + "." + ext;
+      String month = FORMATTER.format(new Date());
+      String path = basePath + "/" + month + "/" + id + "." + ext;
       File file = new File(path);
       if (!file.exists()) {
         File dir = new File(file.getParent());
@@ -47,7 +47,7 @@ public class CardStoreService {
       }
       in.close();
       out.close();
-      return "/" + day + "/" + id + "." + ext;
+      return "/" + month + "/" + id + "." + ext;
     } catch (Throwable ex) {
       throw new RuntimeException(ex);
     }
