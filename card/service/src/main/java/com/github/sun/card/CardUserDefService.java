@@ -109,7 +109,7 @@ public class CardUserDefService {
   public void init(String usrId) {
     List<CardC> list = JSON.deserializeAsList(CARDS, CardC.class);
     CardUserDef.Def def = new CardUserDef.Def();
-    def.setName("金杯之奕");
+    def.setName("hks");
     List<CardUserDef.Item> items = new ArrayList<>();
     for (int i = 1; i <= 50; i++) {
       CardUserDef.Item item = new CardUserDef.Item();
