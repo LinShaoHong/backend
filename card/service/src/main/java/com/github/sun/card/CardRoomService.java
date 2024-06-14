@@ -380,6 +380,7 @@ public class CardRoomService {
     private String userId;
     private String nickname;
     private int avatar;
+    private int vip;
 
     public static Player from(String mainUserId, CardUser user) {
       return Player.builder()
@@ -387,6 +388,7 @@ public class CardRoomService {
         .userId(user.getId())
         .nickname(user.getNickname())
         .avatar(user.getAvatar())
+        .vip(user.getVip())
         .build();
     }
   }
