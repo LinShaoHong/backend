@@ -52,6 +52,7 @@ public abstract class RoomEvent {
   @EqualsAndHashCode(callSuper = true)
   public static class AddEvent extends RoomEvent { //邀请加入
     private int avatar;
+    private int vip;
     private String nickname;
     private @Builder.Default String name = "AddEvent";
   }
@@ -63,6 +64,7 @@ public abstract class RoomEvent {
   @EqualsAndHashCode(callSuper = true)
   public static class NextEvent extends RoomEvent { // 下一个
     private int avatar;
+    private int vip;
     private String nickname;
     private @Builder.Default String name = "NextEvent";
   }

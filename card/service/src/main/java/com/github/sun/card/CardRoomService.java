@@ -186,6 +186,7 @@ public class CardRoomService {
       .userId(userId)
       .nickname(user.getNickname())
       .avatar(user.getAvatar())
+      .vip(user.getVip())
       .build());
   }
 
@@ -247,6 +248,7 @@ public class CardRoomService {
           .userId(player.getId())
           .nickname(player.getNickname())
           .avatar(player.getAvatar())
+          .vip(player.getVip())
           .build());
       }
     }
@@ -295,6 +297,7 @@ public class CardRoomService {
               .userId(player.getId())
               .nickname(player.getNickname())
               .avatar(player.getAvatar())
+              .vip(player.getVip())
               .build());
           }
         }
@@ -406,6 +409,7 @@ public class CardRoomService {
             .mainUserId(v.getMainUserId())
             .nickname(user.getNickname())
             .avatar(user.getAvatar())
+            .vip(user.getVip())
             .time(Dates.simpleTime(v.getEnterTime()))
             .build();
         })
@@ -420,6 +424,7 @@ public class CardRoomService {
     private String mainUserId;
     private String nickname;
     private int avatar;
+    private int vip;
     private String time;
   }
 }
