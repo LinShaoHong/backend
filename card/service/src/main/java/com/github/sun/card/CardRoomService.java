@@ -33,23 +33,23 @@ public class CardRoomService {
   private final CardUserDefMapper defMapper;
 
   //订阅
-  public void sub(String mainUserId, String userId, SseEventSink sink, Sse sse) {
+  public void sub(String mainUserId, String userId, boolean hks, SseEventSink sink, Sse sse) {
     if (sink.isClosed()) {
       return;
     }
-    Holder holder = holders.get(mainUserId);
+    Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder == null) {
       holder = new Holder(mainUserId);
-      holders.put(mainUserId, holder);
+      holders.put(mainUserId + ":" + hks, holder);
     }
-    holder.add(userId, sink, sse);
+    holder.add(userId, hks, sink, sse);
   }
 
   public synchronized <T extends RoomEvent> void addEvent(T event) {
-    Holder holder = holders.get(event.getMainUserId());
+    Holder holder = holders.get(event.getMainUserId() + ":" + event.isHks());
     if (holder == null) {
       holder = new Holder(event.getMainUserId());
-      holders.put(event.getMainUserId(), holder);
+      holders.put(event.getMainUserId() + ":" + event.isHks(), holder);
     }
     holder.enqueue(event);
   }
@@ -123,7 +123,7 @@ public class CardRoomService {
       }
     }
 
-    public void add(String userId, SseEventSink sink, Sse sse) {
+    public void add(String userId, boolean hks, SseEventSink sink, Sse sse) {
       Iterator<Client> it = this.clients.iterator();
       while (it.hasNext()) {
         Client client = it.next();
@@ -145,7 +145,7 @@ public class CardRoomService {
         .sse(sse)
         .time(new Date())
         .build());
-      CardRoomService.this.join(mainUserId, userId);
+      CardRoomService.this.join(mainUserId, userId, hks);
     }
   }
 
@@ -159,7 +159,7 @@ public class CardRoomService {
   }
 
   @Transactional
-  public void join(String mainUserId, String userId) {
+  public void join(String mainUserId, String userId, boolean hks) {
     Set<String> ids = new HashSet<>();
     ids.add(mainUserId);
     ids.add(userId);
@@ -168,12 +168,13 @@ public class CardRoomService {
     if (ids.size() != users.size()) {
       throw new NotFoundException("找不到用户");
     }
-    CardRoom room = mapper.byMainUserIdAndUserId(mainUserId, userId);
+    CardRoom room = mapper.byMainUserIdAndUserId(mainUserId, userId, hks);
     if (room == null) {
       room = new CardRoom();
       room.setId(IdGenerator.next());
       room.setMainUserId(mainUserId);
       room.setUserId(userId);
+      room.setHks(hks);
       room.setEnterTime(new Date());
       mapper.insert(room);
     } else {
@@ -184,42 +185,45 @@ public class CardRoomService {
     addEvent(RoomEvent.AddEvent.builder()
       .mainUserId(mainUserId)
       .userId(userId)
+      .hks(hks)
       .nickname(user.getNickname())
       .avatar(user.getAvatar())
       .vip(user.getVip())
       .build());
   }
 
-  public void shuffle(String mainUserId, String userId) {
+  public void shuffle(String mainUserId, String userId, boolean hks) {
     CardUserDef def = defMapper.byUserId(mainUserId);
     long total = def.getDefs().get(0).getItems().stream().filter(CardUserDef.Item::isEnable).count();
     addEvent(RoomEvent.ShuffleEvent.builder()
       .mainUserId(mainUserId)
       .userId(userId)
+      .hks(hks)
       .total(((Long) total).intValue())
       .build());
   }
 
-  public void open(String mainUserId, String userId, int index, boolean music) {
+  public void open(String mainUserId, String userId, boolean hks, int index, boolean music) {
     CardUserDef def = defMapper.byUserId(mainUserId);
     List<CardUserDef.Item> items = def.getDefs().get(0).getItems().stream()
       .filter(CardUserDef.Item::isEnable).collect(Collectors.toList());
     addEvent(RoomEvent.OpenEvent.builder()
       .mainUserId(mainUserId)
       .userId(userId)
+      .hks(hks)
       .item(items.get(index - 1))
       .index(index)
       .music(music)
       .build());
   }
 
-  public void close(String mainUserId) {
-    addEvent(RoomEvent.CloseEvent.builder().mainUserId(mainUserId).build());
+  public void close(String mainUserId, boolean hks) {
+    addEvent(RoomEvent.CloseEvent.builder().mainUserId(mainUserId).hks(hks).build());
   }
 
   @SuppressWarnings("Duplicates")
-  public void next(String mainUserId, String playerId) {
-    Holder holder = holders.get(mainUserId);
+  public void next(String mainUserId, boolean hks, String playerId) {
+    Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder != null) {
       List<Client> clients = new ArrayList<>(holder.clients);
       clients.removeIf(v -> v.getSink().isClosed());
@@ -246,6 +250,7 @@ public class CardRoomService {
         addEvent(RoomEvent.NextEvent.builder()
           .mainUserId(mainUserId)
           .userId(player.getId())
+          .hks(hks)
           .nickname(player.getNickname())
           .avatar(player.getAvatar())
           .vip(player.getVip())
@@ -254,11 +259,11 @@ public class CardRoomService {
     }
   }
 
-  public void leave(String mainUserId, String userId) {
-    Holder holder = holders.get(mainUserId);
+  public void leave(String mainUserId, boolean hks, String userId) {
+    Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder != null) {
       if (holder.player != null && Objects.equals(holder.player.getUserId(), userId)) {
-        next(mainUserId, userId);
+        next(mainUserId, hks, userId);
       }
 
       Iterator<Client> it = holder.clients.iterator();
@@ -274,18 +279,19 @@ public class CardRoomService {
         }
       }
       if (holder.clients.isEmpty()) {
-        holders.remove(mainUserId);
+        holders.remove(mainUserId + ":" + hks);
       } else {
         addEvent(RoomEvent.LeaveEvent.builder()
           .mainUserId(mainUserId)
           .userId(userId)
+          .hks(hks)
           .build());
       }
     }
   }
 
-  public void assign(String mainUserId, String userId) {
-    Holder holder = holders.get(mainUserId);
+  public void assign(String mainUserId, boolean hks, String userId) {
+    Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder != null) {
       holder.clients.forEach(client -> {
         if (!client.getSink().isClosed() && Objects.equals(client.getUserId(), userId)) {
@@ -295,6 +301,7 @@ public class CardRoomService {
             addEvent(RoomEvent.NextEvent.builder()
               .mainUserId(mainUserId)
               .userId(player.getId())
+              .hks(hks)
               .nickname(player.getNickname())
               .avatar(player.getAvatar())
               .vip(player.getVip())
@@ -305,8 +312,23 @@ public class CardRoomService {
     }
   }
 
-  public List<Player> players(String mainUserId) {
-    Holder holder = holders.get(mainUserId);
+  public void changeCardType(String mainUserId, String cardType) {
+    Holder holder = holders.get(mainUserId + ":false");
+    if (holder != null) {
+      holder.clients.forEach(client -> {
+        if (!client.getSink().isClosed()) {
+          addEvent(RoomEvent.ChangeCardTypeEvent.builder()
+            .mainUserId(mainUserId)
+            .hks(false)
+            .cardType(cardType)
+            .build());
+        }
+      });
+    }
+  }
+
+  public List<Player> players(String mainUserId, boolean hks) {
+    Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder != null) {
       Set<String> userIds = holder.clients.stream().filter(v -> !v.getSink().isClosed())
         .map(Client::getUserId).collect(Collectors.toSet());
@@ -333,15 +355,18 @@ public class CardRoomService {
     return Collections.emptyList();
   }
 
-  public int total(String mainUserId) {
+  public int total(String mainUserId, String cardType) {
     CardUserDef def = defMapper.byUserId(mainUserId);
-    long total = def.getDefs().get(0).getItems().stream().filter(CardUserDef.Item::isEnable).count();
+    CardUserDef.Def value = def.getDefs().stream().filter(v -> Objects.equals(v.getName(), cardType))
+      .findAny()
+      .orElse(null);
+    long total = value == null ? 0L : value.getItems().stream().filter(CardUserDef.Item::isEnable).count();
     return ((Long) total).intValue();
   }
 
   @SuppressWarnings("Duplicates")
-  public Player player(String mainUserId) {
-    Holder holder = holders.get(mainUserId);
+  public Player player(String mainUserId, boolean hks) {
+    Holder holder = holders.get(mainUserId + ":" + hks);
     Player player;
     if (holder != null) {
       player = holder.player;
@@ -396,8 +421,8 @@ public class CardRoomService {
     }
   }
 
-  public List<JoinedRoom> joined(String userId) {
-    List<CardRoom> joined = mapper.joined(userId);
+  public List<JoinedRoom> joined(String userId, boolean hks) {
+    List<CardRoom> joined = mapper.joined(userId, hks);
     Set<String> mainUserIds = joined.stream().map(CardRoom::getMainUserId).collect(Collectors.toSet());
     if (!mainUserIds.isEmpty()) {
       Map<String, CardUser> users = userMapper.findByIds(mainUserIds).stream()

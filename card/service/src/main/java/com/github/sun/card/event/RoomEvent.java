@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 public abstract class RoomEvent {
   private String mainUserId;
   private String userId;
+  private boolean hks;
 
   public abstract String getName();
 
@@ -76,5 +77,15 @@ public abstract class RoomEvent {
   @EqualsAndHashCode(callSuper = true)
   public static class LeaveEvent extends RoomEvent { //离开
     private @Builder.Default String name = "LeaveEvent";
+  }
+
+  @Data
+  @SuperBuilder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @EqualsAndHashCode(callSuper = true)
+  public static class ChangeCardTypeEvent extends RoomEvent { //更改卡片类型
+    private String cardType;
+    private @Builder.Default String name = "ChangeCardTypeEvent";
   }
 }

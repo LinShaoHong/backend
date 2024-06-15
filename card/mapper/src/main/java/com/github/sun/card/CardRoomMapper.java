@@ -9,12 +9,11 @@ import java.util.List;
 
 @Mapper
 public interface CardRoomMapper extends CompositeMapper<CardRoom> {
-  @Select("select * from card_room where mainUserId=#{mainUserId} and userId=#{userId}")
-  CardRoom byMainUserIdAndUserId(@Param("mainUserId") String mainUserId, @Param("userId") String userId);
+  @Select("select * from card_room where mainUserId=#{mainUserId} and userId=#{userId} and hks=#{hks}")
+  CardRoom byMainUserIdAndUserId(@Param("mainUserId") String mainUserId,
+                                 @Param("userId") String userId,
+                                 @Param("hks") boolean hks);
 
-  @Select("select * from card_room where userId=#{userId} order by enterTime desc")
-  List<CardRoom> joined(@Param("userId") String userId);
-
-  @Select("select * from card_room where mainUserId=#{mainUserId} order by enterTime desc")
-  List<CardRoom> byMainUserId(@Param("mainUserId") String mainUserId);
+  @Select("select * from card_room where userId=#{userId} and mainUserId<>#{userId} and hks=#{hks} order by enterTime desc")
+  List<CardRoom> joined(@Param("userId") String userId, @Param("hks") boolean hks);
 }

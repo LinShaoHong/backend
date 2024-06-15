@@ -22,6 +22,7 @@ public class CardRoom {
   private String id;
   private String mainUserId;
   private String userId;
+  private boolean hks;
   private Date enterTime;
   @Transient
   private Date createTime;
