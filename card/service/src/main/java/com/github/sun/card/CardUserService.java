@@ -96,7 +96,7 @@ public class CardUserService {
           .os(os)
           .avatar(new Random().nextInt(40) + 1)
           .vip(vip)
-          .nickname("微信用户-" + code)
+          .nickname("昵称" + code)
           .openId(n.asText())
           .ip(ip)
           .location(location)
