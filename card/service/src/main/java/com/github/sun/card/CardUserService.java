@@ -127,8 +127,12 @@ public class CardUserService {
   }
 
   @Transactional
-  public void inc(String id) {
-    mapper.inc(id);
+  public void inc(String id, boolean hks) {
+    if (hks) {
+      mapper.inc(id);
+    } else {
+      mapper.incLover(id);
+    }
   }
 
   @Transactional
@@ -170,6 +174,7 @@ public class CardUserService {
     private int avatar;
     private String nickname;
     private int playCount;
+    private int loverPlayCount;
     private int vip;
 
     public static UserResp from(CardUser user) {
@@ -181,6 +186,7 @@ public class CardUserService {
         .avatar(user.getAvatar())
         .nickname(user.getNickname())
         .playCount(user.getPlayCount())
+        .loverPlayCount(user.getLoverPlayCount())
         .vip(user.getVip())
         .build();
     }

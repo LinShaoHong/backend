@@ -17,6 +17,9 @@ public interface CardUserMapper extends CompositeMapper<CardUser> {
   @Update("update card_user set playCount=playCount+1 where id=#{id}")
   void inc(@Param("id") String id);
 
+  @Update("update card_user set loverPlayCount=loverPlayCount+1 where id=#{id}")
+  void incLover(@Param("id") String id);
+
   @Update("update card_user set vip=#{vip} where id=#{id}")
   void vip(@Param("id") String id, @Param("vip") int vip);
 

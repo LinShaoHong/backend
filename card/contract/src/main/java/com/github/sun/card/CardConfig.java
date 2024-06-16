@@ -9,6 +9,7 @@ import java.util.List;
 public class CardConfig {
   private int avaCount;
   private int playLimit;
+  private int loverPlayLimit;
   private int iosLimit;
   private boolean game;
   private boolean iosCanPay;
@@ -17,6 +18,9 @@ public class CardConfig {
   private String payText;
   private String shareTitle;
   private String logo;
+  private String roomTitle;
+  private TopTab topTab;
+  private More more;
   private List<Partner> partners;
   private List<Banner> banners;
 
@@ -26,6 +30,12 @@ public class CardConfig {
 
   public List<Partner> getPartners() {
     return partners == null ? Collections.emptyList() : partners;
+  }
+
+  @Data
+  public static class TopTab {
+    private String hks;
+    private String lover;
   }
 
   @Data
@@ -40,5 +50,36 @@ public class CardConfig {
     private String qr;
     private String title;
     private String label;
+  }
+
+  @Data
+  public static class More {
+    private Hks hks;
+    private Lover lover;
+  }
+
+  @Data
+  public static class Hks {
+    private String defTitle;
+    private String defContent;
+    private String battleTitle;
+    private String battleContent;
+  }
+
+  @Data
+  public static class Lover {
+    private String defTitle;
+    private String defContent;
+    private String battleTitle;
+    private String battleContent;
+    private List<Card> cards;
+
+    @Data
+    public static class Card {
+      private String name;
+      private String type;
+      private boolean open;
+      private boolean visible;
+    }
   }
 }

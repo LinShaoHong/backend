@@ -192,29 +192,32 @@ public class CardRoomService {
       .build());
   }
 
-  public void shuffle(String mainUserId, String userId, boolean hks) {
-    CardUserDef def = defMapper.byUserId(mainUserId);
-    long total = def.getDefs().get(0).getItems().stream().filter(CardUserDef.Item::isEnable).count();
+  public void shuffle(String mainUserId, String userId, boolean hks, String cardType) {
     addEvent(RoomEvent.ShuffleEvent.builder()
       .mainUserId(mainUserId)
       .userId(userId)
       .hks(hks)
-      .total(((Long) total).intValue())
+      .total(total(mainUserId, cardType))
       .build());
   }
 
-  public void open(String mainUserId, String userId, boolean hks, int index, boolean music) {
+  public void open(String mainUserId, String userId, boolean hks, String cardType, int index, boolean music) {
     CardUserDef def = defMapper.byUserId(mainUserId);
-    List<CardUserDef.Item> items = def.getDefs().get(0).getItems().stream()
-      .filter(CardUserDef.Item::isEnable).collect(Collectors.toList());
-    addEvent(RoomEvent.OpenEvent.builder()
-      .mainUserId(mainUserId)
-      .userId(userId)
-      .hks(hks)
-      .item(items.get(index - 1))
-      .index(index)
-      .music(music)
-      .build());
+    def.getDefs().stream().filter(v -> Objects.equals(v.getName(), cardType))
+      .findAny().ifPresent(value -> {
+        List<CardUserDef.Item> items = value.getItems()
+          .stream()
+          .filter(CardUserDef.Item::isEnable)
+          .collect(Collectors.toList());
+        addEvent(RoomEvent.OpenEvent.builder()
+          .mainUserId(mainUserId)
+          .userId(userId)
+          .hks(hks)
+          .item(items.get(index - 1))
+          .index(index)
+          .music(music)
+          .build());
+      });
   }
 
   public void close(String mainUserId, boolean hks) {

@@ -27,6 +27,7 @@ public class CardUser {
   private int avatar;
   private String nickname;
   private int playCount;
+  private int loverPlayCount;
   private int vip;
   private String prepayId;
   private String ip;

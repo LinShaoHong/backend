@@ -24,8 +24,9 @@ public class CardRoomResource extends AbstractResource {
   @Path("/shuffle")
   public Response shuffle(@QueryParam("mainUserId") String mainUserId,
                           @QueryParam("userId") String userId,
-                          @DefaultValue("true") @QueryParam("hks") boolean hks) {
-    service.shuffle(mainUserId, userId, hks);
+                          @DefaultValue("true") @QueryParam("hks") boolean hks,
+                          @DefaultValue("hks") @QueryParam("cardType") String cardType) {
+    service.shuffle(mainUserId, userId, hks, cardType);
     return responseOf();
   }
 
@@ -34,9 +35,10 @@ public class CardRoomResource extends AbstractResource {
   public Response open(@QueryParam("mainUserId") String mainUserId,
                        @QueryParam("userId") String userId,
                        @DefaultValue("true") @QueryParam("hks") boolean hks,
+                       @DefaultValue("hks") @QueryParam("cardType") String cardType,
                        @QueryParam("index") int index,
                        @QueryParam("music") boolean music) {
-    service.open(mainUserId, userId, hks, index, music);
+    service.open(mainUserId, userId, hks, cardType, index, music);
     return responseOf();
   }
 

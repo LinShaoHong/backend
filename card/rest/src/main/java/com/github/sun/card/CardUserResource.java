@@ -48,8 +48,9 @@ public class CardUserResource extends AbstractResource {
 
   @GET
   @Path("/inc")
-  public Response inc(@QueryParam("id") String id) {
-    service.inc(id);
+  public Response inc(@QueryParam("id") String id,
+                      @DefaultValue("true") @QueryParam("hks") boolean hks) {
+    service.inc(id, hks);
     return responseOf();
   }
 
