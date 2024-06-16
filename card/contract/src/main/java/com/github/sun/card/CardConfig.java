@@ -21,6 +21,7 @@ public class CardConfig {
   private String roomTitle;
   private TopTab topTab;
   private More more;
+  private boolean noLover;
   private List<Partner> partners;
   private List<Banner> banners;
 
