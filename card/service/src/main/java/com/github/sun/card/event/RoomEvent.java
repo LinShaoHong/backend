@@ -1,8 +1,11 @@
 package com.github.sun.card.event;
 
+import com.github.sun.card.CardRoomService;
 import com.github.sun.card.CardUserDef;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @Data
 @SuperBuilder
@@ -87,5 +90,15 @@ public abstract class RoomEvent {
   public static class ChangeCardTypeEvent extends RoomEvent { //更改卡片类型
     private String cardType;
     private @Builder.Default String name = "ChangeCardTypeEvent";
+  }
+
+  @Data
+  @SuperBuilder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @EqualsAndHashCode(callSuper = true)
+  public static class ReceiveReplyEvent extends RoomEvent { //获取回复
+    private List<CardRoomService.Chat> chats;
+    private @Builder.Default String name = "ReceiveReplyEvent";
   }
 }

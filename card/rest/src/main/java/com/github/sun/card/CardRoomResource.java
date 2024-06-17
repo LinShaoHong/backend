@@ -1,8 +1,10 @@
 package com.github.sun.card;
 
 import com.github.sun.foundation.rest.AbstractResource;
+import lombok.Data;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -83,6 +85,33 @@ public class CardRoomResource extends AbstractResource {
                                  @QueryParam("cardType") String cardType) {
     service.changeCardType(mainUserId, cardType);
     return responseOf();
+  }
+
+  @POST
+  @Path("/reply")
+  public ListResponse<CardRoomService.Chat> reply(@Valid Reply reply) {
+    return responseOf(service.reply(reply.getMainUserId(), reply.getUserId(), reply.getMessage()));
+  }
+
+  @Data
+  public static class Reply {
+    private String mainUserId;
+    private String userId;
+    private String message;
+  }
+
+  @GET
+  @Path("/withdrawReply")
+  public Response withdrawReply(@QueryParam("mainUserId") String mainUserId,
+                                @QueryParam("chatId") String chatId) {
+    service.withdrawReply(mainUserId, chatId);
+    return responseOf();
+  }
+
+  @GET
+  @Path("/replies")
+  public ListResponse<CardRoomService.Chat> replies(@QueryParam("mainUserId") String mainUserId) {
+    return responseOf(service.replies(mainUserId));
   }
 
   @GET

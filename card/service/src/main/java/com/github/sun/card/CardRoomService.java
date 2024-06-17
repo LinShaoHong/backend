@@ -60,6 +60,7 @@ public class CardRoomService {
     public final ConcurrentLinkedQueue<RoomEvent> queue;
     public final List<Client> clients;
     public Player player;
+    public List<Chat> chats;
 
     public void setPlayer(Player player) {
       this.player = player;
@@ -146,6 +147,27 @@ public class CardRoomService {
         .time(new Date())
         .build());
       CardRoomService.this.join(mainUserId, userId, hks);
+    }
+
+    public List<Chat> getChats() {
+      if (chats == null) {
+        chats = new ArrayList<>();
+        return chats;
+      }
+      if (!chats.isEmpty()) {
+        Set<String> ids = chats.stream()
+          .map(Chat::getUserId)
+          .collect(Collectors.toSet());
+        Map<String, CardUser> map = userMapper.findByIds(ids).stream()
+          .collect(Collectors.toMap(CardUser::getId, v -> v));
+        chats.forEach(chat -> {
+          CardUser user = map.get(chat.getUserId());
+          chat.setAvatar(user.getAvatar());
+          chat.setNickname(user.getNickname());
+          chat.setVip(user.getVip());
+        });
+      }
+      return chats;
     }
   }
 
@@ -330,6 +352,48 @@ public class CardRoomService {
     }
   }
 
+  public List<Chat> reply(String mainUserId, String userId, String message) {
+    Holder holder = holders.get(mainUserId + ":false");
+    if (holder != null) {
+      if (holder.chats == null) {
+        holder.chats = new ArrayList<>();
+      }
+      holder.chats.add(Chat.builder()
+        .id(IdGenerator.next())
+        .userId(userId)
+        .message(message)
+        .build());
+      List<Chat> chats = holder.getChats();
+      addEvent(RoomEvent.ReceiveReplyEvent.builder()
+        .mainUserId(mainUserId)
+        .userId(userId)
+        .chats(chats)
+        .build());
+      return chats;
+    }
+    return Collections.emptyList();
+  }
+
+  public void withdrawReply(String mainUserId, String chatId) {
+    Holder holder = holders.get(mainUserId + ":false");
+    if (holder != null) {
+      List<Chat> chats = holder.getChats();
+      chats.removeIf(c -> Objects.equals(c.getId(), chatId));
+      addEvent(RoomEvent.ReceiveReplyEvent.builder()
+        .mainUserId(mainUserId)
+        .chats(chats)
+        .build());
+    }
+  }
+
+  public List<Chat> replies(String mainUserId) {
+    Holder holder = holders.get(mainUserId + ":false");
+    if (holder != null) {
+      return holder.getChats();
+    }
+    return Collections.emptyList();
+  }
+
   public List<Player> players(String mainUserId, boolean hks) {
     Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder != null) {
@@ -454,5 +518,16 @@ public class CardRoomService {
     private int avatar;
     private int vip;
     private String time;
+  }
+
+  @Data
+  @Builder
+  public static class Chat {
+    private String id;
+    private String userId;
+    private String nickname;
+    private int avatar;
+    private int vip;
+    private String message;
   }
 }
