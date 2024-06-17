@@ -19,6 +19,7 @@ public class CardConfig {
   private String shareTitle;
   private String logo;
   private String roomTitle;
+  private String loverPlayTitle;
   private TopTab topTab;
   private More more;
   private boolean noLover;
