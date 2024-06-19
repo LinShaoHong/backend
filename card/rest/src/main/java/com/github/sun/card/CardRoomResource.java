@@ -89,7 +89,7 @@ public class CardRoomResource extends AbstractResource {
 
   @POST
   @Path("/reply")
-  public ListResponse<CardRoomService.Chat> reply(@Valid Reply reply) {
+  public SingleResponse<String> reply(@Valid Reply reply) {
     return responseOf(service.reply(reply.getMainUserId(), reply.getUserId(), reply.getMessage()));
   }
 
@@ -103,9 +103,17 @@ public class CardRoomResource extends AbstractResource {
   @GET
   @Path("/withdrawReply")
   public Response withdrawReply(@QueryParam("mainUserId") String mainUserId,
+                                @QueryParam("userId") String userId,
                                 @QueryParam("chatId") String chatId) {
-    service.withdrawReply(mainUserId, chatId);
+    service.withdrawReply(mainUserId, userId, chatId);
     return responseOf();
+  }
+
+  @GET
+  @Path("/byReplyId")
+  public SingleResponse<CardRoomService.Chat> byReplyId(@QueryParam("mainUserId") String mainUserId,
+                                                        @QueryParam("chatId") String chatId) {
+    return responseOf(service.byReplyId(mainUserId, chatId));
   }
 
   @GET

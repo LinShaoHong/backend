@@ -352,38 +352,50 @@ public class CardRoomService {
     }
   }
 
-  public List<Chat> reply(String mainUserId, String userId, String message) {
+  public String reply(String mainUserId, String userId, String message) {
     Holder holder = holders.get(mainUserId + ":false");
     if (holder != null) {
       if (holder.chats == null) {
         holder.chats = new ArrayList<>();
       }
+      String chatId = IdGenerator.next();
       holder.chats.add(Chat.builder()
-        .id(IdGenerator.next())
+        .id(chatId)
         .userId(userId)
         .message(message)
         .build());
-      List<Chat> chats = holder.getChats();
       addEvent(RoomEvent.ReceiveReplyEvent.builder()
         .mainUserId(mainUserId)
         .userId(userId)
-        .chats(chats)
+        .chatId(chatId)
         .build());
-      return chats;
+      return chatId;
     }
-    return Collections.emptyList();
+    return null;
   }
 
-  public void withdrawReply(String mainUserId, String chatId) {
+  public void withdrawReply(String mainUserId, String userId, String chatId) {
     Holder holder = holders.get(mainUserId + ":false");
     if (holder != null) {
       List<Chat> chats = holder.getChats();
       chats.removeIf(c -> Objects.equals(c.getId(), chatId));
       addEvent(RoomEvent.ReceiveReplyEvent.builder()
         .mainUserId(mainUserId)
-        .chats(chats)
+        .userId(userId)
+        .chatId(chatId)
+        .withdraw(true)
         .build());
     }
+  }
+
+  public Chat byReplyId(String mainUserId, String chatId) {
+    Holder holder = holders.get(mainUserId + ":false");
+    if (holder != null) {
+      return holder.getChats().stream()
+        .filter(v -> Objects.equals(v.getId(), chatId))
+        .findFirst().orElse(null);
+    }
+    return null;
   }
 
   public List<Chat> replies(String mainUserId) {
