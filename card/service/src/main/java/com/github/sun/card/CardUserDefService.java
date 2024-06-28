@@ -33,10 +33,10 @@ public class CardUserDefService {
     if (def == null) {
       throw new NotFoundException("找不到该用户的卡牌");
     }
-//    boolean c = initLove(def, "love99");
-//    if (c) {
-//      mapper.update(def);
-//    }
+    boolean c = initLove(def, "love99");
+    if (c) {
+      mapper.update(def);
+    }
     return def;
   }
 
@@ -133,7 +133,7 @@ public class CardUserDefService {
     def.setId(IdGenerator.next());
     def.setUserId(usrId);
     initHKS(def);
-//    initLove(def, "love99");
+    initLove(def, "love99");
     mapper.insert(def);
   }
 
