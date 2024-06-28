@@ -1,7 +1,6 @@
 package com.github.sun.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.sun.foundation.modelling.Converter;
 import com.github.sun.foundation.modelling.JsonHandler;
 import com.github.sun.foundation.modelling.NamingStrategy;
@@ -13,6 +12,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -51,5 +51,12 @@ public class CardUserDef {
   }
 
   public static class DefsHandler extends JsonHandler.ListHandler<Def> {
+  }
+
+  public List<Def> getDefs() {
+    if (defs == null) {
+      defs = new ArrayList<>();
+    }
+    return defs;
   }
 }

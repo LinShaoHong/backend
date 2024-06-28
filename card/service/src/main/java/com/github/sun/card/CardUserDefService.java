@@ -185,7 +185,6 @@ public class CardUserDefService {
               item.setTitle(c.getType());
               item.setContent(n);
               item.setSrc(c.icon);
-              items.add(item);
               item.setEnable(true);
               items.add(item);
             });
