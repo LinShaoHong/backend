@@ -3,13 +3,19 @@ package com.github.sun.card;
 import com.github.sun.foundation.boot.exception.NotFoundException;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.sql.IdGenerator;
+import com.ibm.icu.impl.data.ResourceReader;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RefreshScope
@@ -107,7 +113,12 @@ public class CardUserDefService {
 
   @Transactional
   public void init(String usrId) {
-    List<CardC> list = JSON.deserializeAsList(CARDS, CardC.class);
+    initHKS(usrId);
+    initLove(usrId);
+  }
+
+  private void initHKS(String usrId) {
+    List<HKSCard> list = JSON.deserializeAsList(CARDS, HKSCard.class);
     CardUserDef.Def def = new CardUserDef.Def();
     def.setName("hks");
     List<CardUserDef.Item> items = new ArrayList<>();
@@ -129,9 +140,23 @@ public class CardUserDefService {
     mapper.insert(v);
   }
 
+  private void initLove(String usrId) {
+    Arrays.asList("love99").forEach(file -> {
+      ClassLoader loader = ResourceReader.class.getClassLoader();
+      try (InputStream in = loader.getResourceAsStream("cards/" + file + ".json");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+        String content = reader.lines().collect(Collectors.joining("\n"));
+        LoveCard card = JSON.deserialize(content, LoveCard.class);
+
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    });
+  }
+
   @Transactional
   public void fresh() {
-    List<CardC> list = JSON.deserializeAsList(CARDS, CardC.class);
+    List<HKSCard> list = JSON.deserializeAsList(CARDS, HKSCard.class);
     int c = 1;
     for (CardUser v : userMapper.all()) {
       CardUserDef def = mapper.byUserId(v.getId());
@@ -150,9 +175,23 @@ public class CardUserDefService {
   }
 
   @Data
-  public static class CardC {
+  public static class HKSCard {
     private String title;
     private String content;
+  }
+
+  @Data
+  public static class LoveCard {
+    private String type;
+    private String name;
+    private List<_C> cards;
+
+    @Data
+    public static class _C {
+      private String type;
+      private String icon;
+      private List<String> names;
+    }
   }
 
   private static final String CARDS = "[\n" +
