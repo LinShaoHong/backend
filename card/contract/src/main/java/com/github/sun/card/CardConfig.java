@@ -22,6 +22,7 @@ public class CardConfig {
   private String loverPlayTitle;
   private TopTab topTab;
   private More more;
+  private List<Lover.Card> loverCards;
   private boolean noLover;
   private List<Partner> partners;
   private List<Banner> banners;
@@ -74,7 +75,6 @@ public class CardConfig {
     private String defContent;
     private String battleTitle;
     private String battleContent;
-    private List<Card> cards;
 
     @Data
     public static class Card {

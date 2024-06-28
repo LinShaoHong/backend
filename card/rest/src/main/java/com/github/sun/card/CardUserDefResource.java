@@ -39,35 +39,28 @@ public class CardUserDefResource extends AbstractResource {
   @POST
   @Path("/add")
   public Response add(@Valid AddDefReq q) {
-    service.add(q.getUserId(), q.getTitle(), q.getContent(), q.getSrc());
+    service.add(q.getUserId(), q.getTitle(), q.getContent(), q.getSrc(), q.getCardType());
     return responseOf();
   }
 
   @POST
   @Path("/edit")
   public Response edit(@Valid EditDefReq q) {
-    service.edit(q.getUserId(), q.getItemId(), q.getTitle(), q.getContent(), q.getSrc());
+    service.edit(q.getUserId(), q.getItemId(), q.getTitle(), q.getContent(), q.getSrc(), q.getCardType());
     return responseOf();
   }
 
   @POST
   @Path("/delete")
   public Response delete(@Valid DeleteReq q) {
-    service.delete(q.getUserId(), q.getItemId());
+    service.delete(q.getUserId(), q.getItemId(), q.getCardType());
     return responseOf();
   }
 
   @POST
   @Path("/enable")
   public Response enable(@Valid EnableReq q) {
-    service.enable(q.getUserId(), q.getItemId(), q.isEnable());
-    return responseOf();
-  }
-
-  @POST
-  @Path("/fresh")
-  public Response fresh() {
-    service.fresh();
+    service.enable(q.getUserId(), q.getItemId(), q.isEnable(), q.getCardType());
     return responseOf();
   }
 
@@ -77,6 +70,7 @@ public class CardUserDefResource extends AbstractResource {
     private String title;
     private String content;
     private String src;
+    private String cardType;
   }
 
   @Data
@@ -86,12 +80,14 @@ public class CardUserDefResource extends AbstractResource {
     private String title;
     private String content;
     private String src;
+    private String cardType;
   }
 
   @Data
   public static class DeleteReq {
     private String userId;
     private String itemId;
+    private String cardType;
   }
 
   @Data
@@ -99,5 +95,6 @@ public class CardUserDefResource extends AbstractResource {
     private String userId;
     private String itemId;
     private boolean enable;
+    private String cardType;
   }
 }
