@@ -510,6 +510,7 @@ public class CardRoomService {
         .map(v -> {
           CardUser user = users.get(v.getMainUserId());
           return JoinedRoom.builder()
+            .id(v.getId())
             .mainUserId(v.getMainUserId())
             .nickname(user.getNickname())
             .avatar(user.getAvatar())
@@ -522,9 +523,15 @@ public class CardRoomService {
     return Collections.emptyList();
   }
 
+  @Transactional
+  public void remove(String id) {
+    mapper.remove(id);
+  }
+
   @Data
   @Builder
   public static class JoinedRoom {
+    private String id;
     private String mainUserId;
     private String nickname;
     private int avatar;

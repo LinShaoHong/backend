@@ -26,7 +26,7 @@ public class CardRoomResource extends AbstractResource {
   @Path("/shuffle")
   public Response shuffle(@QueryParam("mainUserId") String mainUserId,
                           @QueryParam("userId") String userId,
-                          @DefaultValue("true") @QueryParam("hks") boolean hks,
+                          @QueryParam("hks") boolean hks,
                           @DefaultValue("hks") @QueryParam("cardType") String cardType) {
     service.shuffle(mainUserId, userId, hks, cardType);
     return responseOf();
@@ -36,7 +36,7 @@ public class CardRoomResource extends AbstractResource {
   @Path("/open")
   public Response open(@QueryParam("mainUserId") String mainUserId,
                        @QueryParam("userId") String userId,
-                       @DefaultValue("true") @QueryParam("hks") boolean hks,
+                       @QueryParam("hks") boolean hks,
                        @DefaultValue("hks") @QueryParam("cardType") String cardType,
                        @QueryParam("index") int index,
                        @QueryParam("music") boolean music) {
@@ -47,7 +47,7 @@ public class CardRoomResource extends AbstractResource {
   @GET
   @Path("/close")
   public Response close(@QueryParam("mainUserId") String mainUserId,
-                        @DefaultValue("true") @QueryParam("hks") boolean hks) {
+                        @QueryParam("hks") boolean hks) {
     service.close(mainUserId, hks);
     return responseOf();
   }
@@ -55,7 +55,7 @@ public class CardRoomResource extends AbstractResource {
   @GET
   @Path("/next")
   public Response next(@QueryParam("mainUserId") String mainUserId,
-                       @DefaultValue("true") @QueryParam("hks") boolean hks,
+                       @QueryParam("hks") boolean hks,
                        @QueryParam("playerId") String playerId) {
     service.next(mainUserId, hks, playerId);
     return responseOf();
@@ -65,7 +65,7 @@ public class CardRoomResource extends AbstractResource {
   @Path("/leave")
   public Response leave(@QueryParam("mainUserId") String mainUserId,
                         @QueryParam("userId") String userId,
-                        @DefaultValue("true") @QueryParam("hks") boolean hks) {
+                        @QueryParam("hks") boolean hks) {
     service.leave(mainUserId, hks, userId);
     return responseOf();
   }
@@ -74,7 +74,7 @@ public class CardRoomResource extends AbstractResource {
   @Path("/assign")
   public Response assign(@QueryParam("mainUserId") String mainUserId,
                          @QueryParam("userId") String userId,
-                         @DefaultValue("true") @QueryParam("hks") boolean hks) {
+                         @QueryParam("hks") boolean hks) {
     service.assign(mainUserId, hks, userId);
     return responseOf();
   }
@@ -125,14 +125,14 @@ public class CardRoomResource extends AbstractResource {
   @GET
   @Path("/players")
   public ListResponse<CardRoomService.Player> players(@QueryParam("mainUserId") String mainUserId,
-                                                      @DefaultValue("true") @QueryParam("hks") boolean hks) {
+                                                      @QueryParam("hks") boolean hks) {
     return responseOf(service.players(mainUserId, hks));
   }
 
   @GET
   @Path("/player")
   public SingleResponse<CardRoomService.Player> player(@QueryParam("mainUserId") String mainUserId,
-                                                       @DefaultValue("true") @QueryParam("hks") boolean hks) {
+                                                       @QueryParam("hks") boolean hks) {
     return responseOf(service.player(mainUserId, hks));
   }
 
@@ -146,8 +146,15 @@ public class CardRoomResource extends AbstractResource {
   @GET
   @Path("/joined")
   public ListResponse<CardRoomService.JoinedRoom> joined(@QueryParam("userId") String userId,
-                                                         @DefaultValue("true") @QueryParam("hks") boolean hks) {
+                                                         @QueryParam("hks") boolean hks) {
     return responseOf(service.joined(userId, hks));
+  }
+
+  @GET
+  @Path("/remove")
+  public Response remove(@QueryParam("id") String id) {
+    service.remove(id);
+    return responseOf();
   }
 
   @GET
@@ -155,7 +162,7 @@ public class CardRoomResource extends AbstractResource {
   @Produces(MediaType.SERVER_SENT_EVENTS)
   public void sub(@QueryParam("mainUserId") String mainUserId,
                   @QueryParam("userId") String userId,
-                  @DefaultValue("true") @QueryParam("hks") boolean hks,
+                  @QueryParam("hks") boolean hks,
                   @Context SseEventSink sink,
                   @Context Sse sse) {
     service.sub(mainUserId, userId, hks, sink, sse);
