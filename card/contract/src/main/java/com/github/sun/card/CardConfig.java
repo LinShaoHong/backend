@@ -25,6 +25,7 @@ public class CardConfig {
   private List<Lover.Card> loverCards;
   private boolean noLover;
   private List<Partner> partners;
+  private boolean toHks;
   private List<Banner> banners;
 
   public List<Banner> getBanners() {
