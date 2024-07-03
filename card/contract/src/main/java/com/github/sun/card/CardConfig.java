@@ -26,6 +26,7 @@ public class CardConfig {
   private boolean noLover;
   private List<Partner> partners;
   private boolean toHks;
+  private String cpShareTitle;
   private List<Banner> banners;
 
   public List<Banner> getBanners() {
