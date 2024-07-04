@@ -30,7 +30,8 @@ public class CardUserDefService {
     if (def == null) {
       throw new NotFoundException("找不到该用户的卡牌");
     }
-    boolean c = initLove(def, "love69");
+    boolean c = initLove69(def);
+    c = c || initLove52(def);
     if (c) {
       mapper.update(def);
     }
@@ -130,7 +131,8 @@ public class CardUserDefService {
     def.setId(IdGenerator.next());
     def.setUserId(usrId);
     initHKS(def);
-    initLove(def, "love69");
+    initLove69(def);
+    initLove52(def);
     mapper.insert(def);
   }
 
@@ -162,7 +164,8 @@ public class CardUserDefService {
     }
   }
 
-  private boolean initLove(CardUserDef value, String name) {
+  private boolean initLove69(CardUserDef value) {
+    String name = "love69";
     if (value.getDefs().stream().noneMatch(v -> Objects.equals(v.getName(), name))) {
       ClassLoader loader = ResourceReader.class.getClassLoader();
       try (InputStream in = loader.getResourceAsStream("cards/" + name + ".txt")) {
@@ -197,6 +200,39 @@ public class CardUserDefService {
     return false;
   }
 
+  private boolean initLove52(CardUserDef value) {
+    String name = "love52";
+    if (value.getDefs().stream().noneMatch(v -> Objects.equals(v.getName(), name))) {
+      ClassLoader loader = ResourceReader.class.getClassLoader();
+      try (InputStream in = loader.getResourceAsStream("cards/" + name + ".json")) {
+        if (in != null) {
+          BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+          String content = reader.lines().collect(Collectors.joining(""));
+          List<Love52Card> list = JSON.deserializeAsList(content, Love52Card.class);
+          List<CardUserDef.Item> items = new ArrayList<>();
+          for (Love52Card card : list) {
+            CardUserDef.Item item = new CardUserDef.Item();
+            item.setId(IdGenerator.next());
+            item.setDefaulted(true);
+            item.setTitle(card.getTitle());
+            item.setContent(card.getContent());
+            item.setSrc("/cards/love52/" + card.getImg());
+            item.setEnable(true);
+            items.add(item);
+          }
+          CardUserDef.Def def = new CardUserDef.Def();
+          def.setName(name);
+          def.setItems(items);
+          value.getDefs().add(def);
+        }
+      } catch (Throwable ex) {
+        throw new RuntimeException(ex);
+      }
+      return true;
+    }
+    return false;
+  }
+
   private Stack<Integer> random() {
     Stack<Integer> stack = new Stack<>();
     Random random = new Random();
@@ -213,7 +249,7 @@ public class CardUserDefService {
   }
 
   @Data
-  public static class LoveCard {
+  public static class Love69Card {
     private String type;
     private String name;
     private List<_C> cards;
@@ -224,5 +260,12 @@ public class CardUserDefService {
       private String icon;
       private List<String> names;
     }
+  }
+
+  @Data
+  public static class Love52Card {
+    private String img;
+    private String title;
+    private String content;
   }
 }
