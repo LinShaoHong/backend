@@ -17,6 +17,7 @@ public class CardConfig {
   private String price;
   private String payText;
   private String shareTitle;
+  private String loverShareTitle;
   private String logo;
   private String roomTitle;
   private String loverPlayTitle;
@@ -77,6 +78,8 @@ public class CardConfig {
     private String defContent;
     private String battleTitle;
     private String battleContent;
+    private String smsTitle;
+    private String smsContent;
 
     @Data
     public static class Card {
