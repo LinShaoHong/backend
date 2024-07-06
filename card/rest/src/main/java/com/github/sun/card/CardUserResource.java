@@ -34,6 +34,13 @@ public class CardUserResource extends AbstractResource {
   }
 
   @GET
+  @Path("/wx/getPhoneNumber")
+  public SingleResponse<CardUserService.UserResp> getPhoneNumber(@QueryParam("id") String id,
+                                                                 @QueryParam("code") String code) {
+    return responseOf(service.getPhoneNumber(id, code));
+  }
+
+  @GET
   @Path("/byId")
   public SingleResponse<CardUserService.UserResp> byId(@QueryParam("id") String id,
                                                        @QueryParam("os") String os) {

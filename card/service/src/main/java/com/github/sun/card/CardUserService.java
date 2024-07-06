@@ -19,17 +19,17 @@ import org.springframework.util.StringUtils;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Client;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import javax.ws.rs.client.Entity;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RefreshScope
 @RequiredArgsConstructor
 public class CardUserService {
-  private static final String WX_URI = "https://api.weixin.qq.com/sns/jscode2session";
+  private static final String WX_LOGIN_URI = "https://api.weixin.qq.com/sns/jscode2session";
+  private static final String WX_PHONE_URI = "https://api.weixin.qq.com/wxa/business/getuserphonenumber";
+  private static final String WX_TOKEN_URI = "https://api.weixin.qq.com/cgi-bin/token";
   @Value("${wx.appId}")
   private String wxAppId;
   @Value("${wx.secret}")
@@ -54,7 +54,7 @@ public class CardUserService {
                           String partner,
                           String location) {
     String resp = client
-      .target(WX_URI)
+      .target(WX_LOGIN_URI)
       .queryParam("appid", wxAppId)
       .queryParam("secret", wxSecret)
       .queryParam("js_code", code)
@@ -117,6 +117,37 @@ public class CardUserService {
     throw new BadRequestException("获取OpenId失败");
   }
 
+  @Transactional
+  public UserResp getPhoneNumber(String id, String code) {
+    String resp = client
+      .target(WX_PHONE_URI)
+      .queryParam("access_token", getAccessToken())
+      .request()
+      .post(Entity.json(new HashMap<String, String>() {{
+        put("code", code);
+      }}))
+      .readEntity(String.class);
+    JsonNode node = JSON.asJsonNode(resp);
+    String phone = node.get("phone_info").get("phoneNumber").asText();
+    CardUser user = mapper.findById(id);
+    user.setPhone(phone);
+    mapper.update(user);
+    return UserResp.from(user);
+  }
+
+  private String getAccessToken() {
+    String resp = client
+      .target(WX_TOKEN_URI)
+      .queryParam("appid", wxAppId)
+      .queryParam("secret", wxSecret)
+      .queryParam("grant_type", "client_credential")
+      .request()
+      .get()
+      .readEntity(String.class);
+    JsonNode node = JSON.asJsonNode(resp);
+    return node.get("access_token").asText();
+  }
+
   public UserResp byId(String id, String os) {
     CardUser user = mapper.findById(id);
     if (user != null && !StringUtils.hasText(user.getOs()) && StringUtils.hasText(os)) {
@@ -173,6 +204,7 @@ public class CardUserService {
     private String openId;
     private int avatar;
     private String nickname;
+    private String phone;
     private int playCount;
     private int loverPlayCount;
     private int vip;
@@ -185,6 +217,7 @@ public class CardUserService {
         .openId(user.getOpenId())
         .avatar(user.getAvatar())
         .nickname(user.getNickname())
+        .phone(user.getPhone())
         .playCount(user.getPlayCount())
         .loverPlayCount(user.getLoverPlayCount())
         .vip(user.getVip())
