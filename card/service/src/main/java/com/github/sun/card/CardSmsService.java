@@ -4,6 +4,7 @@ import com.github.sun.foundation.sql.IdGenerator;
 import lombok.*;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
@@ -22,16 +23,24 @@ public class CardSmsService {
     return specMapper.byType(type);
   }
 
+  @Transactional
   public void send(String userId, String fromPhone, String toPhone, String message) {
-    CardSms sms = CardSms.builder()
-      .id(IdGenerator.next())
-      .userId(userId)
-      .fromPhone(fromPhone)
-      .toPhone(toPhone)
-      .message(message)
-      .time(new Date())
-      .build();
-    mapper.insert(sms);
+    CardUser user = userMapper.findById(userId);
+    if (user != null) {
+      CardSms sms = CardSms.builder()
+        .id(IdGenerator.next())
+        .userId(userId)
+        .fromPhone(fromPhone)
+        .toPhone(toPhone)
+        .message(message)
+        .time(new Date())
+        .build();
+      if (user.getSmsCount() > 0) {
+        user.setSmsCount(user.getSmsCount() - 1);
+        userMapper.update(user);
+      }
+      mapper.insert(sms);
+    }
   }
 
   public List<Record> records(String userId) {
