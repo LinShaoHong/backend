@@ -175,7 +175,9 @@ public class CardUserService {
     if (!Objects.equals(prepayId, user.getPrepayId())) {
       throw new BadRequestException("用户未支付");
     }
-    mapper.vip(id, vip);
+    user.setVip(vip);
+    user.setSmsCount(config.getSmsLimit());
+    mapper.update(user);
   }
 
   @Transactional
@@ -207,6 +209,7 @@ public class CardUserService {
     private String phone;
     private int playCount;
     private int loverPlayCount;
+    private int smsCount;
     private int vip;
 
     public static UserResp from(CardUser user) {
@@ -220,6 +223,7 @@ public class CardUserService {
         .phone(user.getPhone())
         .playCount(user.getPlayCount())
         .loverPlayCount(user.getLoverPlayCount())
+        .smsCount(user.getSmsCount())
         .vip(user.getVip())
         .build();
     }

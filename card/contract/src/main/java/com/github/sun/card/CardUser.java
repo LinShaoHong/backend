@@ -29,6 +29,7 @@ public class CardUser {
   private String phone;
   private int playCount;
   private int loverPlayCount;
+  private int smsCount;
   private int vip;
   private String prepayId;
   private String ip;
