@@ -32,6 +32,7 @@ public class CardConfig {
   private int smsUnit;
   private double smsPrice;
   private String smsPlaceholder;
+  private String smsShareTitle;
   private List<SmsTemp> smsTemps;
   private List<Banner> banners;
 
