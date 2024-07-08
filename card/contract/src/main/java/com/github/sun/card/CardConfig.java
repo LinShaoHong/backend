@@ -28,6 +28,10 @@ public class CardConfig {
   private List<Partner> partners;
   private boolean toHks;
   private String cpShareTitle;
+  private int smsUnit;
+  private double smsPrice;
+  private String smsPlaceholder;
+  private List<SmsTemp> smsTemps;
   private List<Banner> banners;
 
   public List<Banner> getBanners() {
@@ -88,5 +92,11 @@ public class CardConfig {
       private boolean open;
       private boolean visible;
     }
+  }
+
+  @Data
+  public static class SmsTemp {
+    private String type;
+    private String name;
   }
 }
