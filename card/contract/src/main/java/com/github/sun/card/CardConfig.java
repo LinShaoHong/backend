@@ -28,6 +28,7 @@ public class CardConfig {
   private List<Partner> partners;
   private boolean toHks;
   private String cpShareTitle;
+  private  boolean sms;
   private int smsLimit;
   private int smsUnit;
   private double smsPrice;

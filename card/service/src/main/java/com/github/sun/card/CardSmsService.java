@@ -51,7 +51,7 @@ public class CardSmsService {
         sms.addAll(mapper.byToPhone(user.getPhone()));
       }
       List<CardSms> list = new ArrayList<>(sms);
-      list.sort((o1, o2) -> o2.getTime().compareTo(o1.getTime()));
+      list.sort(Comparator.comparing(CardSms::getTime));
       Set<String> visitor = new HashSet<>();
       List<Record> ret = new ArrayList<>();
       SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -66,8 +66,8 @@ public class CardSmsService {
           if (!visitor.contains(phone)) {
             ret.add(Record.builder()
               .phone(phone)
-              .send(Objects.equals(v.getUserId(), userId))
               .time(format.format(v.getTime()))
+              .type(Objects.equals(v.getUserId(), userId) ? "send" : "receive")
               .build());
           }
           visitor.add(phone);
@@ -124,6 +124,6 @@ public class CardSmsService {
   public static class Record {
     private String phone;
     private String time;
-    private boolean send;
+    private String type;
   }
 }
