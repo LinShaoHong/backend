@@ -1,29 +1,36 @@
 package com.github.sun.card;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderV3Request;
 import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderV3Result;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
+import com.github.binarywang.wxpay.v3.util.AesUtils;
 import com.github.sun.foundation.boot.exception.NotFoundException;
+import com.github.sun.foundation.boot.utility.JSON;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static com.github.binarywang.wxpay.bean.result.enums.TradeTypeEnum.JSAPI;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CardPayService {
   private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyMMddHHmmss");
+  private final CardUserMapper userMapper;
 
   @Value("${wx.appId}")
   private String wxAppId;
@@ -92,6 +99,27 @@ public class CardPayService {
     WxPayService service = new WxPayServiceImpl();
     service.setConfig(config);
     return service;
+  }
+
+  @Transactional
+  public void callback(JsonNode node) {
+    try {
+      byte[] associatedData = node.get("resource").get("associated_data").asText().getBytes(StandardCharsets.UTF_8);
+      byte[] nonce = node.get("resource").get("nonce").asText().getBytes(StandardCharsets.UTF_8);
+      String ciphertext = node.get("resource").get("ciphertext").asText();
+      AesUtils util = new AesUtils(wxApi3Key.getBytes());
+      JsonNode resp = JSON.asJsonNode(util.decryptToString(associatedData, nonce, ciphertext));
+      if ("SUCCESS".equals(resp.get("trade_state").asText())) {
+        String openId = resp.get("payer").get("openid").asText();
+        CardUser user = userMapper.byOpenId(openId);
+        if (user != null) {
+          user.setVip(1);
+          userMapper.update(user);
+        }
+      }
+    } catch (Throwable ex) {
+      log.error("微信支付回调失败", ex);
+    }
   }
 
   @Data
