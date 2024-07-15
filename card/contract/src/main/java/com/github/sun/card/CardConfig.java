@@ -23,12 +23,13 @@ public class CardConfig {
   private String loverPlayTitle;
   private TopTab topTab;
   private More more;
-  private List<Lover.Card> loverCards;
+  private List<Card> hksCards;
+  private List<Card> loverCards;
   private boolean noLover;
   private List<Partner> partners;
   private boolean toHks;
   private String cpShareTitle;
-  private  boolean sms;
+  private boolean sms;
   private int smsLimit;
   private int smsUnit;
   private double smsPrice;
@@ -87,14 +88,16 @@ public class CardConfig {
     private String battleContent;
     private String smsTitle;
     private String smsContent;
+  }
 
-    @Data
-    public static class Card {
-      private String name;
-      private String type;
-      private boolean open;
-      private boolean visible;
-    }
+  @Data
+  public static class Card {
+    private String name;
+    private String type;
+    private boolean cover;
+    private boolean noAdd;
+    private boolean open;
+    private boolean visible;
   }
 
   @Data
