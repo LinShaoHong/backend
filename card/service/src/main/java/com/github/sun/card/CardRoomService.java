@@ -337,8 +337,8 @@ public class CardRoomService {
     }
   }
 
-  public void changeCardType(String mainUserId, String cardType) {
-    Holder holder = holders.get(mainUserId + ":false");
+  public void changeCardType(String mainUserId, String cardType, boolean hks) {
+    Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder != null) {
       holder.clients.forEach(client -> {
         if (!client.getSink().isClosed()) {
@@ -352,8 +352,8 @@ public class CardRoomService {
     }
   }
 
-  public String reply(String mainUserId, String userId, String message) {
-    Holder holder = holders.get(mainUserId + ":false");
+  public String reply(String mainUserId, String userId, String message, boolean hks) {
+    Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder != null) {
       if (holder.chats == null) {
         holder.chats = new ArrayList<>();
@@ -374,8 +374,8 @@ public class CardRoomService {
     return null;
   }
 
-  public void withdrawReply(String mainUserId, String userId, String chatId) {
-    Holder holder = holders.get(mainUserId + ":false");
+  public void withdrawReply(String mainUserId, String userId, String chatId, boolean hks) {
+    Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder != null) {
       List<Chat> chats = holder.getChats();
       chats.removeIf(c -> Objects.equals(c.getId(), chatId));
@@ -388,8 +388,8 @@ public class CardRoomService {
     }
   }
 
-  public Chat byReplyId(String mainUserId, String chatId) {
-    Holder holder = holders.get(mainUserId + ":false");
+  public Chat byReplyId(String mainUserId, String chatId, boolean hks) {
+    Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder != null) {
       return holder.getChats().stream()
         .filter(v -> Objects.equals(v.getId(), chatId))
@@ -398,8 +398,8 @@ public class CardRoomService {
     return null;
   }
 
-  public List<Chat> replies(String mainUserId) {
-    Holder holder = holders.get(mainUserId + ":false");
+  public List<Chat> replies(String mainUserId, boolean hks) {
+    Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder != null) {
       return holder.getChats();
     }

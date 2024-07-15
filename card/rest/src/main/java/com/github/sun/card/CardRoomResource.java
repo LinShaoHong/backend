@@ -82,15 +82,16 @@ public class CardRoomResource extends AbstractResource {
   @GET
   @Path("/changeCardType")
   public Response changeCardType(@QueryParam("mainUserId") String mainUserId,
-                                 @QueryParam("cardType") String cardType) {
-    service.changeCardType(mainUserId, cardType);
+                                 @QueryParam("cardType") String cardType,
+                                 @QueryParam("hks") boolean hks) {
+    service.changeCardType(mainUserId, cardType, hks);
     return responseOf();
   }
 
   @POST
   @Path("/reply")
   public SingleResponse<String> reply(@Valid Reply reply) {
-    return responseOf(service.reply(reply.getMainUserId(), reply.getUserId(), reply.getMessage()));
+    return responseOf(service.reply(reply.getMainUserId(), reply.getUserId(), reply.getMessage(), reply.isHks()));
   }
 
   @Data
@@ -98,28 +99,32 @@ public class CardRoomResource extends AbstractResource {
     private String mainUserId;
     private String userId;
     private String message;
+    private boolean hks;
   }
 
   @GET
   @Path("/withdrawReply")
   public Response withdrawReply(@QueryParam("mainUserId") String mainUserId,
                                 @QueryParam("userId") String userId,
-                                @QueryParam("chatId") String chatId) {
-    service.withdrawReply(mainUserId, userId, chatId);
+                                @QueryParam("chatId") String chatId,
+                                @QueryParam("hks") boolean hks) {
+    service.withdrawReply(mainUserId, userId, chatId, hks);
     return responseOf();
   }
 
   @GET
   @Path("/byReplyId")
   public SingleResponse<CardRoomService.Chat> byReplyId(@QueryParam("mainUserId") String mainUserId,
-                                                        @QueryParam("chatId") String chatId) {
-    return responseOf(service.byReplyId(mainUserId, chatId));
+                                                        @QueryParam("chatId") String chatId,
+                                                        @QueryParam("hks") boolean hks) {
+    return responseOf(service.byReplyId(mainUserId, chatId, hks));
   }
 
   @GET
   @Path("/replies")
-  public ListResponse<CardRoomService.Chat> replies(@QueryParam("mainUserId") String mainUserId) {
-    return responseOf(service.replies(mainUserId));
+  public ListResponse<CardRoomService.Chat> replies(@QueryParam("mainUserId") String mainUserId,
+                                                    @QueryParam("hks") boolean hks) {
+    return responseOf(service.replies(mainUserId, hks));
   }
 
   @GET
