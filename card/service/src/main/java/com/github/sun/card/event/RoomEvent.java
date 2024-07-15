@@ -55,6 +55,7 @@ public abstract class RoomEvent {
     private int avatar;
     private int vip;
     private String nickname;
+    private String cardType;
     private @Builder.Default String name = "AddEvent";
   }
 

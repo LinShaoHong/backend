@@ -31,15 +31,25 @@ public class CardRoomService {
   private final CardRoomMapper mapper;
   private final CardUserMapper userMapper;
   private final CardUserDefMapper defMapper;
+  private final CardConfig config;
 
   //订阅
-  public void sub(String mainUserId, String userId, boolean hks, SseEventSink sink, Sse sse) {
+  public synchronized void sub(String mainUserId, String userId, boolean hks, SseEventSink sink, Sse sse) {
     if (sink.isClosed()) {
       return;
     }
     Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder == null) {
       holder = new Holder(mainUserId);
+      CardConfig.Card card;
+      if (hks) {
+        card = config.getHksCards().stream().filter(CardConfig.Card::isOpen).findFirst().orElse(null);
+      } else {
+        card = config.getLoverCards().stream().filter(CardConfig.Card::isOpen).findFirst().orElse(null);
+      }
+      if (card != null) {
+        holder.cardType = card.getType();
+      }
       holders.put(mainUserId + ":" + hks, holder);
     }
     holder.add(userId, hks, sink, sse);
@@ -60,6 +70,7 @@ public class CardRoomService {
     public final ConcurrentLinkedQueue<RoomEvent> queue;
     public final List<Client> clients;
     public Player player;
+    private String cardType;
     public List<Chat> chats;
 
     public void setPlayer(Player player) {
@@ -146,7 +157,7 @@ public class CardRoomService {
         .sse(sse)
         .time(new Date())
         .build());
-      CardRoomService.this.join(mainUserId, userId, hks);
+      CardRoomService.this.join(mainUserId, userId, hks, cardType);
     }
 
     public List<Chat> getChats() {
@@ -181,7 +192,7 @@ public class CardRoomService {
   }
 
   @Transactional
-  public void join(String mainUserId, String userId, boolean hks) {
+  public void join(String mainUserId, String userId, boolean hks, String cardType) {
     Set<String> ids = new HashSet<>();
     ids.add(mainUserId);
     ids.add(userId);
@@ -211,6 +222,7 @@ public class CardRoomService {
       .nickname(user.getNickname())
       .avatar(user.getAvatar())
       .vip(user.getVip())
+      .cardType(cardType)
       .build());
   }
 
@@ -340,6 +352,7 @@ public class CardRoomService {
   public void changeCardType(String mainUserId, String cardType, boolean hks) {
     Holder holder = holders.get(mainUserId + ":" + hks);
     if (holder != null) {
+      holder.cardType = cardType;
       holder.clients.forEach(client -> {
         if (!client.getSink().isClosed()) {
           addEvent(RoomEvent.ChangeCardTypeEvent.builder()
