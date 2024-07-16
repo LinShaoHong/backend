@@ -381,6 +381,7 @@ public class CardRoomService {
         .mainUserId(mainUserId)
         .userId(userId)
         .chatId(chatId)
+        .hks(hks)
         .build());
       return chatId;
     }
@@ -397,6 +398,7 @@ public class CardRoomService {
         .userId(userId)
         .chatId(chatId)
         .withdraw(true)
+        .hks(hks)
         .build());
     }
   }
