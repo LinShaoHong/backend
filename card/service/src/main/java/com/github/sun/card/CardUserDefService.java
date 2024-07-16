@@ -32,6 +32,7 @@ public class CardUserDefService {
     }
     boolean c = initLove69(def);
     c = c || initLove52(def);
+    c = c || initKing(def);
     if (c) {
       mapper.update(def);
     }
@@ -133,6 +134,7 @@ public class CardUserDefService {
     initHKS(def);
     initLove69(def);
     initLove52(def);
+    initKing(def);
     mapper.insert(def);
   }
 
@@ -217,6 +219,54 @@ public class CardUserDefService {
             item.setTitle(card.getTitle());
             item.setContent(card.getContent());
             item.setSrc("/cards/love52/" + card.getImg());
+            item.setEnable(true);
+            items.add(item);
+          }
+          CardUserDef.Def def = new CardUserDef.Def();
+          def.setName(name);
+          def.setItems(items);
+          value.getDefs().add(def);
+        }
+      } catch (Throwable ex) {
+        throw new RuntimeException(ex);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  private boolean initKing(CardUserDef value) {
+    String name = "king";
+    if (value.getDefs().stream().noneMatch(v -> Objects.equals(v.getName(), name))) {
+      ClassLoader loader = ResourceReader.class.getClassLoader();
+      try (InputStream in = loader.getResourceAsStream("cards/" + name + ".txt")) {
+        if (in != null) {
+          BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+          List<String> lines = reader.lines().collect(Collectors.toList());
+          List<CardUserDef.Item> items = new ArrayList<>();
+          for (int i = 1; i <= lines.size(); i++) {
+            String line = lines.get(i - 1);
+            String[] arr = line.split("：");
+            String icon;
+            if (i >= 1 && i <= 13) {
+              icon = "he" + i;
+            } else if (i >= 14 && i <= 26) {
+              icon = "ho" + (i - 13);
+            } else if (i >= 27 && i <= 39) {
+              icon = "m" + (i - 26);
+            } else if (i >= 40 && i <= 52) {
+              icon = "f" + (i - 39);
+            } else if (i == 53) {
+              icon = "bj";
+            } else {
+              icon = "rj";
+            }
+            CardUserDef.Item item = new CardUserDef.Item();
+            item.setId(IdGenerator.next());
+            item.setDefaulted(true);
+            item.setTitle(arr[0]);
+            item.setContent(arr[1]);
+            item.setSrc("/cards/poker/" + icon + ".png");
             item.setEnable(true);
             items.add(item);
           }
