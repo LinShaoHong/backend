@@ -33,6 +33,7 @@ public class CardUserDefService {
     boolean c = initLove69(def);
     c = c || initLove52(def);
     c = c || initKing(def);
+    c = c || initSex(def);
     if (c) {
       mapper.update(def);
     }
@@ -135,6 +136,7 @@ public class CardUserDefService {
     initLove69(def);
     initLove52(def);
     initKing(def);
+    initSex(def);
     mapper.insert(def);
   }
 
@@ -236,7 +238,14 @@ public class CardUserDefService {
   }
 
   private boolean initKing(CardUserDef value) {
-    String name = "king";
+    return initPoker(value, "king");
+  }
+
+  private boolean initSex(CardUserDef value) {
+    return initPoker(value, "sex");
+  }
+
+  private boolean initPoker(CardUserDef value, String name) {
     if (value.getDefs().stream().noneMatch(v -> Objects.equals(v.getName(), name))) {
       ClassLoader loader = ResourceReader.class.getClassLoader();
       try (InputStream in = loader.getResourceAsStream("cards/" + name + ".txt")) {
