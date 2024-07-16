@@ -357,7 +357,7 @@ public class CardRoomService {
         if (!client.getSink().isClosed()) {
           addEvent(RoomEvent.ChangeCardTypeEvent.builder()
             .mainUserId(mainUserId)
-            .hks(false)
+            .hks(hks)
             .cardType(cardType)
             .build());
         }
