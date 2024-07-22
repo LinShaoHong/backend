@@ -1,0 +1,10 @@
+server.port: 9949
+
+spring:
+  application:
+    name: Word-Server
+  profiles:
+    active: dev
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
