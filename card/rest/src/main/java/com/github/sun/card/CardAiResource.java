@@ -10,6 +10,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
 
 @Path("/ai")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -26,11 +27,11 @@ public class CardAiResource extends AbstractResource {
   @POST
   @Path("/chat")
   public ListResponse<String> chat(@Valid AiReq q) {
-    return responseOf(service.chat(q.getContent()));
+    return responseOf(service.chat(q.getQ()));
   }
 
   @Data
   public static class AiReq {
-    private String content;
+    private List<String> q;
   }
 }

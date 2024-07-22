@@ -1,7 +1,7 @@
 dependencies {
   api project(":$rootName-ai")
   api project(":$rootName-mybatis")
-  api project(":$rootName-card-mapper")
+  api project(":$rootName-word-mapper")
   implementation "com.github.binarywang:weixin-java-pay:4.6.0"
   implementation "org.springframework.cloud:spring-cloud-context:2.1.1.RELEASE"
 }

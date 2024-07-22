@@ -1,6 +1,6 @@
 dependencies {
-  api project(":$rootName-quartz")
-  api project(":$rootName-scheduler-mapper")
+  api project(":$rootName-rest")
+  api project(":$rootName-word-service")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")
