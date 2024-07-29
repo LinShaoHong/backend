@@ -26,7 +26,7 @@ public class CardAiResource extends AbstractResource {
 
   @POST
   @Path("/chat")
-  public ListResponse<String> chat(@Valid AiReq q) {
+  public SingleResponse<String> chat(@Valid AiReq q) {
     return responseOf(service.chat(q.getQ()));
   }
 

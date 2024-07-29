@@ -19,7 +19,7 @@ public class CardAiService {
   private String model;
   private final @Named("qwen") Assistant assistant;
 
-  public List<String> chat(List<String> q) {
+  public String chat(List<String> q) {
     return assistant.chat(apiKey, model, q);
   }
 }
