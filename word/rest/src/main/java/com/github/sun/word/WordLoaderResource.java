@@ -62,6 +62,18 @@ public class WordLoaderResource extends AbstractResource {
   }
 
   @GET
+  @Path("/stats")
+  public ListResponse<WordChecker> stats() {
+    return responseOf(loader.stats());
+  }
+
+  @GET
+  @Path("/dicts")
+  public ListResponse<WordDict> dicts(@QueryParam("date") String date) {
+    return responseOf(loader.dicts(date));
+  }
+
+  @GET
   @Path("/chat")
   public SingleResponse<String> chat(@QueryParam("q") String q) {
     return responseOf(loader.chat(q));

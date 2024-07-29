@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -124,6 +125,10 @@ public class WordDictLoader {
     return checker;
   }
 
+  public List<WordChecker> stats() {
+    return checkerMapper.all();
+  }
+
   @Transactional
   public WordDict byDate(String date, Integer sort) {
     WordChecker checker = checkerMapper.findById(date);
@@ -151,5 +156,9 @@ public class WordDictLoader {
       mapper.viewed(dict.getId());
     }
     return dict;
+  }
+
+  public List<WordDict> dicts(String date) {
+    return mapper.byDate(date);
   }
 }
