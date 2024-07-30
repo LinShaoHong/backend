@@ -96,6 +96,7 @@ public class WordDictLoader {
       default:
         break;
     }
+    dict.setPassed(false);
     mapper.update(dict);
   }
 
@@ -112,16 +113,12 @@ public class WordDictLoader {
   @Transactional
   public WordChecker stat(String date) {
     WordChecker checker = checkerMapper.findById(date);
-    int total = mapper.countByDate(date);
     if (checker == null) {
-      checker = new WordChecker();
-      checker.setId(date);
-      checker.setSort(1);
-      checker.setTotal(total);
-      checkerMapper.insert(checker);
+      List<WordChecker> all = checkerMapper.all();
+      checker = checkerMapper.all().get(all.size() - 1);
     }
-    checker.setTotal(total);
-    checker.setPassed(mapper.countByPassed(date));
+    checker.setTotal(mapper.countByDate(checker.getId()));
+    checker.setPassed(mapper.countByPassed(checker.getId()));
     return checker;
   }
 
