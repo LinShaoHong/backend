@@ -122,34 +122,30 @@ public class WordDictLoader {
     return checker;
   }
 
+  @Transactional
   public List<WordChecker> stats() {
-    return checkerMapper.all();
+    List<WordChecker> all = checkerMapper.all();
+    all.forEach(checker -> {
+      checker.setTotal(mapper.countByDate(checker.getId()));
+      checker.setPassed(mapper.countByPassed(checker.getId()));
+    });
+    return all;
   }
 
   @Transactional
   public WordDict byDate(String date, Integer sort) {
     WordChecker checker = checkerMapper.findById(date);
     if (sort == null) {
-      sort = checker == null ? 1 : checker.getSort();
+      sort = checker.getSort();
     }
     WordDict dict = mapper.byDateAndSort(date, sort);
-    int total = mapper.countByDate(date);
     if (dict != null) {
-      if (checker == null) {
-        checker = new WordChecker();
-        checker.setId(date);
-        checker.setSort(sort);
-        checker.setViewed(1);
-        checker.setTotal(total);
-        checkerMapper.insert(checker);
-      } else {
-        checker.setSort(sort);
-        checker.setTotal(total);
-        if (!dict.isViewed()) {
-          checker.setViewed(checker.getViewed() + 1);
-        }
-        checkerMapper.update(checker);
+      checker.setSort(sort);
+      checker.setTotal(mapper.countByDate(date));
+      if (!dict.isViewed()) {
+        checker.setViewed(checker.getViewed() + 1);
       }
+      checkerMapper.update(checker);
       mapper.viewed(dict.getId());
     }
     return dict;

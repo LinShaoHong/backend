@@ -1,20 +1,26 @@
 package com.github.sun.word;
 
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.word.loader.WordPdfService;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.InputStream;
 
 @Path("/loader")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class WordLoaderResource extends AbstractResource {
   private final WordDictLoader loader;
+  private final WordPdfService pdfService;
 
   @Inject
-  public WordLoaderResource(WordDictLoader loader) {
+  public WordLoaderResource(WordDictLoader loader, WordPdfService pdfService) {
     this.loader = loader;
+    this.pdfService = pdfService;
   }
 
   @GET
@@ -77,5 +83,14 @@ public class WordLoaderResource extends AbstractResource {
   @Path("/chat")
   public SingleResponse<String> chat(@QueryParam("q") String q) {
     return responseOf(loader.chat(q));
+  }
+
+  @POST
+  @Path("/pdf")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response upload(@FormDataParam("file") InputStream in,
+                         @FormDataParam("file") FormDataContentDisposition meta) throws Exception {
+    pdfService.parseRoot(in);
+    return responseOf();
   }
 }

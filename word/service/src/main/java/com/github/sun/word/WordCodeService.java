@@ -13,6 +13,8 @@ import java.util.Date;
 public class WordCodeService {
   @Resource
   private WordCodeMapper mapper;
+  @Resource
+  private WordCheckerMapper checkerMapper;
 
   @Transactional
   public synchronized int genWordSort() {
@@ -27,8 +29,15 @@ public class WordCodeService {
       WordCode v = new WordCode();
       v.setId(id);
       v.setType(date);
-      v.setCode(1);
+      v.setCode(code);
       mapper.insert(v);
+
+      WordChecker checker = new WordChecker();
+      checker.setId(date);
+      checker.setSort(1);
+      checker.setViewed(0);
+      checker.setTotal(0);
+      checkerMapper.insert(checker);
     }
     return ((Long) code).intValue();
   }

@@ -100,7 +100,7 @@ public abstract class WordBasicLoader implements WordLoader {
     });
   }
 
-  public static WordDict init(String word) {
+  public static synchronized WordDict init(String word) {
     WordDictMapper mapper = Injector.getInstance(WordDictMapper.class);
     WordDict db = mapper.findById(word);
     if (db == null) {
@@ -109,19 +109,10 @@ public abstract class WordBasicLoader implements WordLoader {
       WordDict.LoadState loadState = new WordDict.LoadState();
       db.setLoadState(loadState);
       db.setLoadTime(new Date());
+      WordCodeService codeService = Injector.getInstance(WordCodeService.class);
+      int sort = codeService.genWordSort();
+      db.setSort(sort);
       mapper.insert(db);
-    } else {
-      WordDict.LoadState loadState = db.getLoadState();
-      if (loadState == null) {
-        loadState = new WordDict.LoadState();
-        db.setLoadState(loadState);
-      }
-      if(db.getSort() == null) {
-        WordCodeService codeService = Injector.getInstance(WordCodeService.class);
-        int sort = codeService.genWordSort();
-        db.setSort(sort);
-      }
-      mapper.update(db);
     }
     return db;
   }
