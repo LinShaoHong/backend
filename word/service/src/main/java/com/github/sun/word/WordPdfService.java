@@ -1,4 +1,4 @@
-package com.github.sun.word.loader;
+package com.github.sun.word;
 
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.fdf.FDFDocument;

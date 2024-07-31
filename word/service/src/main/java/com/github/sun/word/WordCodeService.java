@@ -14,10 +14,10 @@ public class WordCodeService {
   @Resource
   private WordCodeMapper mapper;
   @Resource
-  private WordCheckerMapper checkerMapper;
+  private WordCheckMapper checkMapper;
 
   @Transactional
-  public synchronized int genWordSort() {
+  public synchronized int genWordSort(int userId) {
     String date = Dates.format(new Date());
     long code = 1;
     String id = date + ":" + code;
@@ -32,12 +32,12 @@ public class WordCodeService {
       v.setCode(code);
       mapper.insert(v);
 
-      WordChecker checker = new WordChecker();
-      checker.setId(date);
-      checker.setSort(1);
-      checker.setViewed(0);
-      checker.setTotal(0);
-      checkerMapper.insert(checker);
+      WordCheck check = new WordCheck();
+      check.setId(date + ":" + userId);
+      check.setUserId(userId);
+      check.setDate(date);
+      check.setSort(1);
+      checkMapper.insert(check);
     }
     return ((Long) code).intValue();
   }

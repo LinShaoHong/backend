@@ -14,8 +14,8 @@ import java.util.Set;
 @Service("synAnts")
 public class WordSynAntsLoader extends WordBasicLoader {
   @Override
-  public void load(String word) {
-    retry(word, dict -> {
+  public void load(String word, int userId) {
+    retry(word, userId, dict -> {
       String q = loadQ("cues/近反义词.md");
       String resp = assistant.chat(apiKey, model, "直接列出单词'" + word + "'的所有英文近义词和反义词。要求不要包含短语，单词首字母小写。");
       JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, resp + "\n\n" + q)));

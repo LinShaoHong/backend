@@ -39,9 +39,9 @@ public abstract class WordBasicLoader implements WordLoader {
   @Resource(name = "mysql")
   protected SqlBuilder.Factory factory;
 
-  protected void retry(String word, Consumer<WordDict> run, String... fields) {
+  protected void retry(String word, int userId, Consumer<WordDict> run, String... fields) {
     Throwable ex = null;
-    WordDict dict = init(word);
+    WordDict dict = init(word, userId);
     mapper.noPass(word);
     Arrays.asList(fields).forEach(f -> mapper.loading(word, "'$." + f + "Loading'"));
     for (int i = 0; i < 5; i++) {
@@ -100,7 +100,7 @@ public abstract class WordBasicLoader implements WordLoader {
     });
   }
 
-  public static synchronized WordDict init(String word) {
+  public static synchronized WordDict init(String word, int userId) {
     WordDictMapper mapper = Injector.getInstance(WordDictMapper.class);
     WordDict db = mapper.findById(word);
     if (db == null) {
@@ -110,7 +110,7 @@ public abstract class WordBasicLoader implements WordLoader {
       db.setLoadState(loadState);
       db.setLoadTime(new Date());
       WordCodeService codeService = Injector.getInstance(WordCodeService.class);
-      int sort = codeService.genWordSort();
+      int sort = codeService.genWordSort(userId);
       db.setSort(sort);
       mapper.insert(db);
     }

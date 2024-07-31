@@ -1,7 +1,6 @@
 package com.github.sun.word;
 
 import com.github.sun.foundation.rest.AbstractResource;
-import com.github.sun.word.loader.WordPdfService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -25,16 +24,18 @@ public class WordLoaderResource extends AbstractResource {
 
   @GET
   @Path("/all")
-  public Response loadAll(@QueryParam("words") String words) {
-    loader.loadAll(words);
+  public Response loadAll(@QueryParam("words") String words,
+                          @QueryParam("userId") int userId) {
+    loader.loadAll(words, userId);
     return responseOf();
   }
 
   @GET
   @Path("/part")
   public Response loadPart(@QueryParam("word") String word,
-                           @QueryParam("part") String part) {
-    loader.loadPart(word, part);
+                           @QueryParam("part") String part,
+                           @QueryParam("userId") int userId) {
+    loader.loadPart(word, part, userId);
     return responseOf();
   }
 
@@ -42,8 +43,9 @@ public class WordLoaderResource extends AbstractResource {
   @Path("/remove")
   public Response loadPart(@QueryParam("word") String word,
                            @QueryParam("part") String part,
-                           @QueryParam("path") String path) {
-    loader.removePart(word, part, path);
+                           @QueryParam("path") String path,
+                           @QueryParam("userId") int userId) {
+    loader.removePart(word, part, path, userId);
     return responseOf();
   }
 
@@ -55,22 +57,24 @@ public class WordLoaderResource extends AbstractResource {
   }
 
   @GET
-  @Path("/byDate")
+  @Path("/dict")
   public SingleResponse<WordDict> byDate(@QueryParam("date") String date,
-                                         @QueryParam("sort") Integer sort) {
-    return responseOf(loader.byDate(date, sort));
+                                         @QueryParam("sort") Integer sort,
+                                         @QueryParam("userId") int userId) {
+    return responseOf(loader.dict(date, sort, userId));
   }
 
   @GET
   @Path("/stat")
-  public SingleResponse<WordChecker> stat(@QueryParam("date") String date) {
-    return responseOf(loader.stat(date));
+  public SingleResponse<WordCheck> stat(@QueryParam("date") String date,
+                                        @QueryParam("userId") int userId) {
+    return responseOf(loader.stat(date, userId));
   }
 
   @GET
   @Path("/stats")
-  public ListResponse<WordChecker> stats() {
-    return responseOf(loader.stats());
+  public ListResponse<WordCheck> stats(@QueryParam("userId") int userId) {
+    return responseOf(loader.stats(userId));
   }
 
   @GET

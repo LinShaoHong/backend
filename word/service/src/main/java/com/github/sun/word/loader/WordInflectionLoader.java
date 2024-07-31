@@ -14,8 +14,8 @@ import java.util.Set;
 @Service("inflection")
 public class WordInflectionLoader extends WordBasicLoader {
   @Override
-  public void load(String word) {
-    retry(word, dict -> {
+  public void load(String word, int userId) {
+    retry(word, userId, dict -> {
       String q = loadQ("cues/派生词.md");
       String resp = assistant.chat(apiKey, model, "直接列出单词'" + word + "'的单复数、进行时、过去时、完成时、第三人称、比较级和最高级的变形。" +
         "要求只需给出该单词的相关变形，不要分析其他单词，不要给出短语和词组形式，不要给出非标准给非常规形式，单词本身没有比较级时不要给出，中文不要给出。");

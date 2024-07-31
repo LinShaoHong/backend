@@ -10,8 +10,8 @@ import java.util.List;
 @Service("struct")
 public class WordStructLoader extends WordBasicLoader {
   @Override
-  public void load(String word) {
-    retry(word, dict -> {
+  public void load(String word, int userId) {
+    retry(word, userId, dict -> {
       String q = loadQ("cues/词根词缀.md");
       String resp = assistant.chat(apiKey, model, "分析并直接列出单词'" + word + "'的词根词缀组成结构。" +
         "要求它们恰好能不多不少拼成这个单词，只要分析单词本身，不要分析其派生词");

@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 @Service("derivatives")
 public class WordDerivativesLoader extends WordBasicLoader {
   @Override
-  public void load(String word) {
-    retry(word, dict -> {
+  public void load(String word, int userId) {
+    retry(word, userId, dict -> {
       String root = dict.getStruct().getParts().stream()
         .filter(WordDict.Part::isRoot)
         .map(part -> {

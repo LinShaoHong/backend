@@ -2,7 +2,6 @@ package com.github.sun.word;
 
 import com.github.sun.foundation.ai.Assistant;
 import com.github.sun.foundation.boot.Scanner;
-import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.word.loader.WordBasicLoader;
 import com.github.sun.word.loader.WordDerivativesLoader;
@@ -18,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Service
 @RefreshScope
@@ -32,7 +32,7 @@ public class WordDictLoader {
   @Resource
   private WordDictMapper mapper;
   @Resource
-  private WordCheckerMapper checkerMapper;
+  private WordCheckMapper checkMapper;
   @Resource
   private WordStructLoader structLoader;
   @Resource
@@ -42,35 +42,35 @@ public class WordDictLoader {
     return assistant.chat(apiKey, model, q);
   }
 
-  public void loadAll(String words) {
+  public void loadAll(String words, int userId) {
     for (String word : words.split(",")) {
-      WordBasicLoader.init(word);
+      WordBasicLoader.init(word, userId);
       Scanner.getClassesWithInterface(WordLoader.class)
         .stream()
         .filter(Scanner.ClassTag::isImplementClass)
         .filter(v -> v.runtimeClass() != WordStructLoader.class &&
           v.runtimeClass() != WordDerivativesLoader.class)
-        .forEach(loader -> executor.submit(() -> loader.getInstance().load(word)));
+        .forEach(loader -> executor.submit(() -> loader.getInstance().load(word, userId)));
       executor.submit(() -> {
-        structLoader.load(word);
-        derivativesLoader.load(word);
+        structLoader.load(word, userId);
+        derivativesLoader.load(word, userId);
       });
     }
   }
 
-  public void loadPart(String word, String part) {
-    WordBasicLoader.init(word);
+  public void loadPart(String word, String part, int userId) {
+    WordBasicLoader.init(word, userId);
     mapper.loading(word, "'$." + part + "Loading'");
     Scanner.getClassesWithInterface(WordLoader.class)
       .stream().filter(v -> v.isImplementClass() &&
         v.runtimeClass().getAnnotation(Service.class).value().equals(part))
       .findFirst()
-      .ifPresent(loader -> executor.submit(() -> loader.getInstance().load(word)));
+      .ifPresent(loader -> executor.submit(() -> loader.getInstance().load(word, userId)));
   }
 
   @Transactional
-  public void removePart(String word, String part, String path) {
-    WordDict dict = WordBasicLoader.init(word);
+  public void removePart(String word, String part, String path, int userId) {
+    WordDict dict = WordBasicLoader.init(word, userId);
     switch (part) {
       case "meaning":
         if (StringUtils.hasText(path)) {
@@ -103,49 +103,56 @@ public class WordDictLoader {
   @Transactional
   public void pass(String word) {
     mapper.pass(word);
-    WordDict dict = mapper.findById(word);
-    String date = Dates.format(dict.getLoadTime());
-    WordChecker checker = stat(date);
-    checker.setPassed(mapper.countByPassed(date));
-    checkerMapper.update(checker);
   }
 
   @Transactional
-  public WordChecker stat(String date) {
-    WordChecker checker = checkerMapper.findById(date);
-    if (checker == null) {
-      List<WordChecker> all = checkerMapper.all();
-      checker = checkerMapper.all().get(all.size() - 1);
+  public WordCheck stat(String date, int userId) {
+    WordCheck check = checkMapper.findById(date + ":" + userId);
+    check.setTotal(mapper.countByDate(date));
+    check.setPassed(mapper.countByPassed(date));
+    return check;
+  }
+
+  @Transactional
+  public List<WordCheck> stats(int userId) {
+    List<String> dates = checkMapper.dates();
+    return dates.stream().map(date -> {
+      String id = date + ":" + userId;
+      WordCheck check = checkMapper.findById(id);
+      if (check == null) {
+        check = new WordCheck();
+        check.setId(date + ":" + userId);
+        check.setUserId(userId);
+        check.setDate(date);
+        check.setSort(1);
+        checkMapper.replace(check);
+      }
+      return check;
+    }).collect(Collectors.toList());
+  }
+
+  @Transactional
+  public WordDict dict(String date, Integer sort, int userId) {
+    WordCheck check = null;
+    List<WordCheck> all = stats(userId);
+    if (!StringUtils.hasText(date)) {
+      check = all.stream().filter(WordCheck::isCurr).findFirst().orElse(null);
+      if (check == null) {
+        check = all.get(all.size() - 1);
+      }
+      date = check.getDate();
     }
-    checker.setTotal(mapper.countByDate(checker.getId()));
-    checker.setPassed(mapper.countByPassed(checker.getId()));
-    return checker;
-  }
-
-  @Transactional
-  public List<WordChecker> stats() {
-    List<WordChecker> all = checkerMapper.all();
-    all.forEach(checker -> {
-      checker.setTotal(mapper.countByDate(checker.getId()));
-      checker.setPassed(mapper.countByPassed(checker.getId()));
-    });
-    return all;
-  }
-
-  @Transactional
-  public WordDict byDate(String date, Integer sort) {
-    WordChecker checker = checkerMapper.findById(date);
+    check = check == null ? checkMapper.findById(date + ":" + userId) : check;
     if (sort == null) {
-      sort = checker.getSort();
+      sort = check.getSort();
     }
     WordDict dict = mapper.byDateAndSort(date, sort);
     if (dict != null) {
-      checker.setSort(sort);
-      checker.setTotal(mapper.countByDate(date));
-      if (!dict.isViewed()) {
-        checker.setViewed(checker.getViewed() + 1);
-      }
-      checkerMapper.update(checker);
+      check.setSort(sort);
+      check.setCurr(true);
+      checkMapper.update(check);
+      checkMapper.past(date + ":" + userId, userId);
+
       mapper.viewed(dict.getId());
     }
     return dict;

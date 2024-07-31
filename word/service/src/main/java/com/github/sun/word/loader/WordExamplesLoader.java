@@ -12,8 +12,8 @@ import java.util.List;
 @Service("examples")
 public class WordExamplesLoader extends WordBasicLoader {
   @Override
-  public void load(String word) {
-    retry(word, dict -> {
+  public void load(String word, int userId) {
+    retry(word, userId, dict -> {
       String q = loadQ("cues/释义例句.md");
       JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, q, word)));
       dict.setMeaning(WordDict.TranslatedMeaning.builder()
