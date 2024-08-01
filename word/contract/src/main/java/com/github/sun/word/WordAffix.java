@@ -9,26 +9,18 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "word_check")
+@Table(name = "word_affix")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WordCheck {
+public class WordAffix {
   @Id
   private String id;
-  private String date;
-  private int userId;
-  private int sort;
-  private boolean curr;
-  @Transient
-  private int viewed;
-  @Transient
-  private int passed;
-  @Transient
-  private int total;
+  private String root;
+  private String rootDesc;
+  private String wordDesc;
 }

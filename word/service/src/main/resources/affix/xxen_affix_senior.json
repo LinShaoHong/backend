@@ -1,0 +1,1036 @@
+[
+  {
+    "roots": [
+      "-ac-",
+      "-acr-",
+      "-acu-"
+    ],
+    "en": "",
+    "desc": "尖"
+  },
+  {
+    "roots": [
+      "-aer-"
+    ],
+    "en": "",
+    "desc": "空气"
+  },
+  {
+    "roots": [
+      "-agog-"
+    ],
+    "en": "",
+    "desc": "领导"
+  },
+  {
+    "roots": [
+      "-alter-",
+      "-al-"
+    ],
+    "en": "",
+    "desc": "全部改变"
+  },
+  {
+    "roots": [
+      "-ambul-"
+    ],
+    "en": "",
+    "desc": "行走"
+  },
+  {
+    "roots": [
+      "-angul-"
+    ],
+    "en": "",
+    "desc": "角"
+  },
+  {
+    "roots": [
+      "-anth-"
+    ],
+    "en": "",
+    "desc": "花"
+  },
+  {
+    "roots": [
+      "-anthrop-"
+    ],
+    "en": "",
+    "desc": "人"
+  },
+  {
+    "roots": [
+      "-aster-",
+      "-astr-"
+    ],
+    "en": "",
+    "desc": "星星"
+  },
+  {
+    "roots": [
+      "-audi-",
+      "-audit-"
+    ],
+    "en": "",
+    "desc": "听"
+  },
+  {
+    "roots": [
+      "-aur-"
+    ],
+    "en": "",
+    "desc": "耳"
+  },
+  {
+    "roots": [
+      "-avi-"
+    ],
+    "en": "",
+    "desc": "鸟"
+  },
+  {
+    "roots": [
+      "-bar-"
+    ],
+    "en": "",
+    "desc": "重量"
+  },
+  {
+    "roots": [
+      "-bas-",
+      "-bat-"
+    ],
+    "en": "",
+    "desc": "走"
+  },
+  {
+    "roots": [
+      "-biblio-"
+    ],
+    "en": "",
+    "desc": "书"
+  },
+  {
+    "roots": [
+      "-brev-"
+    ],
+    "en": "",
+    "desc": "短的"
+  },
+  {
+    "roots": [
+      "-burs-"
+    ],
+    "en": "",
+    "desc": "袋子"
+  },
+  {
+    "roots": [
+      "cac-"
+    ],
+    "en": "",
+    "desc": "恶"
+  },
+  {
+    "roots": [
+      "-cad-",
+      "-cas-",
+      "-cid-"
+    ],
+    "en": "",
+    "desc": "落"
+  },
+  {
+    "roots": [
+      "-calc-"
+    ],
+    "en": "",
+    "desc": "钙"
+  },
+  {
+    "roots": [
+      "-cap-"
+    ],
+    "en": "",
+    "desc": "抓"
+  },
+  {
+    "roots": [
+      "-car-",
+      "-carn-"
+    ],
+    "en": "",
+    "desc": "肉"
+  },
+  {
+    "roots": [
+      "-celer-"
+    ],
+    "en": "",
+    "desc": "快速"
+  },
+  {
+    "roots": [
+      "-chron-"
+    ],
+    "en": "",
+    "desc": "时间"
+  },
+  {
+    "roots": [
+      "-cil-"
+    ],
+    "en": "",
+    "desc": "召唤"
+  },
+  {
+    "roots": [
+      "-circ-",
+      "-cycl-"
+    ],
+    "en": "",
+    "desc": "圆"
+  },
+  {
+    "roots": [
+      "-clin-",
+      "-cliv-"
+    ],
+    "en": "",
+    "desc": "倾"
+  },
+  {
+    "roots": [
+      "-cogn-"
+    ],
+    "en": "",
+    "desc": "知道"
+  },
+  {
+    "roots": [
+      "contra-",
+      "counter-"
+    ],
+    "en": "",
+    "desc": "对立"
+  },
+  {
+    "roots": [
+      "-crim-"
+    ],
+    "en": "",
+    "desc": "罪"
+  },
+  {
+    "roots": [
+      "-cryo-"
+    ],
+    "en": "",
+    "desc": "冷"
+  },
+  {
+    "roots": [
+      "-culp-"
+    ],
+    "en": "",
+    "desc": "责备"
+  },
+  {
+    "roots": [
+      "-dem-"
+    ],
+    "en": "",
+    "desc": "人民"
+  },
+  {
+    "roots": [
+      "-derm-"
+    ],
+    "en": "",
+    "desc": "皮"
+  },
+  {
+    "roots": [
+      "-dic-"
+    ],
+    "en": "",
+    "desc": "宣称"
+  },
+  {
+    "roots": [
+      "-dogm-",
+      "-dox-"
+    ],
+    "en": "",
+    "desc": "意见"
+  },
+  {
+    "roots": [
+      "-dorm-"
+    ],
+    "en": "",
+    "desc": "睡眠"
+  },
+  {
+    "roots": [
+      "-drom-"
+    ],
+    "en": "",
+    "desc": "跑"
+  },
+  {
+    "roots": [
+      "-dur-"
+    ],
+    "en": "",
+    "desc": "持久"
+  },
+  {
+    "roots": [
+      "-ego-"
+    ],
+    "en": "",
+    "desc": "我"
+  },
+  {
+    "roots": [
+      "-erg-"
+    ],
+    "en": "",
+    "desc": "工作"
+  },
+  {
+    "roots": [
+      "-ess-"
+    ],
+    "en": "",
+    "desc": "存在"
+  },
+  {
+    "roots": [
+      "-femin-"
+    ],
+    "en": "",
+    "desc": "女性"
+  },
+  {
+    "roots": [
+      "-ferv-"
+    ],
+    "en": "",
+    "desc": "热"
+  },
+  {
+    "roots": [
+      "-fibr-"
+    ],
+    "en": "",
+    "desc": "纤维"
+  },
+  {
+    "roots": [
+      "-fig-",
+      "-fict-"
+    ],
+    "en": "",
+    "desc": "构成"
+  },
+  {
+    "roots": [
+      "-fil-"
+    ],
+    "en": "",
+    "desc": "子女"
+  },
+  {
+    "roots": [
+      "-fisc-"
+    ],
+    "en": "",
+    "desc": "国库"
+  },
+  {
+    "roots": [
+      "-foli-"
+    ],
+    "en": "",
+    "desc": "叶"
+  },
+  {
+    "roots": [
+      "-forc-",
+      "-fort-"
+    ],
+    "en": "",
+    "desc": "强"
+  },
+  {
+    "roots": [
+      "-fug-"
+    ],
+    "en": "",
+    "desc": "逃"
+  },
+  {
+    "roots": [
+      "grand-"
+    ],
+    "en": "",
+    "desc": "大"
+  },
+  {
+    "roots": [
+      "-grat-"
+    ],
+    "en": "",
+    "desc": "感激"
+  },
+  {
+    "roots": [
+      "-grav-"
+    ],
+    "en": "",
+    "desc": "加重"
+  },
+  {
+    "roots": [
+      "-gyr-"
+    ],
+    "en": "",
+    "desc": "旋转"
+  },
+  {
+    "roots": [
+      "-her-",
+      "-hes-"
+    ],
+    "en": "",
+    "desc": "粘"
+  },
+  {
+    "roots": [
+      "holo-"
+    ],
+    "en": "",
+    "desc": "全"
+  },
+  {
+    "roots": [
+      "-horr-"
+    ],
+    "en": "",
+    "desc": "怕"
+  },
+  {
+    "roots": [
+      "-hum-"
+    ],
+    "en": "",
+    "desc": "地"
+  },
+  {
+    "roots": [
+      "-ideo-"
+    ],
+    "en": "",
+    "desc": "观念"
+  },
+  {
+    "roots": [
+      "-idio-"
+    ],
+    "en": "",
+    "desc": "个人的"
+  },
+  {
+    "roots": [
+      "-iod-"
+    ],
+    "en": "",
+    "desc": "碘"
+  },
+  {
+    "roots": [
+      "iso-"
+    ],
+    "en": "",
+    "desc": "等"
+  },
+  {
+    "roots": [
+      "-journ-"
+    ],
+    "en": "",
+    "desc": "天"
+  },
+  {
+    "roots": [
+      "-lat-"
+    ],
+    "en": "",
+    "desc": "持"
+  },
+  {
+    "roots": [
+      "-later-"
+    ],
+    "en": "",
+    "desc": "边"
+  },
+  {
+    "roots": [
+      "-lav-"
+    ],
+    "en": "",
+    "desc": "洗"
+  },
+  {
+    "roots": [
+      "-leg-"
+    ],
+    "en": "",
+    "desc": "法"
+  },
+  {
+    "roots": [
+      "-lig-"
+    ],
+    "en": "",
+    "desc": "绑"
+  },
+  {
+    "roots": [
+      "-lingu-"
+    ],
+    "en": "",
+    "desc": "语言"
+  },
+  {
+    "roots": [
+      "-lith-"
+    ],
+    "en": "",
+    "desc": "石"
+  },
+  {
+    "roots": [
+      "-lun-"
+    ],
+    "en": "",
+    "desc": "月亮"
+  },
+  {
+    "roots": [
+      "-lust-"
+    ],
+    "en": "",
+    "desc": "光"
+  },
+  {
+    "roots": [
+      "-man-",
+      "-manu-"
+    ],
+    "en": "",
+    "desc": "手"
+  },
+  {
+    "roots": [
+      "-marin-",
+      "-mar-"
+    ],
+    "en": "",
+    "desc": "海"
+  },
+  {
+    "roots": [
+      "mega-"
+    ],
+    "en": "",
+    "desc": "大"
+  },
+  {
+    "roots": [
+      "-merc-"
+    ],
+    "en": "",
+    "desc": "商"
+  },
+  {
+    "roots": [
+      "-merg-"
+    ],
+    "en": "",
+    "desc": "沉"
+  },
+  {
+    "roots": [
+      "-meso-"
+    ],
+    "en": "",
+    "desc": "中间"
+  },
+  {
+    "roots": [
+      "-misc-",
+      "-mixt-"
+    ],
+    "en": "",
+    "desc": "混杂"
+  },
+  {
+    "roots": [
+      "miso-"
+    ],
+    "en": "",
+    "desc": "厌恶"
+  },
+  {
+    "roots": [
+      "-mob-"
+    ],
+    "en": "",
+    "desc": "动"
+  },
+  {
+    "roots": [
+      "-mon-"
+    ],
+    "en": "",
+    "desc": "忠告"
+  },
+  {
+    "roots": [
+      "-morph-"
+    ],
+    "en": "",
+    "desc": "形"
+  },
+  {
+    "roots": [
+      "-mur-"
+    ],
+    "en": "",
+    "desc": "墙"
+  },
+  {
+    "roots": [
+      "-myst-"
+    ],
+    "en": "",
+    "desc": "神秘"
+  },
+  {
+    "roots": [
+      "-nunci-"
+    ],
+    "en": "",
+    "desc": "通知"
+  },
+  {
+    "roots": [
+      "-oo-"
+    ],
+    "en": "",
+    "desc": "卵"
+  },
+  {
+    "roots": [
+      "-opt-"
+    ],
+    "en": "",
+    "desc": "视"
+  },
+  {
+    "roots": [
+      "-ora-"
+    ],
+    "en": "",
+    "desc": "说"
+  },
+  {
+    "roots": [
+      "-oram-"
+    ],
+    "en": "",
+    "desc": "景"
+  },
+  {
+    "roots": [
+      "-oss-"
+    ],
+    "en": "",
+    "desc": "骨"
+  },
+  {
+    "roots": [
+      "-ot-"
+    ],
+    "en": "",
+    "desc": "耳"
+  },
+  {
+    "roots": [
+      "-pac-"
+    ],
+    "en": "",
+    "desc": "和平"
+  },
+  {
+    "roots": [
+      "-paleo-"
+    ],
+    "en": "",
+    "desc": "老"
+  },
+  {
+    "roots": [
+      "-par-"
+    ],
+    "en": "",
+    "desc": "生"
+  },
+  {
+    "roots": [
+      "-pet-"
+    ],
+    "en": "",
+    "desc": "寻求"
+  },
+  {
+    "roots": [
+      "-petr-"
+    ],
+    "en": "",
+    "desc": "石"
+  },
+  {
+    "roots": [
+      "-phob-"
+    ],
+    "en": "",
+    "desc": "怕"
+  },
+  {
+    "roots": [
+      "-phon-"
+    ],
+    "en": "",
+    "desc": "声音"
+  },
+  {
+    "roots": [
+      "-plor-"
+    ],
+    "en": "",
+    "desc": "流出"
+  },
+  {
+    "roots": [
+      "-port-"
+    ],
+    "en": "",
+    "desc": "分"
+  },
+  {
+    "roots": [
+      "-pot-"
+    ],
+    "en": "",
+    "desc": "能"
+  },
+  {
+    "roots": [
+      "-prec-"
+    ],
+    "en": "",
+    "desc": "祈祷"
+  },
+  {
+    "roots": [
+      "-priv-"
+    ],
+    "en": "",
+    "desc": "个人的"
+  },
+  {
+    "roots": [
+      "-prob-"
+    ],
+    "en": "",
+    "desc": "试验"
+  },
+  {
+    "roots": [
+      "-pter-"
+    ],
+    "en": "",
+    "desc": "翅"
+  },
+  {
+    "roots": [
+      "-quer-"
+    ],
+    "en": "",
+    "desc": "抱怨"
+  },
+  {
+    "roots": [
+      "-rect-",
+      "-reg-"
+    ],
+    "en": "",
+    "desc": "直"
+  },
+  {
+    "roots": [
+      "-sacr-",
+      "-sanct-"
+    ],
+    "en": "",
+    "desc": "神圣"
+  },
+  {
+    "roots": [
+      "-scens-",
+      "-scend-"
+    ],
+    "en": "",
+    "desc": "爬"
+  },
+  {
+    "roots": [
+      "-scop-"
+    ],
+    "en": "",
+    "desc": "看"
+  },
+  {
+    "roots": [
+      "-secut-",
+      "-sequ-"
+    ],
+    "en": "",
+    "desc": "跟随"
+  },
+  {
+    "roots": [
+      "-sin-",
+      "-sino-"
+    ],
+    "en": "",
+    "desc": "中国"
+  },
+  {
+    "roots": [
+      "-sist-"
+    ],
+    "en": "",
+    "desc": "站立"
+  },
+  {
+    "roots": [
+      "-spars-"
+    ],
+    "en": "",
+    "desc": "散播"
+  },
+  {
+    "roots": [
+      "-spect-",
+      "-spec-",
+      "-spic-"
+    ],
+    "en": "",
+    "desc": "看"
+  },
+  {
+    "roots": [
+      "-sper-"
+    ],
+    "en": "",
+    "desc": "希望"
+  },
+  {
+    "roots": [
+      "-spher-"
+    ],
+    "en": "",
+    "desc": "球"
+  },
+  {
+    "roots": [
+      "-spond-",
+      "-spons-"
+    ],
+    "en": "",
+    "desc": "承诺"
+  },
+  {
+    "roots": [
+      "-still-"
+    ],
+    "en": "",
+    "desc": "滴"
+  },
+  {
+    "roots": [
+      "-stinct-",
+      "-sting-"
+    ],
+    "en": "",
+    "desc": "刺"
+  },
+  {
+    "roots": [
+      "-struct-"
+    ],
+    "en": "",
+    "desc": "建造"
+  },
+  {
+    "roots": [
+      "-tact-",
+      "-tang-"
+    ],
+    "en": "",
+    "desc": "接触"
+  },
+  {
+    "roots": [
+      "-tect-"
+    ],
+    "en": "",
+    "desc": "掩盖"
+  },
+  {
+    "roots": [
+      "-tempor-"
+    ],
+    "en": "",
+    "desc": "时"
+  },
+  {
+    "roots": [
+      "-tempt-",
+      "-tent-"
+    ],
+    "en": "",
+    "desc": "触摸"
+  },
+  {
+    "roots": [
+      "-tenu-"
+    ],
+    "en": "",
+    "desc": "细薄"
+  },
+  {
+    "roots": [
+      "-term-"
+    ],
+    "en": "",
+    "desc": "末端"
+  },
+  {
+    "roots": [
+      "-terr-"
+    ],
+    "en": "",
+    "desc": "地"
+  },
+  {
+    "roots": [
+      "-therm-"
+    ],
+    "en": "",
+    "desc": "热"
+  },
+  {
+    "roots": [
+      "-toler-"
+    ],
+    "en": "",
+    "desc": "容忍"
+  },
+  {
+    "roots": [
+      "-ton-"
+    ],
+    "en": "",
+    "desc": "音"
+  },
+  {
+    "roots": [
+      "-tract-",
+      "-treat-"
+    ],
+    "en": "",
+    "desc": "处理"
+  },
+  {
+    "roots": [
+      "-tric-"
+    ],
+    "en": "",
+    "desc": "困惑, 诡计"
+  },
+  {
+    "roots": [
+      "-turb-"
+    ],
+    "en": "",
+    "desc": "骚乱"
+  },
+  {
+    "roots": [
+      "-vac-",
+      "-van-"
+    ],
+    "en": "",
+    "desc": "空"
+  },
+  {
+    "roots": [
+      "-val-"
+    ],
+    "en": "",
+    "desc": "强"
+  },
+  {
+    "roots": [
+      "-veng-",
+      "-venge-"
+    ],
+    "en": "",
+    "desc": "惩罚"
+  },
+  {
+    "roots": [
+      "-vent-"
+    ],
+    "en": "",
+    "desc": "风"
+  },
+  {
+    "roots": [
+      "-ver-"
+    ],
+    "en": "",
+    "desc": "真实"
+  },
+  {
+    "roots": [
+      "-verg-"
+    ],
+    "en": "",
+    "desc": "倾斜"
+  },
+  {
+    "roots": [
+      "-vibr-"
+    ],
+    "en": "",
+    "desc": "摇动"
+  }
+]

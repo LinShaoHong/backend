@@ -110,6 +110,7 @@ public class WordDictLoader {
     WordCheck check = checkMapper.findById(date + ":" + userId);
     check.setTotal(mapper.countByDate(date));
     check.setPassed(mapper.countByPassed(date));
+    check.setViewed(mapper.countByViewed(date));
     return check;
   }
 
@@ -127,6 +128,9 @@ public class WordDictLoader {
         check.setSort(1);
         checkMapper.replace(check);
       }
+      check.setTotal(mapper.countByDate(date));
+      check.setPassed(mapper.countByPassed(date));
+      check.setViewed(mapper.countByViewed(date));
       return check;
     }).collect(Collectors.toList());
   }

@@ -1,6 +1,7 @@
 package com.github.sun.word;
 
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.word.spider.WordXxEnAffixSpider;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -15,11 +16,15 @@ import java.io.InputStream;
 public class WordLoaderResource extends AbstractResource {
   private final WordDictLoader loader;
   private final WordPdfService pdfService;
+  private final WordXxEnAffixSpider xxEnAffixSpider;
 
   @Inject
-  public WordLoaderResource(WordDictLoader loader, WordPdfService pdfService) {
+  public WordLoaderResource(WordDictLoader loader,
+                            WordPdfService pdfService,
+                            WordXxEnAffixSpider xxEnAffixSpider) {
     this.loader = loader;
     this.pdfService = pdfService;
+    this.xxEnAffixSpider = xxEnAffixSpider;
   }
 
   @GET
@@ -81,6 +86,13 @@ public class WordLoaderResource extends AbstractResource {
   @Path("/dicts")
   public ListResponse<WordDict> dicts(@QueryParam("date") String date) {
     return responseOf(loader.dicts(date));
+  }
+
+  @GET
+  @Path("/spider/affix/xxEn")
+  public Response spiderXxEnAffix() throws Exception {
+    xxEnAffixSpider.apply();
+    return responseOf();
   }
 
   @GET

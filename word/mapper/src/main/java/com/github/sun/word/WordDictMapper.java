@@ -28,6 +28,9 @@ public interface WordDictMapper extends CompositeMapper<WordDict> {
   @Select("select count(0) from word_dict where date_format(loadTime,'%Y-%m-%d')=#{date}")
   int countByDate(@Param("date") String date);
 
+  @Select("select count(0) from word_dict where date_format(loadTime,'%Y-%m-%d')=#{date} and viewed=1")
+  int countByViewed(@Param("date") String date);
+
   @Select("select count(0) from word_dict where date_format(loadTime,'%Y-%m-%d')=#{date} and passed=1")
   int countByPassed(@Param("date") String date);
 
