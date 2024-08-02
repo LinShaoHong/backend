@@ -25,8 +25,8 @@ import java.util.List;
 public class WordDict {
   @Id
   private String id;
-  private String ukTranscription;//英式音标
-  private String usTranscription;//美式音标
+  private String ukPhonetic;//英式音标
+  private String usPhonetic;//美式音标
   @Converter(MeaningHandler.class)
   private TranslatedMeaning meaning;//中文释义
   @Converter(ExamplesHandler.class)
@@ -37,6 +37,7 @@ public class WordDict {
   private Inflection inflection;//派生词
   @Converter(DerivativesHandler.class)
   private List<Derivative> derivatives;//派生树
+  private List<Phrase> phrases;//短语词组
   @Converter(SynAntHandler.class)
   private SynAnt synAnts;//近反义词
   private String tags;//标签
@@ -141,6 +142,20 @@ public class WordDict {
 
   public static class DerivativesHandler extends JsonHandler.ListHandler<Derivative> {
   }
+
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public static class Phrase {
+    private String en;
+    private String zh;
+  }
+
+  public static class PhrasesHandler extends JsonHandler.ListHandler<Phrase> {
+  }
+
 
   @Data
   @Builder
