@@ -1,39 +1,36 @@
 package com.github.sun.word.spider;
 
-import com.github.sun.spider.Fetcher;
-import com.github.sun.spider.spi.JSoupFetcher;
 import com.github.sun.spider.spi.XPaths;
 import com.github.sun.word.WordDict;
+import com.github.sun.word.WordDictLoader;
 import org.apache.commons.text.StringEscapeUtils;
-import org.htmlcleaner.CleanerProperties;
-import org.htmlcleaner.DomSerializer;
-import org.htmlcleaner.HtmlCleaner;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Service
 public class WordYdSpider {
-  private static final Fetcher fetcher = new JSoupFetcher();
-  private static final HtmlCleaner hc = new HtmlCleaner();
-
   public static void main(String[] args) {
     try {
-      String html = fetcher.fetch("https://dict.youdao.com/result?lang=en&word=abstract");
-      Document node = new DomSerializer(new CleanerProperties()).createDOM(hc.clean(html));
-//      WordXxEnSpider.fetchPhrase("starve");
-//      WordHcSpider.fetchPhrase("starve");
-      fetchPhrase(node, null);
+      WordDict dict = new WordDict();
+      dict.setId("abstract");
+      WordHcSpider.fetchSynAnts(dict, synAnt -> {
+        System.out.println(synAnt.getSynonyms());
+        System.out.println("-------------------");
+        System.out.println(synAnt.getAntonyms());
+      });
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-
-  public static void fetchPhonetic(Document node, WordDict dict) {
+  public static void fetchPhonetic(WordDict dict) {
+    Document node = WordDictLoader.fetchDocument("https://dict.youdao.com/result?lang=en&word=" + dict.getId());
     List<Node> arr = XPaths.of(node, "//div[@class='per-phone']").asArray();
     String uk = XPaths.of(arr.get(0), ".//span[@class='phonetic']/text()").asText();
     String us = XPaths.of(arr.get(1), ".//span[@class='phonetic']/text()").asText();
@@ -43,7 +40,8 @@ public class WordYdSpider {
     dict.setUsPhonetic(us);
   }
 
-  public static void fetchInflection(Document node, WordDict dict) {
+  public static void fetchInflection(WordDict dict) {
+    Document node = WordDictLoader.fetchDocument("https://dict.youdao.com/result?lang=en&word=" + dict.getId());
     WordDict.Inflection inflection = new WordDict.Inflection();
     List<Node> arr = XPaths.of(node, "//li[@class='word-wfs-cell-less']").asArray();
     arr.forEach(n -> {
@@ -80,14 +78,20 @@ public class WordYdSpider {
     dict.setInflection(inflection);
   }
 
-  public static void fetchPhrase(Document node, WordDict dict) {
-    List<Node> arr = XPaths.of(node, "//div[@class='webPhrase']//li[@class='mcols-layout']").asArray();
-    arr.forEach(v -> {
-      String name = XPaths.of(v, ".//a[@class='point']").asText().trim();
-      String desc = XPaths.of(v, ".//p").as().getTextContent().trim();
-      name = StringEscapeUtils.unescapeHtml4(name);
-      desc = StringEscapeUtils.unescapeHtml4(desc);
-      System.out.println(name + ": " + desc);
-    });
+  public static void fetchPhrase(WordDict dict, Consumer<WordDict.Phrase> func) {
+    try {
+      Document node = WordDictLoader.fetchDocument("https://dict.youdao.com/result?lang=en&word=" + dict.getId());
+      List<Node> arr = XPaths.of(node, "//div[@class='webPhrase']//li[@class='mcols-layout']").asArray();
+      arr.forEach(v -> {
+        String name = XPaths.of(v, ".//a[@class='point']").asText().trim();
+        String desc = XPaths.of(v, ".//p").as().getTextContent().trim();
+        name = StringEscapeUtils.unescapeHtml4(name);
+        desc = StringEscapeUtils.unescapeHtml4(desc);
+        if (StringUtils.hasText(name) && StringUtils.hasText(desc)) {
+          func.accept(new WordDict.Phrase(name, desc));
+        }
+      });
+    } catch (Exception ex) {
+    }
   }
 }

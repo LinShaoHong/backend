@@ -63,10 +63,16 @@ public class WordLoaderResource extends AbstractResource {
 
   @GET
   @Path("/dict")
-  public SingleResponse<WordDict> byDate(@QueryParam("date") String date,
-                                         @QueryParam("sort") Integer sort,
-                                         @QueryParam("userId") int userId) {
+  public SingleResponse<WordDict> dict(@QueryParam("date") String date,
+                                       @QueryParam("sort") Integer sort,
+                                       @QueryParam("userId") int userId) {
     return responseOf(loader.dict(date, sort, userId));
+  }
+
+  @GET
+  @Path("/root")
+  public SingleResponse<String> root(@QueryParam("word") String word) {
+    return responseOf(loader.root(word));
   }
 
   @GET

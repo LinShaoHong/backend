@@ -8,12 +8,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Builder
@@ -37,6 +40,7 @@ public class WordDict {
   private Inflection inflection;//派生词
   @Converter(DerivativesHandler.class)
   private List<Derivative> derivatives;//派生树
+  @Converter(PhrasesHandler.class)
   private List<Phrase> phrases;//短语词组
   @Converter(SynAntHandler.class)
   private SynAnt synAnts;//近反义词
@@ -151,11 +155,23 @@ public class WordDict {
   public static class Phrase {
     private String en;
     private String zh;
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof Phrase)) return false;
+      Phrase phrase = (Phrase) o;
+      return getEn().equals(phrase.getEn());
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(getEn());
+    }
   }
 
   public static class PhrasesHandler extends JsonHandler.ListHandler<Phrase> {
   }
-
 
   @Data
   @Builder
@@ -182,6 +198,7 @@ public class WordDict {
     private boolean structLoading;
     private boolean synAntsLoading;
     private boolean derivativesLoading;
+    private boolean phrasesLoading;
   }
 
   public static class LoadStateHandler extends JsonHandler<LoadState> {

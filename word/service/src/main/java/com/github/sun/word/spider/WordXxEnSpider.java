@@ -6,8 +6,11 @@ import com.github.sun.spider.spi.JSoupFetcher;
 import com.github.sun.spider.spi.XPaths;
 import com.github.sun.word.WordAffix;
 import com.github.sun.word.WordAffixMapper;
+import com.github.sun.word.WordDict;
+import com.github.sun.word.WordDictLoader;
 import com.ibm.icu.impl.data.ResourceReader;
 import lombok.Data;
+import org.apache.commons.text.StringEscapeUtils;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
@@ -25,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,23 +40,24 @@ public class WordXxEnSpider {
   @Resource
   private WordAffixMapper mapper;
 
-  public static void fetchPhrase(String word) {
+  public static void fetchPhrase(WordDict dict, Consumer<WordDict.Phrase> func) {
     try {
-      String html = fetcher.fetch("https://www.xxenglish.com/w6/" + word);
-      Document node = new DomSerializer(new CleanerProperties()).createDOM(hc.clean(html));
+      Document node = WordDictLoader.fetchDocument("https://www.xxenglish.com/w6/" + dict.getId());
       List<Node> arr = XPaths.of(node, "//span[@class='CX']").asArray();
       arr.forEach(v -> {
         String name = XPaths.of(v, "./span[@class='YX']").asText();
         String desc = XPaths.of(v, "./span[@class='JX']").asText();
-        if (StringUtils.hasText(name)) {
-          System.out.println(name + ": " + (desc.length() > 2 ? desc.substring(2) : desc));
+        name = StringEscapeUtils.unescapeHtml4(name);
+        desc = StringEscapeUtils.unescapeHtml4(desc);
+        if (StringUtils.hasText(name) && StringUtils.hasText(desc)) {
+          func.accept(new WordDict.Phrase(name, desc.substring(2)));
         }
       });
-    } catch (Exception ex) {
-      ex.printStackTrace();
+    }catch (Exception ex) {
     }
   }
 
+  // --------------------------------------- affix -----------------------------------
   public void fetchAffix() {
     Arrays.asList("xxen_affix", "xxen_affix_junior", "xxen_affix_middle", "xxen_affix_senior", "xxen_affix_other")
       .forEach(file -> {

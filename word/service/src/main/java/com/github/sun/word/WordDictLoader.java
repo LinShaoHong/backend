@@ -1,28 +1,45 @@
 package com.github.sun.word;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.sun.foundation.ai.Assistant;
 import com.github.sun.foundation.boot.Scanner;
 import com.github.sun.foundation.boot.utility.Reflections;
+import com.github.sun.spider.Fetcher;
+import com.github.sun.spider.spi.JSoupFetcher;
 import com.github.sun.word.loader.WordBasicLoader;
 import com.github.sun.word.loader.WordDerivativesLoader;
 import com.github.sun.word.loader.WordStructLoader;
+import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.DomSerializer;
+import org.htmlcleaner.HtmlCleaner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Document;
 
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
 @RefreshScope
 public class WordDictLoader {
+  private static final Fetcher fetcher = new JSoupFetcher();
+  private static final HtmlCleaner hc = new HtmlCleaner();
   private final static ExecutorService executor = Executors.newFixedThreadPool(10);
+  private final static Cache<String, Document> documents = Caffeine.newBuilder()
+    .expireAfterWrite(30, TimeUnit.SECONDS)
+    .maximumSize(100)
+    .build();
+
   @Value("${qwen.key}")
   private String apiKey;
   @Value("${qwen.model}")
@@ -33,6 +50,8 @@ public class WordDictLoader {
   private WordDictMapper mapper;
   @Resource
   private WordCheckMapper checkMapper;
+  @Resource
+  private WordAffixMapper affixMapper;
   @Resource
   private WordStructLoader structLoader;
   @Resource
@@ -86,12 +105,21 @@ public class WordDictLoader {
           dict.setInflection(new WordDict.Inflection());
         }
         break;
-      case "derivatives":
+      case "phrases":
         if (StringUtils.hasText(path)) {
-          dict.getDerivatives().removeIf(d -> d.getWord().contains(path));
+          dict.getPhrases().removeIf(d -> Objects.equals(d.getEn(), path));
         } else {
           dict.setDerivatives(Collections.emptyList());
         }
+
+        break;
+      case "derivatives":
+        if (StringUtils.hasText(path)) {
+          dict.getDerivatives().removeIf(d -> d.getWord().equals(path));
+        } else {
+          dict.setDerivatives(Collections.emptyList());
+        }
+        WordDerivativesLoader.rebuild(dict);
         break;
       default:
         break;
@@ -164,5 +192,21 @@ public class WordDictLoader {
 
   public List<WordDict> dicts(String date) {
     return mapper.byDate(date);
+  }
+
+  public String root(String word) {
+    WordAffix affix = affixMapper.findById(word);
+    return affix == null ? "" : affix.getRoot();
+  }
+
+  public static Document fetchDocument(String url) {
+    return documents.get(url, u -> {
+      try {
+        String html = fetcher.fetch(url);
+        return new DomSerializer(new CleanerProperties()).createDOM(hc.clean(html));
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    });
   }
 }
