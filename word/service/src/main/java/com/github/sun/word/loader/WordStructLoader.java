@@ -4,6 +4,7 @@ import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.word.WordAffix;
 import com.github.sun.word.WordAffixMapper;
 import com.github.sun.word.WordDict;
+import com.github.sun.word.spider.WordJsSpider;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -17,13 +18,16 @@ public class WordStructLoader extends WordBasicLoader {
   private WordAffixMapper affixMapper;
 
   @Override
-  public void load(String word, int userId) {
+  public void load(String word, JSON.Valuer attr, int userId) {
     WordAffix affix = affixMapper.findById(word);
     retry(word, userId, dict -> {
       String q = loadQ("cues/词根词缀.md");
       String resp;
-      if (affix != null && StringUtils.hasText(affix.getRoot())) {
-        resp = assistant.chat(apiKey, model, "请简要分析单词" + word + "的词根为" + affix.getRoot() +
+      String root = attr == null ? null : attr.get("root").asText();
+      root = StringUtils.hasText(root) ? root : (affix != null ? affix.getRoot() : null);
+      root = StringUtils.hasText(root) ? root : WordJsSpider.fetchRoot(dict);
+      if (StringUtils.hasText(root)) {
+        resp = assistant.chat(apiKey, model, "请简要分析单词" + word + "的词根为" + root +
           "时的词根词缀组成结构，不要给出其他情况");
       } else {
         resp = assistant.chat(apiKey, model, "分析并直接列出单词'" + word + "'的词根词缀组成结构。" +

@@ -45,6 +45,7 @@ public class WordHcSpider {
         }
       });
     }catch (Exception ex) {
+      //do nothing
     }
   }
 

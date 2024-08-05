@@ -54,6 +54,7 @@ public class WordXxEnSpider {
         }
       });
     }catch (Exception ex) {
+      //do nothing
     }
   }
 

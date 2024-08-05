@@ -15,7 +15,7 @@ import java.util.Set;
 @Service("synAnts")
 public class WordSynAntsLoader extends WordBasicLoader {
   @Override
-  public void load(String word, int userId) {
+  public void load(String word, JSON.Valuer attr, int userId) {
     retry(word, userId, dict -> {
       Set<String> synonyms = new LinkedHashSet<>();
       Set<String> antonyms = new LinkedHashSet<>();

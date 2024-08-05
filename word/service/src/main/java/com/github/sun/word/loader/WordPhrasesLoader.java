@@ -15,7 +15,7 @@ import java.util.Set;
 @Service("phrases")
 public class WordPhrasesLoader extends WordBasicLoader {
   @Override
-  public void load(String word, int userId) {
+  public void load(String word, JSON.Valuer attr, int userId) {
     retry(word, userId, dict -> {
       Set<WordDict.Phrase> phrases = new LinkedHashSet<>();
       String q = loadQ("cues/短语词组.md");

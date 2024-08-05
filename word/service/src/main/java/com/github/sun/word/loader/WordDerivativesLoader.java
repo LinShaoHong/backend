@@ -1,5 +1,6 @@
 package com.github.sun.word.loader;
 
+import com.github.sun.foundation.boot.utility.Iterators;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.StringSorts;
 import com.github.sun.word.WordAffix;
@@ -7,7 +8,6 @@ import com.github.sun.word.WordAffixMapper;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.WordDictMapper;
 import com.github.sun.word.spider.WordHcSpider;
-import com.github.sun.word.spider.WordYdSpider;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import javax.ws.rs.client.Client;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,12 +26,14 @@ import java.util.stream.Collectors;
 @Service("derivatives")
 public class WordDerivativesLoader extends WordBasicLoader {
   @Resource
+  private Client client;
+  @Resource
   private WordDictMapper dictMapper;
   @Resource
   private WordAffixMapper affixMapper;
 
   @Override
-  public void load(String word, int userId) {
+  public void load(String word, JSON.Valuer attr, int userId) {
     retry(word, userId, dict -> {
       String root = dict.getStruct().getParts().stream()
         .filter(WordDict.Part::isRoot)
@@ -55,7 +58,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
       String resp;
       if (hasRoot) {
         words.addAll(affixMapper.byRoot(root));
-        resp = assistant.chat(apiKey, model, "尽可能多的直接列出词根\"" + root + "\"的所有派生词");
+        resp = assistant.chat(apiKey, model, "尽可能多的直接列出词根" + root + "的派生词，要求这些派生词的词根也为" + root + "且其词根意义相近。");
         JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, resp + "\n\n" + q)));
         for (JSON.Valuer v : valuer.asArray()) {
           words.add(v.get("word").asText());
@@ -72,7 +75,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
   }
 
   private List<WordDict.Derivative> merge(WordDict dict, List<String> words, String root) {
-    clearInvalidate(words, root);
+    clearInvalid(words, dict, root);
     String word = dict.getId();
     List<String> _words = words.stream().map(String::toLowerCase).distinct().collect(Collectors.toList());
     dict.getDerivatives().forEach(d -> _words.add(d.getWord()));
@@ -139,9 +142,14 @@ public class WordDerivativesLoader extends WordBasicLoader {
     }
   }
 
-  private void clearInvalidate(List<String> words, String root) {
+  private void clearInvalid(List<String> words, WordDict dict, String root) {
+    Set<String> exist = dict.getDerivatives() == null ? new HashSet<>() :
+      dict.getDerivatives().stream().map(WordDict.Derivative::getWord).collect(Collectors.toSet());
     words.removeIf(v -> {
       if (Objects.equals(v, root)) {
+        return false;
+      }
+      if (exist.contains(v)) {
         return false;
       }
       boolean invalid = !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'s");
@@ -156,15 +164,36 @@ public class WordDerivativesLoader extends WordBasicLoader {
       if (a != null) {
         return false;
       }
-      WordDict in = new WordDict();
-      in.setId(v);
-      try {
-        WordYdSpider.fetchPhonetic(in);
-      } catch (Exception ex) {
-        return true;
-      }
-      return false;
+      return !has(v);
     });
+  }
+
+  private boolean has(String word) {
+    try {
+      String resp = client
+        .target("http://dict.youdao.com/suggest")
+        .queryParam("num", 1)
+        .queryParam("doctype", "json")
+        .queryParam("q", word)
+        .request()
+        .get()
+        .readEntity(String.class);
+      JSON.Valuer valuer = JSON.newValuer(resp);
+      int code = valuer.get("result").get("code").asInt();
+      if (code != 200) {
+        return false;
+      }
+      List<JSON.Valuer> arr = Iterators.asList(valuer.get("data").get("entries").asArray());
+      if (arr.size() > 0) {
+        String entry = arr.get(0).get("entry").asText();
+        if (!word.equalsIgnoreCase(entry)) {
+          return false;
+        }
+      }
+    } catch (Exception ex) {
+      return false;
+    }
+    return true;
   }
 
   private static void sort(List<WordNode> nodes) {

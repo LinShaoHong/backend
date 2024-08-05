@@ -1,7 +1,9 @@
 package com.github.sun.word;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.word.spider.WordXxEnSpider;
+import lombok.Data;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -35,13 +37,20 @@ public class WordLoaderResource extends AbstractResource {
     return responseOf();
   }
 
-  @GET
+  @POST
   @Path("/part")
-  public Response loadPart(@QueryParam("word") String word,
-                           @QueryParam("part") String part,
-                           @QueryParam("userId") int userId) {
-    loader.loadPart(word, part, userId);
+  public Response loadPart(PartReq req) {
+    loader.loadPart(req.getWord(), req.getPart(), req.getAttr(), req.getUserId());
     return responseOf();
+  }
+
+  @Data
+  public static class PartReq {
+    private String word;
+    private String part;
+    private String path;
+    private int userId;
+    private JsonNode attr;
   }
 
   @GET

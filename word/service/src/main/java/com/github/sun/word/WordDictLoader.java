@@ -1,9 +1,11 @@
 package com.github.sun.word;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.sun.foundation.ai.Assistant;
 import com.github.sun.foundation.boot.Scanner;
+import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.spider.Fetcher;
 import com.github.sun.spider.spi.JSoupFetcher;
@@ -36,7 +38,7 @@ public class WordDictLoader {
   private static final HtmlCleaner hc = new HtmlCleaner();
   private final static ExecutorService executor = Executors.newFixedThreadPool(10);
   private final static Cache<String, Document> documents = Caffeine.newBuilder()
-    .expireAfterWrite(30, TimeUnit.SECONDS)
+    .expireAfterWrite(5, TimeUnit.MINUTES)
     .maximumSize(100)
     .build();
 
@@ -77,14 +79,14 @@ public class WordDictLoader {
     }
   }
 
-  public void loadPart(String word, String part, int userId) {
+  public void loadPart(String word, String part, JsonNode attr, int userId) {
     WordBasicLoader.init(word, userId);
     mapper.loading(word, "'$." + part + "Loading'");
     Scanner.getClassesWithInterface(WordLoader.class)
       .stream().filter(v -> v.isImplementClass() &&
         v.runtimeClass().getAnnotation(Service.class).value().equals(part))
       .findFirst()
-      .ifPresent(loader -> executor.submit(() -> loader.getInstance().load(word, userId)));
+      .ifPresent(loader -> executor.submit(() -> loader.getInstance().load(word, attr == null ? null : JSON.newValuer(attr), userId)));
   }
 
   @Transactional
@@ -96,6 +98,11 @@ public class WordDictLoader {
           Reflections.setValue(dict.getMeaning(), path, "");
         } else {
           dict.setMeaning(new WordDict.TranslatedMeaning());
+        }
+        break;
+      case "struct":
+        if (!StringUtils.hasText(path)) {
+          dict.setStruct(null);
         }
         break;
       case "inflection":
@@ -199,7 +206,7 @@ public class WordDictLoader {
     return affix == null ? "" : affix.getRoot();
   }
 
-  public static Document fetchDocument(String url) {
+  public static synchronized Document fetchDocument(String url) {
     return documents.get(url, u -> {
       try {
         String html = fetcher.fetch(url);
