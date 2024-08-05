@@ -24,10 +24,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -53,9 +50,21 @@ public class WordXxEnSpider {
           func.accept(new WordDict.Phrase(name, desc.substring(2)));
         }
       });
-    }catch (Exception ex) {
+    } catch (Exception ex) {
       //do nothing
     }
+  }
+
+  public static Set<String> fetchDiffs(WordDict dict) {
+    Set<String> set = new HashSet<>();
+    try {
+      Document node = WordDictLoader.fetchDocument("https://www.xxenglish.com/w7/" + dict.getId());
+      List<Node> arr = XPaths.of(node, "//a[@class='sec-trans']").asArray();
+      arr.forEach(a -> set.add(a.getTextContent()));
+    } catch (Exception ex) {
+      //do nothing
+    }
+    return set;
   }
 
   // --------------------------------------- affix -----------------------------------

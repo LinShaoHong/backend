@@ -44,7 +44,7 @@ public abstract class WordBasicLoader implements WordLoader {
     WordDict dict = init(word, userId);
     mapper.noPass(word);
     Arrays.asList(fields).forEach(f -> mapper.loading(word, "'$." + f + "Loading'"));
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 2; i++) {
       try {
         run.accept(dict);
         ex = null;

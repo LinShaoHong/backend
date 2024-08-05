@@ -35,17 +35,18 @@ public class WordDerivativesLoader extends WordBasicLoader {
   @Override
   public void load(String word, JSON.Valuer attr, int userId) {
     retry(word, userId, dict -> {
-      String root = dict.getStruct().getParts().stream()
-        .filter(WordDict.Part::isRoot)
-        .map(part -> {
-          String w = part.getPart();
-          w = w.replaceAll("-", "");
-          if (w.contains("(")) {
-            int i = w.indexOf("(");
-            w = w.substring(0, i);
-          }
-          return w;
-        }).collect(Collectors.joining());
+      String root = dict.getStruct() == null ? null :
+        dict.getStruct().getParts().stream()
+          .filter(WordDict.Part::isRoot)
+          .map(part -> {
+            String w = part.getPart();
+            w = w.replaceAll("-", "");
+            if (w.contains("(")) {
+              int i = w.indexOf("(");
+              w = w.substring(0, i);
+            }
+            return w;
+          }).collect(Collectors.joining());
       root = StringUtils.hasText(root) ? root : word;
 
       String q = loadQ("cues/派生树.md");
@@ -53,21 +54,20 @@ public class WordDerivativesLoader extends WordBasicLoader {
       words.add(word);
       words.add(root);
       WordHcSpider.fetchDerivative(dict, words::addAll);
-
-      boolean hasRoot = dict.getStruct().getParts().stream().anyMatch(WordDict.Part::isRoot);
+      boolean hasRoot = dict.getStruct() != null && dict.getStruct().getParts().stream().anyMatch(WordDict.Part::isRoot);
       String resp;
       if (hasRoot) {
         words.addAll(affixMapper.byRoot(root));
-        resp = assistant.chat(apiKey, model, "尽可能多的直接列出词根" + root + "的派生词，要求这些派生词的词根也为" + root + "且其词根意义相近。");
-        JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, resp + "\n\n" + q)));
-        for (JSON.Valuer v : valuer.asArray()) {
-          words.add(v.get("word").asText());
-        }
+        resp = assistant.chat(apiKey, model, q.replace("$input", "尽可能多的直接列出词根" + root + "的派生词，要求这些派生词的词根也为" + root + "且其词根意义相近。"));
+      } else {
+        resp = assistant.chat(apiKey, model, q.replace("$input", "尽可能多的直接列出单词\"" + word + "\"的所有派生词"));
       }
-      resp = assistant.chat(apiKey, model, "尽可能多的直接列出单词\"" + word + "\"的所有派生词");
-      JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, resp + "\n\n" + q)));
+      JSON.Valuer valuer = JSON.newValuer(parse(resp));
       for (JSON.Valuer v : valuer.asArray()) {
-        words.add(v.get("word").asText());
+        String w = v.get("word").asText("");
+        if (StringUtils.hasText(w)) {
+          words.add(w);
+        }
       }
       List<String> _words = words.stream().distinct().collect(Collectors.toList());
       dict.setDerivatives(merge(dict, _words, root));

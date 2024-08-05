@@ -9,10 +9,7 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Service
@@ -20,9 +17,8 @@ public class WordYdSpider {
   public static void main(String[] args) {
     try {
       WordDict dict = new WordDict();
-      dict.setId("flesh");
-      fetchInflection(dict);
-      System.out.println(dict);
+      dict.setId("abstract");
+      System.out.println(WordXxEnSpider.fetchDiffs(dict));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -45,7 +41,7 @@ public class WordYdSpider {
 
   @SuppressWarnings("Duplicates")
   public static Set<String> fetchMeaning(WordDict dict) {
-    Set<String> set = new HashSet<>();
+    Set<String> set = new LinkedHashSet<>();
     try {
       Document node = WordDictLoader.fetchDocument("https://dict.youdao.com/result?lang=en&word=" + dict.getId());
       List<Node> arr = XPaths.of(node, "//li[@class='word-exp']").asArray();

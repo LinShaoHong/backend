@@ -38,7 +38,7 @@ public class WordDictLoader {
   private static final HtmlCleaner hc = new HtmlCleaner();
   private final static ExecutorService executor = Executors.newFixedThreadPool(10);
   private final static Cache<String, Document> documents = Caffeine.newBuilder()
-    .expireAfterWrite(5, TimeUnit.MINUTES)
+    .expireAfterWrite(10, TimeUnit.MINUTES)
     .maximumSize(100)
     .build();
 
@@ -122,7 +122,12 @@ public class WordDictLoader {
         break;
       case "derivatives":
         if (StringUtils.hasText(path)) {
-          dict.getDerivatives().removeIf(d -> d.getWord().equals(path));
+          if (path.endsWith(":sub")) {
+            String _path = path.substring(0, path.length() - 4);
+            dict.getDerivatives().removeIf(d -> d.getWord().contains(_path));
+          } else {
+            dict.getDerivatives().removeIf(d -> d.getWord().equals(path));
+          }
         } else {
           dict.setDerivatives(Collections.emptyList());
         }

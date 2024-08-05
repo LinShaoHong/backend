@@ -9,6 +9,6 @@ import java.util.List;
 
 @Mapper
 public interface WordAffixMapper extends CompositeMapper<WordAffix> {
-  @Select("select root from word_affix where root=#{root}")
+  @Select("select distinct id from word_affix where root=#{root}")
   List<String> byRoot(@Param("root") String root);
 }

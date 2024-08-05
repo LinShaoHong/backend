@@ -5,6 +5,7 @@ import com.github.sun.word.WordAffix;
 import com.github.sun.word.WordAffixMapper;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.spider.WordJsSpider;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -12,6 +13,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+@RefreshScope
 @Service("struct")
 public class WordStructLoader extends WordBasicLoader {
   @Resource
@@ -27,14 +29,11 @@ public class WordStructLoader extends WordBasicLoader {
       root = StringUtils.hasText(root) ? root : (affix != null ? affix.getRoot() : null);
       root = StringUtils.hasText(root) ? root : WordJsSpider.fetchRoot(dict);
       if (StringUtils.hasText(root)) {
-        resp = assistant.chat(apiKey, model, "请简要分析单词" + word + "的词根为" + root +
-          "时的词根词缀组成结构，不要给出其他情况");
+        resp = assistant.chat(apiKey, model, q.replace("$input", "请简要分析单词" + word + "的词根为" + root + "时的词根词缀组成结构，不要给出其他情况"));
       } else {
-        resp = assistant.chat(apiKey, model, "分析并直接列出单词'" + word + "'的词根词缀组成结构。" +
-          "要求它们恰好能不多不少拼成这个单词，只要分析单词本身，不要分析其派生词");
+        resp = assistant.chat(apiKey, model, q.replace("$input", "分析并直接列出单词'" + word + "'的词根词缀组成结构。"));
       }
-      q = resp + "\n\n" + q;
-      JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, q)));
+      JSON.Valuer valuer = JSON.newValuer(parse(resp));
       WordDict.Struct struct = new WordDict.Struct();
       List<WordDict.Part> parts = new ArrayList<>();
       valuer.get("parts").asArray().forEach(p -> {

@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Service
@@ -90,7 +87,7 @@ public class WordJsSpider {
 
   @SuppressWarnings("Duplicates")
   public static Set<String> fetchMeaning(WordDict dict) {
-    Set<String> set = new HashSet<>();
+    Set<String> set = new LinkedHashSet<>();
     try {
       Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + dict.getId());
       List<Node> arr = XPaths.of(node, "//ul[@class='Mean_part__UI9M6']/li").asArray();
@@ -128,5 +125,17 @@ public class WordJsSpider {
       //do nothing
     }
     return root;
+  }
+
+  public static Set<String> fetchDiffs(WordDict dict) {
+    Set<String> set = new HashSet<>();
+    try {
+      Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + dict.getId());
+      List<Node> arr = XPaths.of(node, "//div[@class='SameAnalysis_sameAnalysis__fkwr8']//span[@class='jsx-1012413381']").asArray();
+      arr.forEach(a -> set.add(a.getTextContent()));
+    } catch (Exception ex) {
+      //do nothing
+    }
+    return set;
   }
 }
