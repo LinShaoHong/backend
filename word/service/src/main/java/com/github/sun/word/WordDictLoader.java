@@ -212,7 +212,7 @@ public class WordDictLoader {
   }
 
   public WordAffix affix(String word) {
-    return affixMapper.findById(word);
+    return affixMapper.byId(word);
   }
 
   public static synchronized Document fetchDocument(String url) {
