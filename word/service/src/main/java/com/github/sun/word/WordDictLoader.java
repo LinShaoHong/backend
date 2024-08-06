@@ -211,6 +211,10 @@ public class WordDictLoader {
     return affix == null ? "" : affix.getRoot();
   }
 
+  public WordAffix affix(String word) {
+    return affixMapper.findById(word);
+  }
+
   public static synchronized Document fetchDocument(String url) {
     return documents.get(url, u -> {
       try {

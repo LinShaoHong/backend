@@ -14,6 +14,9 @@ public interface CardUserMapper extends CompositeMapper<CardUser> {
   @Select("select * from card_user where shareCode=#{shareCode} order by createTime desc")
   List<CardUser> byShareCode(@Param("shareCode") String shareCode);
 
+  @Select("select * from card_user where date_format(createTime, '%Y-%m-%d')=#{date} order by createTime desc")
+  List<CardUser> byDate(@Param("date") String date);
+
   @Update("update card_user set playCount=playCount+1 where id=#{id}")
   void inc(@Param("id") String id);
 

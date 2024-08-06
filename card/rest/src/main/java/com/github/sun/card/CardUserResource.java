@@ -48,6 +48,12 @@ public class CardUserResource extends AbstractResource {
   }
 
   @GET
+  @Path("/byDate")
+  public ListResponse<CardUser> byDate(@QueryParam("date") String date) {
+    return responseOf(service.byDate(date));
+  }
+
+  @GET
   @Path("/invited")
   public ListResponse<CardUserService.UserResp> invited(@QueryParam("code") String code) {
     return responseOf(service.invited(code));

@@ -1,6 +1,7 @@
 package com.github.sun.word.spider;
 
 import com.github.sun.foundation.boot.utility.JSON;
+import com.github.sun.foundation.boot.utility.Strings;
 import com.github.sun.spider.Fetcher;
 import com.github.sun.spider.spi.JSoupFetcher;
 import com.github.sun.spider.spi.XPaths;
@@ -11,8 +12,6 @@ import com.github.sun.word.WordDictLoader;
 import com.ibm.icu.impl.data.ResourceReader;
 import lombok.Data;
 import org.apache.commons.text.StringEscapeUtils;
-import org.htmlcleaner.CleanerProperties;
-import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -24,9 +23,11 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 @Service
 public class WordXxEnSpider {
@@ -69,84 +70,101 @@ public class WordXxEnSpider {
 
   // --------------------------------------- affix -----------------------------------
   public void fetchAffix() {
-    Arrays.asList("xxen_affix", "xxen_affix_junior", "xxen_affix_middle", "xxen_affix_senior", "xxen_affix_other")
-      .forEach(file -> {
-        try (InputStream in = loader.getResourceAsStream("affix/" + file + ".json")) {
-          assert in != null;
-          BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-          String json = reader.lines().collect(Collectors.joining(""));
-          List<Affix> affixes = JSON.deserializeAsList(json, Affix.class);
-
-          for (Affix affix : affixes) {
-            String html = fetcher.fetch("https://www.xxenglish.com/root/" + affix.getRoots().get(0));
-            Document node = new DomSerializer(new CleanerProperties()).createDOM(hc.clean(html));
-            List<Node> divs = XPaths.of(node, "//article/div").asArray();
-            List<String> roots = new ArrayList<>();
-            String indicate = "";
-            for (Node div : divs) {
-              Node cls = div.getAttributes().getNamedItem("class");
-              if (cls.getNodeValue().contains("ras-title")) {
-                String s = XPaths.of(div, ".//span[@class='ras-content']/text()").asText();
-                indicate = XPaths.of(div, ".//span[@class='ras-indicate']/text()").asText();
-                roots = Arrays.asList(s.split("，"));
-                roots = roots.stream()
-                  .flatMap(r -> Arrays.stream(r.split(",")).map(v -> v.replaceAll(" ", "")))
-                  .flatMap(v -> {
-                    List<String> vs = new ArrayList<>();
-                    if (v.contains("(")) {
-                      int i = v.indexOf("(");
-                      int j = v.lastIndexOf(")");
-                      String prefix = i > 0 ? v.substring(0, i) : "";
-                      String infix = v.substring(i + 1, j);
-                      String suffix = j < v.length() - 1 ? v.substring(j + 1) : "";
-                      vs.add(prefix + suffix);
-                      vs.add(prefix + infix + suffix);
-                    } else {
-                      vs.add(v);
-                    }
-                    return vs.stream();
-                  }).collect(Collectors.toList());
-                roots.sort(Comparator.comparingInt(String::length));
-              } else {
-                String rootDesc = XPaths.of(div, ".//span[@class='ras-td']").asText();
-                rootDesc = StringUtils.hasText(rootDesc) ? rootDesc : indicate;
-                rootDesc = StringUtils.hasText(rootDesc) ? rootDesc : affix.getEn() + " " + affix.getDesc();
-                List<Node> rs = XPaths.of(div, ".//div[contains(@class,'ex-ras')]").asArray();
-                for (Node ras : rs) {
-                  String word = XPaths.of(ras, ".//span[@class='ex-word']").asText();
-                  String desc = XPaths.of(ras, ".//span[@class='ex-dec']").asText();
-
-                  String root = "";
-                  for (int i = roots.size() - 1; i >= 0; i--) {
-                    if (word.contains(roots.get(i))) {
-                      root = roots.get(i);
-                      break;
-                    }
-                  }
-                  System.out.println(word + ":" + root);
-                  if (StringUtils.hasText(root)) {
-                    WordAffix v = mapper.findById(word);
-                    if (v == null) {
-                      v = new WordAffix();
-                    }
-                    v.setRoot(root);
-                    v.setRootDesc(rootDesc);
-                    v.setWordDesc(desc);
-                    if (v.getId() == null) {
-                      v.setId(word);
-                      mapper.insert(v);
-                    } else {
-                      mapper.update(v);
-                    }
-                  }
-                }
-              }
-            }
-          }
-        } catch (Exception ex) {
-          throw new RuntimeException(ex);
+    try (InputStream in = loader.getResourceAsStream("affix/1.json")) {
+      assert in != null;
+      BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+      String line = reader.readLine();
+      while (StringUtils.hasText(line)) {
+        String word = JSON.asJsonNode(line).get("word").asText("");
+        WordAffix affix = mapper.findById(word);
+        if (affix == null) {
+          affix = new WordAffix();
         }
-      });
+        String content = JSON.asJsonNode(line).get("content").asText("");
+        Strings.Parser parser = Strings.newParser().set(content);
+        if (StringUtils.hasText(content)) {
+          if (content.contains("词根分析")) {
+            parser.next(Pattern.compile("(?:(?!词根分析).)+", Pattern.DOTALL));
+            parser.next(Pattern.compile("词根分析", Pattern.DOTALL));
+            parser.next(Pattern.compile("\\*+"));
+            parser.next(Pattern.compile("】"));
+            parser.next(Pattern.compile("——"));
+            parser.next(Pattern.compile("_"));
+            parser.next(Pattern.compile(":"));
+            parser.next(Pattern.compile("："));
+            parser.next(Pattern.compile("\\*+"));
+            parser.next(Pattern.compile("[\\s\\n]+"));
+            parser.next(Pattern.compile("[^\\n]+"));
+            String rootDesc = parser.processed();
+            affix.setGptRoot(rootDesc);
+          }
+          if (content.contains("词缀分析")) {
+            parser.next(Pattern.compile("(?:(?!词缀分析).)+", Pattern.DOTALL));
+            parser.next(Pattern.compile("词缀分析", Pattern.DOTALL));
+            parser.next(Pattern.compile("\\*+"));
+            parser.next(Pattern.compile("】"));
+            parser.next(Pattern.compile("——"));
+            parser.next(Pattern.compile("_"));
+            parser.next(Pattern.compile(":"));
+            parser.next(Pattern.compile("："));
+            parser.next(Pattern.compile("\\*+"));
+            parser.next(Pattern.compile("[\\s\\n]+"));
+            parser.next(Pattern.compile("[^\\n]+"));
+            String affixDesc = parser.processed();
+            affix.setGptAffix(affixDesc);
+          }
+        }
+        if (StringUtils.hasText(affix.getGptRoot()) || StringUtils.hasText(affix.getGptAffix())) {
+          if (affix.getId() == null) {
+            affix.setId(word);
+            mapper.insert(affix);
+          } else {
+            mapper.update(affix);
+          }
+        }
+        line = reader.readLine();
+      }
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  public static void main(String[] args) {
+    String content = "{\"word\":\"dignity\",\"content\":\"_分析词义_\\n\\n  \\n\\n\\\"Dignity\\\" 是一个英语单词，主要指的是尊严，庄重，尊贵之类的意义。这体现了一个人或实体的价值，应受到尊重和敬仰的特质。\\n\\n  \\n\\n_列举例句_\\n\\n  \\n\\n1.  Everyone deserves to be treated with dignity. (每个人都应得到尊严的对待。)\\n2.  He maintained his dignity in the face of his illness. (他面对疾病时仍保持了尊严。)\\n3.  She is a lady of great dignity. (她是一个非常有尊严的女士。)\\n\\n  \\n\\n_词根分析_\\n\\n  \\n\\n\\\"Dignity\\\" 的词根来自拉丁语 \\\"dignitas\\\"，意为 \\\"尊贵\\\"。从这个词根衍生出的其他单词有 \\\"dignified\\\"（有尊严的）和 \\\"indignity\\\"（失去尊严）等。\\n\\n  \\n\\n_词缀分析_\\n\\n  \\n\\n\\\"Dignity\\\" 的前缀 \\\"di-\\\" 来自拉丁语，表示 \\\"双重\\\" 的意思，而 \\\"-ity\\\" 是一个表示抽象名词的后缀。其他使用了 \\\"-ity\\\" 后缀的词有 \\\"ability\\\"（能力）,\\\"reality\\\"（现实）,\\\"equality\\\"（平等）等。\\n\\n  \\n\\n_发展历史和文化背景_\\n\\n  \\n\\n这个词出现在14世纪的英语中，源自拉丁文的 \\\"dignitas\\\"。在欧美文化中，\\\"dignity\\\" 是一个非常重要的概念，与人权，自由，公平，公正等概念相连。\\n\\n  \\n\\n_单词变形_\\n\\n  \\n\\n*   形容词： Dignified (有尊严的)\\n*   名词复数： Dignities (尊严)\\n\\n  \\n\\n固定搭配有 \\\"dignity of work\\\"（工作的尊严）\\n\\n  \\n\\n_记忆辅助_\\n\\n  \\n\\n道可道，非常道。名可名，非常名。无，名天地之始；有，名万物之母。故常无，欲以观其妙；常有，欲以观其徼。此两者，同出而异名，同谓之玄。玄之又玄，众妙之门。开始\\\"道\\\"字，可理解为象征尊严的开始。通过这种方式，也许可以帮助记住 \\\"dignity\\\" 这个单词。\\n\\n  \\n\\n_小故事_\\n\\n  \\n\\nOnce upon a time, a wise king ruled a large kingdom. Despite the power, he treated every citizen with dignity. He believed that every person’s value lied in their dignity, and it should be respected.\\n\\n  \\n\\n曾经，智慧的国王统治着一个庞大的王国。尽管有着权力，他对待每一个公民都充满了尊严。他坚信每个人的价值在于他们的尊严，这应该被尊重。\"}";
+    content = JSON.asJsonNode(content).get("content").asText("");
+    Strings.Parser parser = Strings.newParser().set(content);
+    if (StringUtils.hasText(content)) {
+      if (content.contains("词根分析")) {
+        parser.next(Pattern.compile("(?:(?!词根分析).)+", Pattern.DOTALL));
+        parser.next(Pattern.compile("词根分析", Pattern.DOTALL));
+        parser.next(Pattern.compile("\\*+"));
+        parser.next(Pattern.compile("】"));
+        parser.next(Pattern.compile("——"));
+        parser.next(Pattern.compile("_"));
+        parser.next(Pattern.compile(":"));
+        parser.next(Pattern.compile("："));
+        parser.next(Pattern.compile("\\*+"));
+        parser.next(Pattern.compile("[\\s\\n]+"));
+        parser.next(Pattern.compile("[^\\n]+"));
+        String rootDesc = parser.processed();
+        System.out.println(rootDesc);
+      }
+      if (content.contains("词缀分析")) {
+        parser.next(Pattern.compile("(?:(?!词缀分析).)+", Pattern.DOTALL));
+        parser.next(Pattern.compile("词缀分析", Pattern.DOTALL));
+        parser.next(Pattern.compile("\\*+"));
+        parser.next(Pattern.compile("】"));
+        parser.next(Pattern.compile("——"));
+        parser.next(Pattern.compile("_"));
+        parser.next(Pattern.compile(":"));
+        parser.next(Pattern.compile("："));
+        parser.next(Pattern.compile("\\*+"));
+        parser.next(Pattern.compile("[\\s\\n]+"));
+        parser.next(Pattern.compile("[^\\n]+"));
+        String affixDesc = parser.processed();
+        System.out.println(affixDesc);
+      }
+    }
   }
 
   @Data

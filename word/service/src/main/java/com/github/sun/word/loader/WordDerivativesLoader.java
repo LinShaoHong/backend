@@ -35,20 +35,22 @@ public class WordDerivativesLoader extends WordBasicLoader {
   @Override
   public void load(String word, JSON.Valuer attr, int userId) {
     retry(word, userId, dict -> {
-      String root = dict.getStruct() == null ? null :
-        dict.getStruct().getParts().stream()
-          .filter(WordDict.Part::isRoot)
-          .map(part -> {
-            String w = part.getPart();
-            w = w.replaceAll("-", "");
-            if (w.contains("(")) {
-              int i = w.indexOf("(");
-              w = w.substring(0, i);
+      String root = null;
+      String rootDesc = null;
+      if (dict.getStruct() != null) {
+        int index = -1;
+        for (int i = 0; i < dict.getStruct().getParts().size(); i++) {
+          WordDict.Part part = dict.getStruct().getParts().get(i);
+          if (part.isRoot()) {
+            if (index < 0 || i == index + 1) {
+              root = root == null ? part.getPart() : root + part.getPart();
+              rootDesc = rootDesc == null ? part.getMeaningTrans() : rootDesc + "，" + part.getMeaningTrans();
+              index = i;
             }
-            return w;
-          }).collect(Collectors.joining());
+          }
+        }
+      }
       root = StringUtils.hasText(root) ? root : word;
-
       String q = loadQ("cues/派生树.md");
       List<String> words = new ArrayList<>();
       words.add(word);
@@ -58,7 +60,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
       String resp;
       if (hasRoot) {
         words.addAll(affixMapper.byRoot(root));
-        resp = assistant.chat(apiKey, model, q.replace("$input", "尽可能多的直接列出词根" + root + "的派生词，要求这些派生词的词根也为" + root + "且其词根意义相近。"));
+        resp = assistant.chat(apiKey, model, q.replace("$input", "尽可能多的直接列出词根" + root + "(意思为:" + rootDesc + ")的派生词，要求这些派生词的词根也为" + root + "且其词根意义相近。"));
       } else {
         resp = assistant.chat(apiKey, model, q.replace("$input", "尽可能多的直接列出单词\"" + word + "\"的所有派生词"));
       }
@@ -146,7 +148,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
     Set<String> exist = dict.getDerivatives() == null ? new HashSet<>() :
       dict.getDerivatives().stream().map(WordDict.Derivative::getWord).collect(Collectors.toSet());
     words.removeIf(v -> {
-      if (Objects.equals(v, root)) {
+      if (Objects.equals(v, root) || Objects.equals(v, dict.getId())) {
         return false;
       }
       if (exist.contains(v)) {

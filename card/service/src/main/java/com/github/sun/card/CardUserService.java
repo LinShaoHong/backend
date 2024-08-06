@@ -2,6 +2,7 @@ package com.github.sun.card;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.boot.exception.NotFoundException;
+import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.sql.IdGenerator;
 import lombok.Builder;
@@ -195,6 +196,13 @@ public class CardUserService {
       return mapper.byShareCode(code).stream().map(UserResp::from).collect(Collectors.toList());
     }
     return Collections.emptyList();
+  }
+
+  public List<CardUser> byDate(String date) {
+    if (!StringUtils.hasText(date)) {
+      date = Dates.format(new Date());
+    }
+    return mapper.byDate(date);
   }
 
   @Data

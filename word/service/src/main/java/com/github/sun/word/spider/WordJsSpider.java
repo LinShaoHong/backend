@@ -118,9 +118,11 @@ public class WordJsSpider {
     try {
       Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + dict.getId());
       String name = XPaths.of(node, "//div[@class='Affix_affix__iiL_9']/p").as().getTextContent();
-      Strings.Parser parser = Strings.newParser().set(name);
-      parser.next(Pattern.compile("[^a-z]*"));
-      root = parser.right();
+      if (name.contains("词根")) {
+        Strings.Parser parser = Strings.newParser().set(name);
+        parser.next(Pattern.compile("[^a-z]*"));
+        root = parser.right();
+      }
     } catch (Exception ex) {
       //do nothing
     }

@@ -111,6 +111,12 @@ public class WordLoaderResource extends AbstractResource {
   }
 
   @GET
+  @Path("/affix")
+  public SingleResponse<WordAffix> affix(@QueryParam("word") String word) {
+    return responseOf(loader.affix(word));
+  }
+
+  @GET
   @Path("/chat")
   public SingleResponse<String> chat(@QueryParam("q") String q) {
     return responseOf(loader.chat(q));

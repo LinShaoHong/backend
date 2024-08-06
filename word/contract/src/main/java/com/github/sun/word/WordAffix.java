@@ -23,4 +23,6 @@ public class WordAffix {
   private String root;
   private String rootDesc;
   private String wordDesc;
+  private String gptRoot;
+  private String gptAffix;
 }
