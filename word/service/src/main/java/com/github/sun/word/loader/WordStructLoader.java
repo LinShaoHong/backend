@@ -63,16 +63,16 @@ public class WordStructLoader extends WordBasicLoader {
           parts.add(part);
         }
       });
-      String w = "";
-      Iterator<WordDict.Part> it = parts.iterator();
-      while (it.hasNext()) {
-        String _w = w + it.next().getPart();
-        if (dict.getId().startsWith(_w)) {
-          w = _w;
-        } else {
-          it.remove();
-        }
-      }
+//      String w = "";
+//      Iterator<WordDict.Part> it = parts.iterator();
+//      while (it.hasNext()) {
+//        String _w = w + it.next().getPart();
+//        if (dict.getId().startsWith(_w)) {
+//          w = _w;
+//        } else {
+//          it.remove();
+//        }
+//      }
       struct.setParts(parts);
       struct.setAnalysis(valuer.get("analysis_en").asText());
       struct.setAnalysisTrans(valuer.get("analysis_zh").asText());

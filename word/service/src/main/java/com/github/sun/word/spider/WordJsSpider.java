@@ -6,10 +6,12 @@ import com.github.sun.word.WordDict;
 import com.github.sun.word.WordDictLoader;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 @Service
@@ -127,6 +129,23 @@ public class WordJsSpider {
       //do nothing
     }
     return root;
+  }
+
+  @SuppressWarnings("Duplicates")
+  public static void fetchDerivative(WordDict dict, Consumer<Set<String>> func) {
+    Set<String> words = new LinkedHashSet<>();
+    Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + dict.getId());
+    List<Node> arr = XPaths.of(node, "//div[@class='Affix_affix__iiL_9']/ul/li/div/h5").asArray();
+    arr.forEach(a -> {
+      String name = a.getTextContent();
+      Strings.Parser parser = Strings.newParser().set(name);
+      parser.next(Pattern.compile("[a-z]*"));
+      String word = parser.left();
+      if (StringUtils.hasText(word)) {
+        words.add(word);
+      }
+    });
+    func.accept(words);
   }
 
   public static Set<String> fetchDiffs(WordDict dict) {

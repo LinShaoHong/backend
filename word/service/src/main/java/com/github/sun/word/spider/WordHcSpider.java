@@ -27,6 +27,13 @@ public class WordHcSpider {
         words.add(n.split(" ")[0]);
       }
     });
+    arr = XPaths.of(node, "//div[@class='layout nwd']//a").asArray();
+    arr.forEach(v -> {
+      String name = StringEscapeUtils.unescapeHtml4(v.getTextContent().trim());
+      if (name.split(" ").length == 1) {
+        words.add(name);
+      }
+    });
     func.accept(words);
   }
 
@@ -44,7 +51,7 @@ public class WordHcSpider {
           func.accept(new WordDict.Phrase(name, desc));
         }
       });
-    }catch (Exception ex) {
+    } catch (Exception ex) {
       //do nothing
     }
   }

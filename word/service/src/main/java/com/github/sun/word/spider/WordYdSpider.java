@@ -9,7 +9,10 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 @Service
@@ -18,7 +21,7 @@ public class WordYdSpider {
     try {
       WordDict dict = new WordDict();
       dict.setId("abstract");
-      System.out.println(WordXxEnSpider.fetchDiffs(dict));
+      WordXdfSpider.fetchDerivative(dict, System.out::println);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

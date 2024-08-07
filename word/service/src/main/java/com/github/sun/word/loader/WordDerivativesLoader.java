@@ -8,6 +8,8 @@ import com.github.sun.word.WordAffixMapper;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.WordDictMapper;
 import com.github.sun.word.spider.WordHcSpider;
+import com.github.sun.word.spider.WordJsSpider;
+import com.github.sun.word.spider.WordXdfSpider;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -56,6 +58,9 @@ public class WordDerivativesLoader extends WordBasicLoader {
       words.add(word);
       words.add(root);
       WordHcSpider.fetchDerivative(dict, words::addAll);
+      WordJsSpider.fetchDerivative(dict, words::addAll);
+      WordXdfSpider.fetchDerivative(dict, words::addAll);
+
       boolean hasRoot = dict.getStruct() != null && dict.getStruct().getParts().stream().anyMatch(WordDict.Part::isRoot);
       String resp;
       if (hasRoot) {
