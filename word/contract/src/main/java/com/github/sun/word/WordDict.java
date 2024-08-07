@@ -95,7 +95,7 @@ public class WordDict {
   public static class Struct {
     private List<Part> parts;
     private String analysis;
-    private String analysisTrans;
+    private String history;
   }
 
   @Data

@@ -74,8 +74,8 @@ public class WordStructLoader extends WordBasicLoader {
 //        }
 //      }
       struct.setParts(parts);
-      struct.setAnalysis(valuer.get("analysis_en").asText());
-      struct.setAnalysisTrans(valuer.get("analysis_zh").asText());
+      struct.setAnalysis(valuer.get("struct_analysis_zh").asText());
+      struct.setHistory(valuer.get("historical_cultural_zh").asText());
       dict.setStruct(struct);
     }, "struct");
   }
