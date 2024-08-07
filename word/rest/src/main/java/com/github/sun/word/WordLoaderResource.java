@@ -53,6 +53,19 @@ public class WordLoaderResource extends AbstractResource {
     private JsonNode attr;
   }
 
+  @POST
+  @Path("/edit/struct")
+  public Response editStruct(EditStructReq req) {
+    loader.editStruct(req.getId(), req.getStruct());
+    return responseOf();
+  }
+
+  @Data
+  public static class EditStructReq {
+    private String id;
+    private WordDict.Struct struct;
+  }
+
   @GET
   @Path("/remove")
   public Response loadPart(@QueryParam("word") String word,

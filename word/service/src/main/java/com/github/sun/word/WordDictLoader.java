@@ -7,6 +7,7 @@ import com.github.sun.foundation.ai.Assistant;
 import com.github.sun.foundation.boot.Scanner;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.Reflections;
+import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.spider.Fetcher;
 import com.github.sun.spider.spi.JSoupFetcher;
 import com.github.sun.word.loader.WordBasicLoader;
@@ -23,6 +24,7 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -48,6 +50,8 @@ public class WordDictLoader {
   private String model;
   @Resource(name = "qwen")
   private Assistant assistant;
+  @Resource(name = "mysql")
+  protected SqlBuilder.Factory factory;
   @Resource
   private WordDictMapper mapper;
   @Resource
@@ -132,6 +136,20 @@ public class WordDictLoader {
           dict.setDerivatives(Collections.emptyList());
         }
         WordDerivativesLoader.rebuild(dict);
+        break;
+      case "synonym":
+        if (StringUtils.hasText(path)) {
+          dict.getSynAnts().getSynonyms().removeIf(d -> Objects.equals(d, path));
+        } else {
+          dict.getSynAnts().setSynonyms(new ArrayList<>());
+        }
+        break;
+      case "antonym":
+        if (StringUtils.hasText(path)) {
+          dict.getSynAnts().getAntonyms().removeIf(d -> Objects.equals(d, path));
+        } else {
+          dict.getSynAnts().setAntonyms(new ArrayList<>());
+        }
         break;
       default:
         break;
@@ -224,5 +242,15 @@ public class WordDictLoader {
         throw new RuntimeException(ex);
       }
     });
+  }
+
+  public void editStruct(String id, WordDict.Struct struct) {
+    struct.getParts().removeIf(v -> !StringUtils.hasText(v.getPart()));
+    SqlBuilder sb = factory.create();
+    SqlBuilder.Template template = sb.from(WordDict.class)
+      .where(sb.field("id").eq(id))
+      .update().set("struct", struct)
+      .template();
+    mapper.updateByTemplate(template);
   }
 }
