@@ -31,7 +31,11 @@ public class WordStructLoader extends WordBasicLoader {
       root = StringUtils.hasText(root) ? root : (affix != null ? affix.getRoot() : null);
       root = StringUtils.hasText(root) ? root : WordJsSpider.fetchRoot(dict);
       if (StringUtils.hasText(root)) {
-        resp = assistant.chat(apiKey, model, q.replace("$input", word + "的词根为" + root + "，分析并直接给出其(词根、前缀、中缀、后缀)结构"));
+        if (root.contains("-") || root.contains("+")) {
+          resp = assistant.chat(apiKey, model, q.replace("$input", word + "的结构为" + root + "，以此分析并直接给出其(词根、前缀、中缀、后缀)结构"));
+        } else {
+          resp = assistant.chat(apiKey, model, q.replace("$input", word + "的词根为" + root + "，分析并直接给出其(词根、前缀、中缀、后缀)结构"));
+        }
       } else {
         resp = assistant.chat(apiKey, model, q.replace("$input", "分析并直接给出单词'" + word + "'的(词根、前缀、中缀、后缀)结构"));
       }
