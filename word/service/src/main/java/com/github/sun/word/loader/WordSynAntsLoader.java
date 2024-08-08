@@ -21,7 +21,7 @@ public class WordSynAntsLoader extends WordBasicLoader {
       Set<String> antonyms = new LinkedHashSet<>();
 
       String q = loadQ("cues/近反义词.md");
-      String resp = assistant.chat(apiKey, model, q.replace("$input", "直接列出单词'" + word + "'的英文近义词和反义词。要求每项最多5个，不要包含短语，单词首字母小写。"));
+      String resp = assistant.chat(apiKey, model, q.replace("$input", "直接列出单词'" + word + "'的英文近义词和反义词。要求每项最多3个，不要包含短语，单词首字母小写。"));
       JSON.Valuer valuer = JSON.newValuer(parse(resp));
 
       WordDict.SynAnt synAnt = new WordDict.SynAnt();
@@ -30,13 +30,13 @@ public class WordSynAntsLoader extends WordBasicLoader {
       valuer.get("antonyms").asArray().forEach(f -> antonyms.add(f.get("word").asText()));
 
       WordHcSpider.fetchSynAnts(dict, vs -> {
-        if (vs.getSynonyms().size() > 5) {
-          synonyms.addAll(vs.getSynonyms().subList(0, 5));
+        if (vs.getSynonyms().size() > 2) {
+          synonyms.addAll(vs.getSynonyms().subList(0, 2));
         } else {
           synonyms.addAll(vs.getSynonyms());
         }
-        if (vs.getAntonyms().size() > 5) {
-          antonyms.addAll(vs.getAntonyms().subList(0, 5));
+        if (vs.getAntonyms().size() > 2) {
+          antonyms.addAll(vs.getAntonyms().subList(0, 2));
         } else {
           antonyms.addAll(vs.getAntonyms());
         }

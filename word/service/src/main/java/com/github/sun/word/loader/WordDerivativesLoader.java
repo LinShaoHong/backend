@@ -117,7 +117,9 @@ public class WordDerivativesLoader extends WordBasicLoader {
           List<WordNode> children = vs.stream()
             .map(v -> make(v, level + 1))
             .collect(Collectors.toList());
-          sort(children);
+          if (!children.isEmpty()) {
+            sort(children);
+          }
           root.setChildren(children);
           root.setIndex(level);
           root.setHas(root.getWord().contains(word) || children.stream().anyMatch(WordNode::isHas));
@@ -204,13 +206,14 @@ public class WordDerivativesLoader extends WordBasicLoader {
   }
 
   private static void sort(List<WordNode> nodes) {
+    List<String> all = nodes.stream().map(WordNode::getWord).collect(Collectors.toList());
+    all = StringSorts.sort(all, 0.7);
+    List<String> _all = all;
+    nodes.sort(Comparator.comparingInt(v -> _all.indexOf(v.getWord())));
     List<String> has = nodes.stream().filter(WordNode::isHas).map(WordNode::getWord).collect(Collectors.toList());
     List<String> nos = nodes.stream().filter(v -> !v.isHas()).map(WordNode::getWord).collect(Collectors.toList());
-    has = StringSorts.sort(has, 0.5);
-    nos = StringSorts.sort(nos, 0.5);
     has.addAll(nos);
-    List<String> _has = has;
-    nodes.sort(Comparator.comparingInt(v -> _has.indexOf(v.getWord())));
+    nodes.sort(Comparator.comparingInt(v -> has.indexOf(v.getWord())));
   }
 
   @Data
