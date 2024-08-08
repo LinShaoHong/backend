@@ -152,7 +152,7 @@ public class WordJsSpider {
     Set<String> set = new HashSet<>();
     try {
       Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + dict.getId());
-      List<Node> arr = XPaths.of(node, "//div[@class='SameAnalysis_sameAnalysis__fkwr8']//span[@class='jsx-1012413381']").asArray();
+      List<Node> arr = XPaths.of(node, "//div[@class='SameAnalysis_sameAnalysis__fkwr8'][1]//span[@class='jsx-1012413381']").asArray();
       arr.forEach(a -> set.add(a.getTextContent()));
     } catch (Exception ex) {
       //do nothing

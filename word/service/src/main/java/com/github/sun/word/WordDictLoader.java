@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.sun.foundation.ai.Assistant;
 import com.github.sun.foundation.boot.Scanner;
+import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.foundation.sql.SqlBuilder;
@@ -56,6 +57,8 @@ public class WordDictLoader {
   private WordDictMapper mapper;
   @Resource
   private WordCheckMapper checkMapper;
+  @Resource
+  private WordCodeMapper codeMapper;
   @Resource
   private WordAffixMapper affixMapper;
   @Resource
@@ -122,7 +125,6 @@ public class WordDictLoader {
         } else {
           dict.setDerivatives(Collections.emptyList());
         }
-
         break;
       case "derivatives":
         if (StringUtils.hasText(path)) {
@@ -136,6 +138,13 @@ public class WordDictLoader {
           dict.setDerivatives(Collections.emptyList());
         }
         WordDerivativesLoader.rebuild(dict);
+        break;
+      case "differs":
+        if (StringUtils.hasText(path)) {
+          dict.getDiffers().removeIf(d -> Objects.equals(d.getWord(), path));
+        } else {
+          dict.setDiffers(Collections.emptyList());
+        }
         break;
       case "synonym":
         if (StringUtils.hasText(path)) {
@@ -156,6 +165,24 @@ public class WordDictLoader {
     }
     dict.setPassed(false);
     mapper.update(dict);
+  }
+
+  @Transactional
+  public int remove(String word) {
+    int next = 1;
+    WordDict dict = mapper.findById(word);
+    if (dict != null) {
+      String date = Dates.format(dict.getLoadTime());
+      mapper.dec(dict.getSort(), date);
+      mapper.deleteById(word);
+      next = dict.getSort();
+      int total = mapper.countByDate(date);
+      if (total < next) {
+        next = total;
+      }
+      codeMapper.updateById(date + ":1", total);
+    }
+    return next;
   }
 
   @Transactional

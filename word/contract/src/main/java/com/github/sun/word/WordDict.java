@@ -53,11 +53,6 @@ public class WordDict {
   private Date loadTime;//获取时间
   private Date passTime;//通过时间
   private Integer sort;//排序
-  //------------ common -------------
-  @Transient
-  private Date createTime;
-  @Transient
-  private Date updateTime;
 
   @Data
   @Builder

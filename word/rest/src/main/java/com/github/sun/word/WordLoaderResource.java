@@ -2,6 +2,7 @@ package com.github.sun.word;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.word.spider.WordXdfSpider;
 import com.github.sun.word.spider.WordXxEnSpider;
 import lombok.Data;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -19,14 +20,17 @@ public class WordLoaderResource extends AbstractResource {
   private final WordDictLoader loader;
   private final WordPdfService pdfService;
   private final WordXxEnSpider xxEnAffixSpider;
+  private final WordXdfSpider xdfSpider;
 
   @Inject
   public WordLoaderResource(WordDictLoader loader,
                             WordPdfService pdfService,
-                            WordXxEnSpider xxEnAffixSpider) {
+                            WordXxEnSpider xxEnAffixSpider,
+                            WordXdfSpider xdfSpider) {
     this.loader = loader;
     this.pdfService = pdfService;
     this.xxEnAffixSpider = xxEnAffixSpider;
+    this.xdfSpider = xdfSpider;
   }
 
   @GET
@@ -67,13 +71,19 @@ public class WordLoaderResource extends AbstractResource {
   }
 
   @GET
-  @Path("/remove")
-  public Response loadPart(@QueryParam("word") String word,
-                           @QueryParam("part") String part,
-                           @QueryParam("path") String path,
-                           @QueryParam("userId") int userId) {
+  @Path("/remove/part")
+  public Response removePart(@QueryParam("word") String word,
+                             @QueryParam("part") String part,
+                             @QueryParam("path") String path,
+                             @QueryParam("userId") int userId) {
     loader.removePart(word, part, path, userId);
     return responseOf();
+  }
+
+  @GET
+  @Path("/remove")
+  public SingleResponse<Integer> remove(@QueryParam("word") String word) {
+    return responseOf(loader.remove(word));
   }
 
   @GET
@@ -141,6 +151,15 @@ public class WordLoaderResource extends AbstractResource {
   public Response upload(@FormDataParam("file") InputStream in,
                          @FormDataParam("file") FormDataContentDisposition meta) throws Exception {
     pdfService.parseRoot(in);
+    return responseOf();
+  }
+
+  @GET
+  @Path("/tag")
+  public Response tag(@QueryParam("uri") String uri,
+                      @QueryParam("start") int start,
+                      @QueryParam("end") int end) {
+    xdfSpider.fetchWords(uri, start, end);
     return responseOf();
   }
 }

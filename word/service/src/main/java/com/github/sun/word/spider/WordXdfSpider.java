@@ -3,11 +3,13 @@ package com.github.sun.word.spider;
 import com.github.sun.spider.spi.XPaths;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.WordDictLoader;
+import com.github.sun.word.WordTagMapper;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import javax.annotation.Resource;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +17,9 @@ import java.util.function.Consumer;
 
 @Service
 public class WordXdfSpider {
+  @Resource
+  private WordTagMapper mapper;
+
   public static void fetchDerivative(WordDict dict, Consumer<Set<String>> func) {
     Set<String> words = new LinkedHashSet<>();
     Document node = WordDictLoader.fetchDocument("https://www.koolearn.com/dict/search/index?keywords=" + dict.getId());
@@ -36,5 +41,16 @@ public class WordXdfSpider {
       });
     }
     func.accept(words);
+  }
+
+  public void fetchWords(String uri, int start, int end) {
+    for (int i = start; i <= end; i++) {
+      String url = String.format(uri, i);
+      Document node = WordDictLoader.fetchDocument(url);
+      List<Node> arr = XPaths.of(node, "//a[@class='word']").asArray();
+      arr.forEach(a -> {
+        System.out.println(a.getTextContent());
+      });
+    }
   }
 }

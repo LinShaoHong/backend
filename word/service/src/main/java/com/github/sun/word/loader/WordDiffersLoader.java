@@ -45,6 +45,7 @@ public class WordDiffersLoader extends WordBasicLoader {
           differs.add(differ);
         });
       }
+      differs.removeIf(d -> !ws.contains(d.getWord()));
       dict.setDiffers(differs);
     }, "differs");
   }

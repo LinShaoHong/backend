@@ -39,4 +39,7 @@ public interface WordDictMapper extends CompositeMapper<WordDict> {
 
   @Select("select id,meaning,loadState,passed,viewed,sort from word_dict where date_format(loadTime,'%Y-%m-%d')=#{date} order by sort")
   List<WordDict> byDate(@Param("date") String date);
+
+  @Update("update word_dict set sort=sort-1 where date_format(loadTime,'%Y-%m-%d')=#{date} and sort>#{sort}")
+  void dec(@Param("sort") int sort, @Param("date") String date);
 }
