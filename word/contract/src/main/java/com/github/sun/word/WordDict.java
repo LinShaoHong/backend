@@ -8,12 +8,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -40,6 +38,8 @@ public class WordDict {
   private Inflection inflection;//派生词
   @Converter(DerivativesHandler.class)
   private List<Derivative> derivatives;//派生树
+  @Converter(DiffersHandler.class)
+  private List<Differ> differs;//辨析
   @Converter(PhrasesHandler.class)
   private List<Phrase> phrases;//短语词组
   @Converter(SynAntHandler.class)
@@ -152,6 +152,21 @@ public class WordDict {
   @NoArgsConstructor
   @AllArgsConstructor
   @JsonIgnoreProperties(ignoreUnknown = true)
+  public static class Differ {
+    private String word;
+    private String definition;
+    private String scenario;
+    private List<ExampleSentence> examples;
+  }
+
+  public static class DiffersHandler extends JsonHandler.ListHandler<Differ> {
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Phrase {
     private String en;
     private String zh;
@@ -198,6 +213,7 @@ public class WordDict {
     private boolean structLoading;
     private boolean synAntsLoading;
     private boolean derivativesLoading;
+    private boolean differsLoading;
     private boolean phrasesLoading;
   }
 
