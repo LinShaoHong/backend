@@ -70,6 +70,28 @@ public class WordLoaderResource extends AbstractResource {
     private WordDict.Struct struct;
   }
 
+  @POST
+  @Path("/edit/meaning")
+  public Response editMeaning(EditMeaningReq req) {
+    loader.editMeaning(req.getId(), req.getMeaning());
+    return responseOf();
+  }
+
+  @Data
+  public static class EditMeaningReq {
+    private String id;
+    private WordDict.TranslatedMeaning meaning;
+  }
+
+  @GET
+  @Path("/move/derivative")
+  public Response moveDerivative(@QueryParam("id") String id,
+                                 @QueryParam("word") String word,
+                                 @QueryParam("op") String op) {
+    loader.moveDerivative(id, word, op);
+    return responseOf();
+  }
+
   @GET
   @Path("/remove/part")
   public Response removePart(@QueryParam("word") String word,

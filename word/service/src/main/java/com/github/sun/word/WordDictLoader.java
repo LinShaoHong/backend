@@ -14,6 +14,9 @@ import com.github.sun.spider.spi.JSoupFetcher;
 import com.github.sun.word.loader.WordBasicLoader;
 import com.github.sun.word.loader.WordDerivativesLoader;
 import com.github.sun.word.loader.WordStructLoader;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
@@ -271,6 +274,15 @@ public class WordDictLoader {
     });
   }
 
+  public void editMeaning(String id, WordDict.TranslatedMeaning meaning) {
+    SqlBuilder sb = factory.create();
+    SqlBuilder.Template template = sb.from(WordDict.class)
+      .where(sb.field("id").eq(id))
+      .update().set("meaning", meaning)
+      .template();
+    mapper.updateByTemplate(template);
+  }
+
   public void editStruct(String id, WordDict.Struct struct) {
     struct.getParts().removeIf(v -> !StringUtils.hasText(v.getPart()));
     SqlBuilder sb = factory.create();
@@ -279,5 +291,115 @@ public class WordDictLoader {
       .update().set("struct", struct)
       .template();
     mapper.updateByTemplate(template);
+  }
+
+  public void moveDerivative(String id, String word, String op) {
+    WordDict dict = mapper.findById(id);
+    if (dict != null) {
+      List<WordDict.Derivative> list = dict.getDerivatives();
+      List<WordDict.Derivative> derivatives = new ArrayList<>();
+      class Util {
+        public List<Node> make(String parent, int pos, int index) {
+          List<Node> cs = new ArrayList<>();
+          for (int i = pos; i < list.size(); i++) {
+            WordDict.Derivative v = list.get(i);
+            if (v.getIndex() < index) {
+              break;
+            }
+            if (v.getIndex() == index) {
+              Node node = new Node();
+              node.setWord(v.getWord());
+              node.setParent(parent);
+              node.setChildren(make(node.getWord(), i + 1, v.getIndex() + 1));
+              cs.add(node);
+            }
+          }
+          return cs;
+        }
+
+        public void walk(Node node, int index) {
+          derivatives.add(new WordDict.Derivative(node.getWord(), index));
+          node.getChildren().forEach(c -> walk(c, index + 1));
+        }
+
+        public Node find(List<Node> ns, String word) {
+          for (Node n : ns) {
+            if (Objects.equals(n.getWord(), word)) {
+              return n;
+            } else {
+              List<Node> cs = n.getChildren();
+              Node c = find(cs, word);
+              if (c != null) {
+                return c;
+              }
+            }
+          }
+          return null;
+        }
+      }
+      Util util = new Util();
+      List<Node> nodes = util.make(null, 0, 0);
+      Node curr = util.find(nodes, word);
+      if (curr != null) {
+        Node parent = StringUtils.hasText(curr.getParent()) ?
+          util.find(nodes, curr.getParent()) : null;
+        Node grandParent = null;
+        if (parent != null) {
+          grandParent = StringUtils.hasText(parent.getParent()) ?
+            util.find(nodes, parent.getParent()) : null;
+        }
+        switch (op) {
+          case "left":
+            if (parent != null) {
+              List<Node> brs = grandParent != null ? grandParent.getChildren() : nodes;
+              parent.getChildren().remove(curr);
+              int i = brs.indexOf(parent);
+              brs.add(i + 1, curr);
+            }
+            break;
+          case "right":
+            List<Node> brs = parent == null ? nodes : parent.getChildren();
+            int i = brs.indexOf(curr);
+            if (i > 0) {
+              brs.remove(curr);
+              brs.get(i - 1).getChildren().add(curr);
+            }
+            break;
+          case "up":
+            brs = parent == null ? nodes : parent.getChildren();
+            i = brs.indexOf(curr);
+            if (i > 0) {
+              Collections.swap(brs, i - 1, i);
+            }
+            break;
+          case "down":
+            brs = parent == null ? nodes : parent.getChildren();
+            i = brs.indexOf(curr);
+            if (i < brs.size() - 1) {
+              Collections.swap(brs, i, i + 1);
+            }
+            break;
+          default:
+            break;
+        }
+      }
+      nodes.forEach(n -> util.walk(n, 0));
+      SqlBuilder sb = factory.create();
+      SqlBuilder.Template template = sb.from(WordDict.class)
+        .where(sb.field("id").eq(id))
+        .update().set("derivatives", derivatives)
+        .template();
+      mapper.updateByTemplate(template);
+    }
+  }
+
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class Node {
+    private String word;
+    private String parent;
+    private List<Node> children;
+    private int index;
   }
 }
