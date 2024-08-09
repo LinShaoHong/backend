@@ -93,6 +93,15 @@ public class WordLoaderResource extends AbstractResource {
   }
 
   @GET
+  @Path("/add/derivative")
+  public Response addDerivative(@QueryParam("id") String id,
+                                @QueryParam("word") String word,
+                                @QueryParam("input") String input) {
+    loader.addDerivative(id, word, input);
+    return responseOf();
+  }
+
+  @GET
   @Path("/remove/part")
   public Response removePart(@QueryParam("word") String word,
                              @QueryParam("part") String part,

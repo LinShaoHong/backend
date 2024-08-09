@@ -393,6 +393,41 @@ public class WordDictLoader {
     }
   }
 
+  public void addDerivative(String id, String word, String input) {
+    WordDict dict = mapper.findById(id);
+    if (dict != null) {
+      List<WordDict.Derivative> list = dict.getDerivatives();
+      if (list.stream().noneMatch(v -> Objects.equals(v.getWord(), input))) {
+        if (!StringUtils.hasText(word)) {
+          dict.getDerivatives().add(new WordDict.Derivative(input, 0));
+        } else {
+          int j = -1;
+          for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getWord().equals(word)) {
+              j = i;
+            }
+          }
+          if (j >= 0) {
+            int z = j;
+            for (int k = j + 1; k < list.size(); k++) {
+              if (list.get(k).getIndex() <= list.get(j).getIndex()) {
+                break;
+              }
+              z = k;
+            }
+            dict.getDerivatives().add(z + 1, new WordDict.Derivative(input, list.get(j).getIndex() + 1));
+          }
+        }
+        SqlBuilder sb = factory.create();
+        SqlBuilder.Template template = sb.from(WordDict.class)
+          .where(sb.field("id").eq(id))
+          .update().set("derivatives", dict.getDerivatives())
+          .template();
+        mapper.updateByTemplate(template);
+      }
+    }
+  }
+
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
