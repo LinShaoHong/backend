@@ -16,7 +16,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -57,9 +56,9 @@ public class WordDerivativesLoader extends WordBasicLoader {
       List<String> words = new ArrayList<>();
       words.add(word);
       words.add(root);
-      WordHcSpider.fetchDerivative(dict, words::addAll);
-      WordJsSpider.fetchDerivative(dict, words::addAll);
-      WordXdfSpider.fetchDerivative(dict, words::addAll);
+      WordHcSpider.fetchDerivative(dict.getId(), words::addAll);
+      WordJsSpider.fetchDerivative(dict.getId(), words::addAll);
+      WordXdfSpider.fetchDerivative(dict.getId(), words::addAll);
 
       boolean hasRoot = dict.getStruct() != null && dict.getStruct().getParts().stream().anyMatch(WordDict.Part::isRoot);
       String resp;
@@ -88,10 +87,22 @@ public class WordDerivativesLoader extends WordBasicLoader {
     dict.getDerivatives().forEach(d -> _words.add(d.getWord()));
     List<String> ws = _words.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
     ws.removeIf(v -> !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'s"));
-    return build(word, ws);
+    List<WordDict.Derivative> list = build(word, root, ws);
+
+    List<String> firsts = new ArrayList<>();
+    list.stream().filter(v -> v.getIndex() == 1 && !Objects.equals(v.getWord(), word))
+      .forEach(v -> {
+        WordHcSpider.fetchDerivative(v.getWord(), firsts::addAll);
+        WordJsSpider.fetchDerivative(v.getWord(), firsts::addAll);
+        WordXdfSpider.fetchDerivative(v.getWord(), firsts::addAll);
+      });
+    ws.addAll(firsts);
+
+    ws.removeIf(v -> !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'s"));
+    return build(word, root, ws.stream().distinct().collect(Collectors.toList()));
   }
 
-  private static List<WordDict.Derivative> build(String word, List<String> ws) {
+  private static List<WordDict.Derivative> build(String word, String root, List<String> ws) {
     List<WordNode> nodes = ws.stream().map(w -> {
       WordNode node = new WordNode();
       node.setWord(w);
@@ -117,7 +128,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
           List<WordNode> children = vs.stream()
             .map(v -> make(v, level + 1))
             .collect(Collectors.toList());
-          if (!children.isEmpty()) {
+          if (children.size() > 1) {
             sort(children);
           }
           root.setChildren(children);
@@ -138,17 +149,9 @@ public class WordDerivativesLoader extends WordBasicLoader {
         .map(v -> util.make(v, 0))
         .collect(Collectors.toList());
       sort(trees);
-      trees.forEach(util::walk);
+      trees.stream().filter(t -> Objects.equals(t.getWord(), root)).forEach(util::walk);
     }
     return derivatives;
-  }
-
-  public static void rebuild(WordDict dict) {
-    if (!CollectionUtils.isEmpty(dict.getDerivatives())) {
-      List<String> words = dict.getDerivatives().stream()
-        .map(WordDict.Derivative::getWord).collect(Collectors.toList());
-      dict.setDerivatives(build(dict.getId(), words));
-    }
   }
 
   private void clearInvalid(List<String> words, WordDict dict, String root) {

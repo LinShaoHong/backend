@@ -131,16 +131,39 @@ public class WordDictLoader {
         break;
       case "derivatives":
         if (StringUtils.hasText(path)) {
-          if (path.endsWith(":sub")) {
-            String _path = path.substring(0, path.length() - 4);
-            dict.getDerivatives().removeIf(d -> d.getWord().contains(_path));
-          } else {
-            dict.getDerivatives().removeIf(d -> d.getWord().equals(path));
+          String removed = path.endsWith(":sub") ? path.substring(0, path.length() - 4) : path;
+          List<WordDict.Derivative> vs = dict.getDerivatives();
+          int j = -1;
+          for (int i = 0; i < vs.size(); i++) {
+            if (vs.get(i).getWord().equals(removed)) {
+              j = i;
+              break;
+            }
+          }
+          if (j >= 0) {
+            int z = j;
+            for (int k = j + 1; k < vs.size(); k++) {
+              if (vs.get(k).getIndex() <= vs.get(j).getIndex()) {
+                break;
+              }
+              z = k;
+            }
+            if (path.endsWith(":sub")) {
+              List<WordDict.Derivative> ds = new ArrayList<>();
+              for (int i = j; i <= z; i++) {
+                ds.add(vs.get(i));
+              }
+              vs.removeAll(ds);
+            } else {
+              for (int i = j + 1; i <= z; i++) {
+                vs.get(i).setIndex(vs.get(i).getIndex() - 1);
+              }
+              vs.remove(j);
+            }
           }
         } else {
           dict.setDerivatives(Collections.emptyList());
         }
-        WordDerivativesLoader.rebuild(dict);
         break;
       case "differs":
         if (StringUtils.hasText(path)) {
@@ -278,7 +301,9 @@ public class WordDictLoader {
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(WordDict.class)
       .where(sb.field("id").eq(id))
-      .update().set("meaning", meaning)
+      .update()
+      .set("passed", 0)
+      .set("meaning", meaning)
       .template();
     mapper.updateByTemplate(template);
   }
@@ -288,7 +313,9 @@ public class WordDictLoader {
     SqlBuilder sb = factory.create();
     SqlBuilder.Template template = sb.from(WordDict.class)
       .where(sb.field("id").eq(id))
-      .update().set("struct", struct)
+      .update()
+      .set("passed", 0)
+      .set("struct", struct)
       .template();
     mapper.updateByTemplate(template);
   }
@@ -387,7 +414,9 @@ public class WordDictLoader {
       SqlBuilder sb = factory.create();
       SqlBuilder.Template template = sb.from(WordDict.class)
         .where(sb.field("id").eq(id))
-        .update().set("derivatives", derivatives)
+        .update()
+        .set("passed", 0)
+        .set("derivatives", derivatives)
         .template();
       mapper.updateByTemplate(template);
     }
@@ -421,7 +450,9 @@ public class WordDictLoader {
         SqlBuilder sb = factory.create();
         SqlBuilder.Template template = sb.from(WordDict.class)
           .where(sb.field("id").eq(id))
-          .update().set("derivatives", dict.getDerivatives())
+          .update()
+          .set("passed", 0)
+          .set("derivatives", dict.getDerivatives())
           .template();
         mapper.updateByTemplate(template);
       }

@@ -132,20 +132,24 @@ public class WordJsSpider {
   }
 
   @SuppressWarnings("Duplicates")
-  public static void fetchDerivative(WordDict dict, Consumer<Set<String>> func) {
-    Set<String> words = new LinkedHashSet<>();
-    Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + dict.getId());
-    List<Node> arr = XPaths.of(node, "//div[@class='Affix_affix__iiL_9']/ul/li/div/h5").asArray();
-    arr.forEach(a -> {
-      String name = a.getTextContent();
-      Strings.Parser parser = Strings.newParser().set(name);
-      parser.next(Pattern.compile("[a-z]*"));
-      String word = parser.left();
-      if (StringUtils.hasText(word)) {
-        words.add(word);
-      }
-    });
-    func.accept(words);
+  public static void fetchDerivative(String w, Consumer<Set<String>> func) {
+    try {
+      Set<String> words = new LinkedHashSet<>();
+      Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + w);
+      List<Node> arr = XPaths.of(node, "//div[@class='Affix_affix__iiL_9']/ul/li/div/h5").asArray();
+      arr.forEach(a -> {
+        String name = a.getTextContent();
+        Strings.Parser parser = Strings.newParser().set(name);
+        parser.next(Pattern.compile("[a-z]*"));
+        String word = parser.left();
+        if (StringUtils.hasText(word)) {
+          words.add(word);
+        }
+      });
+      func.accept(words);
+    } catch (Throwable ex) {
+      //do nothing
+    }
   }
 
   public static Set<String> fetchDiffs(WordDict dict) {

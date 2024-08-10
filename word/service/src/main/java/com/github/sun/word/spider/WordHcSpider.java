@@ -17,24 +17,29 @@ import java.util.function.Consumer;
 
 @Service
 public class WordHcSpider {
-  public static void fetchDerivative(WordDict dict, Consumer<Set<String>> func) {
-    Set<String> words = new LinkedHashSet<>();
-    Document node = WordDictLoader.fetchDocument("https://dict.cn/search?q=" + dict.getId());
-    List<Node> arr = XPaths.of(node, "//div[@class='layout derive']//li").asArray();
-    arr.forEach(v -> {
-      String name = StringEscapeUtils.unescapeHtml4(v.getTextContent());
-      for (String n : name.split("‖")) {
-        words.add(n.split(" ")[0]);
-      }
-    });
-    arr = XPaths.of(node, "//div[@class='layout nwd']//a").asArray();
-    arr.forEach(v -> {
-      String name = StringEscapeUtils.unescapeHtml4(v.getTextContent().trim());
-      if (name.split(" ").length == 1) {
-        words.add(name);
-      }
-    });
-    func.accept(words);
+  public static void fetchDerivative(String word, Consumer<Set<String>> func) {
+    try {
+      Set<String> words = new LinkedHashSet<>();
+      Document node = WordDictLoader.fetchDocument("https://dict.cn/search?q=" + word);
+      List<Node> arr = XPaths.of(node, "//div[@class='layout derive']//li").asArray();
+      arr.forEach(v -> {
+        String name = StringEscapeUtils.unescapeHtml4(v.getTextContent());
+        for (String n : name.split("‖")) {
+          words.add(n.split(" ")[0]);
+        }
+      });
+      arr = XPaths.of(node, "//div[@class='layout nwd']//a").asArray();
+      arr.forEach(v -> {
+        String name = StringEscapeUtils.unescapeHtml4(v.getTextContent().trim());
+        if (name.split(" ").length == 1) {
+          words.add(name);
+        }
+      });
+      func.accept(words);
+
+    } catch (Throwable ex) {
+      //dothing
+    }
   }
 
   public static void fetchPhrase(WordDict dict, Consumer<WordDict.Phrase> func) {
