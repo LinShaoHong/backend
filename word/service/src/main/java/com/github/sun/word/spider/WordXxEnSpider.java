@@ -63,6 +63,16 @@ public class WordXxEnSpider {
     return set;
   }
 
+  public static boolean has(String word) {
+    try {
+      Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + word);
+      return !XPaths.of(node, "//div[@class='guess-title']").asArray().isEmpty();
+    } catch (Exception ex) {
+      //do nothing
+    }
+    return true;
+  }
+
   // --------------------------------------- affix -----------------------------------
   public void fetchAffix() {
     try (InputStream in = loader.getResourceAsStream("affix/1.json")) {

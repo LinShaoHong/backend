@@ -6,24 +6,24 @@ import com.github.sun.word.*;
 import com.github.sun.word.spider.WordHcSpider;
 import com.github.sun.word.spider.WordJsSpider;
 import com.github.sun.word.spider.WordXdfSpider;
+import com.github.sun.word.spider.WordXxEnSpider;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import javax.ws.rs.client.Client;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RefreshScope
 @Service("derivatives")
 public class WordDerivativesLoader extends WordBasicLoader {
-  @Resource
-  private Client client;
   @Resource
   private WordDictMapper dictMapper;
   @Resource
@@ -84,7 +84,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
     List<String> _words = words.stream().map(String::toLowerCase).distinct().collect(Collectors.toList());
     dict.getDerivatives().forEach(d -> _words.add(d.getWord()));
     List<String> ws = _words.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
-    ws.removeIf(v -> !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'s"));
+    ws.removeIf(v -> !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'"));
     List<WordDict.Derivative> list = build(word, root, ws);
 
     List<String> firsts = new ArrayList<>();
@@ -96,7 +96,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
       });
     ws.addAll(firsts);
 
-    ws.removeIf(v -> !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'s"));
+    ws.removeIf(v -> !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'"));
     words = ws.stream().distinct().collect(Collectors.toList());
     clearInvalid(words, dict, root);
     return build(word, root, words);
@@ -164,7 +164,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
       if (exist.contains(v)) {
         return false;
       }
-      boolean invalid = !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'s");
+      boolean invalid = !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'");
       if (invalid) {
         return true;
       }
@@ -185,19 +185,9 @@ public class WordDerivativesLoader extends WordBasicLoader {
     if (w != null) {
       return w.isHas();
     }
-    try {
-      String resp = client
-        .target("https://api.dictionaryapi.dev/api/v2/entries/en/" + word)
-        .request()
-        .get()
-        .readEntity(String.class);
-      JSON.Valuer valuer = JSON.newValuer(resp);
-      boolean has = !"No Definitions Found".equals(valuer.get("title").asText(""));
-      existMapper.insert(new WordExist(word, has));
-      return has;
-    } catch (Exception ex) {
-      return false;
-    }
+    boolean has = WordXxEnSpider.has(word);
+    existMapper.insert(new WordExist(word, has));
+    return has;
   }
 
   private static void sort(List<WordNode> nodes) {
