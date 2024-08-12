@@ -10,6 +10,7 @@ import com.github.sun.word.WordDictLoader;
 import com.ibm.icu.impl.data.ResourceReader;
 import lombok.Data;
 import org.apache.commons.text.StringEscapeUtils;
+import org.jsoup.HttpStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
@@ -65,12 +66,12 @@ public class WordXxEnSpider {
 
   public static boolean has(String word) {
     try {
-      Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + word);
-      return !XPaths.of(node, "//div[@class='guess-title']").asArray().isEmpty();
+      Document node = WordDictLoader.fetchDocument("https://www.xxenglish.com/wd/" + word);
+      return XPaths.of(node, "//div[@class='guess-title']").asArray().isEmpty();
     } catch (Exception ex) {
       //do nothing
     }
-    return true;
+    return false;
   }
 
   // --------------------------------------- affix -----------------------------------
