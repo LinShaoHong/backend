@@ -1,6 +1,5 @@
 package com.github.sun.word.loader;
 
-import com.github.sun.foundation.boot.utility.Iterators;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.StringSorts;
 import com.github.sun.word.WordAffix;
@@ -45,7 +44,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
           if (part.isRoot()) {
             if (index < 0 || i == index + 1) {
               root = root == null ? part.getPart() : root + part.getPart();
-              rootDesc = rootDesc == null ? part.getMeaningTrans() : rootDesc + "，" + part.getMeaningTrans();
+              rootDesc = rootDesc == null ? part.getMeaningTrans() : rootDesc + "；" + part.getMeaningTrans();
               index = i;
             }
           }
@@ -99,7 +98,9 @@ public class WordDerivativesLoader extends WordBasicLoader {
     ws.addAll(firsts);
 
     ws.removeIf(v -> !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'s"));
-    return build(word, root, ws.stream().distinct().collect(Collectors.toList()));
+    words = ws.stream().distinct().collect(Collectors.toList());
+    clearInvalid(words, dict, root);
+    return build(word, root, words);
   }
 
   private static List<WordDict.Derivative> build(String word, String root, List<String> ws) {
@@ -183,29 +184,15 @@ public class WordDerivativesLoader extends WordBasicLoader {
   private boolean has(String word) {
     try {
       String resp = client
-        .target("http://dict.youdao.com/suggest")
-        .queryParam("num", 1)
-        .queryParam("doctype", "json")
-        .queryParam("q", word)
+        .target("https://api.dictionaryapi.dev/api/v2/entries/en/" + word)
         .request()
         .get()
         .readEntity(String.class);
       JSON.Valuer valuer = JSON.newValuer(resp);
-      int code = valuer.get("result").get("code").asInt();
-      if (code != 200) {
-        return false;
-      }
-      List<JSON.Valuer> arr = Iterators.asList(valuer.get("data").get("entries").asArray());
-      if (arr.size() > 0) {
-        String entry = arr.get(0).get("entry").asText();
-        if (!word.equalsIgnoreCase(entry)) {
-          return false;
-        }
-      }
+      return !"No Definitions Found".equals(valuer.get("title").asText(""));
     } catch (Exception ex) {
       return false;
     }
-    return true;
   }
 
   private static void sort(List<WordNode> nodes) {
