@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "word_affix")
+@Table(name = "word_loader_affix")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WordAffix {
   @Id

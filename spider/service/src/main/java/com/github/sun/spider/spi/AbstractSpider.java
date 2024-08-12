@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.sun.foundation.boot.utility.Cache;
-import com.github.sun.foundation.boot.utility.Iterators;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.Retry;
 import com.github.sun.spider.Fetcher;
 import com.github.sun.spider.Spider;
+import com.github.sun.spider.SpiderException;
+import com.github.sun.spider.XPaths;
 import org.apache.commons.text.StringEscapeUtils;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.DomSerializer;
@@ -20,7 +21,6 @@ import java.util.stream.Collectors;
 
 abstract class AbstractSpider extends SchemaParser implements Spider {
   private static final HtmlCleaner hc = new HtmlCleaner();
-  private static final Fetcher fetcher = new JSoupFetcher();
   private final Cache<JSON.Valuer, List<Field>> fieldsCache = new Cache<>();
 
   JsonNode crawl(int currPage, Node node, JSON.Valuer process) {
@@ -168,7 +168,8 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
 
   Node get(String url) {
     try {
-      return Retry.execute(getSetting().getRetryCount(), getSetting().getRetryDelays(), () -> new DomSerializer(new CleanerProperties()).createDOM(hc.clean(fetcher.fetch(url))));
+      return Retry.execute(getSetting().getRetryCount(), getSetting().getRetryDelays(),
+        () -> new DomSerializer(new CleanerProperties()).createDOM(hc.clean(Fetcher.fetch(url))));
     } catch (Exception ex) {
       throw new SpiderException("Error get html from url: " + url, ex);
     }
@@ -177,7 +178,7 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
   Node get(Request req) {
     try {
       return Retry.execute(getSetting().getRetryCount(), getSetting().getRetryDelays(), () -> {
-        String body = fetcher.fetch(req.uri, req.timeout, req.method, req.body, req.charset);
+        String body = Fetcher.fetch(req.uri, req.timeout, req.method, req.body, req.charset);
         return new DomSerializer(new CleanerProperties()).createDOM(hc.clean(body));
       });
     } catch (Exception ex) {

@@ -6,6 +6,7 @@ import com.github.sun.foundation.boot.utility.Iterators;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.spider.Setting;
 import com.github.sun.spider.Spider;
+import com.github.sun.spider.SpiderException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;

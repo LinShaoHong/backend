@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.sun.foundation.boot.utility.Iterators;
 import com.github.sun.foundation.boot.utility.JSON;
+import com.github.sun.spider.SpiderException;
+import com.github.sun.spider.XPaths;
 import org.w3c.dom.Node;
 
 import javax.script.*;
@@ -11,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 
 abstract class SchemaParser {
   private static final ScriptEngineManager manager = new ScriptEngineManager();

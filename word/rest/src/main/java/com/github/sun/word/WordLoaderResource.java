@@ -158,6 +158,12 @@ public class WordLoaderResource extends AbstractResource {
   }
 
   @GET
+  @Path("/search")
+  public ListResponse<WordDict> dict(@QueryParam("q") String q) {
+    return responseOf(loader.search(q));
+  }
+
+  @GET
   @Path("/spider/affix/xxEn")
   public Response spiderXxEnAffix() throws Exception {
     xxEnAffixSpider.fetchAffix();

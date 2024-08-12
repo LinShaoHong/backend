@@ -1,6 +1,6 @@
 package com.github.sun.word.spider;
 
-import com.github.sun.spider.spi.XPaths;
+import com.github.sun.spider.XPaths;
 import com.github.sun.word.WordDictLoader;
 import com.github.sun.word.WordTagMapper;
 import org.apache.commons.text.StringEscapeUtils;

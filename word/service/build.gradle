@@ -2,7 +2,7 @@ dependencies {
   api project(":$rootName-ai")
   api project(":$rootName-mybatis")
   api project(":$rootName-word-mapper")
-  api project(":$rootName-spider-service")
+  api project(":$rootName-spider-contract")
   implementation "com.github.binarywang:weixin-java-pay:4.6.0"
   implementation "org.springframework.cloud:spring-cloud-context:2.1.1.RELEASE"
   implementation 'org.apache.pdfbox:pdfbox:3.0.2'

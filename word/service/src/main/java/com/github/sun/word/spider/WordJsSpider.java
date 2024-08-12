@@ -1,7 +1,7 @@
 package com.github.sun.word.spider;
 
 import com.github.sun.foundation.boot.utility.Strings;
-import com.github.sun.spider.spi.XPaths;
+import com.github.sun.spider.XPaths;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.WordDictLoader;
 import org.apache.commons.text.StringEscapeUtils;

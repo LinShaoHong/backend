@@ -2,10 +2,7 @@ package com.github.sun.word.loader;
 
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.StringSorts;
-import com.github.sun.word.WordAffix;
-import com.github.sun.word.WordAffixMapper;
-import com.github.sun.word.WordDict;
-import com.github.sun.word.WordDictMapper;
+import com.github.sun.word.*;
 import com.github.sun.word.spider.WordHcSpider;
 import com.github.sun.word.spider.WordJsSpider;
 import com.github.sun.word.spider.WordXdfSpider;
@@ -31,6 +28,8 @@ public class WordDerivativesLoader extends WordBasicLoader {
   private WordDictMapper dictMapper;
   @Resource
   private WordAffixMapper affixMapper;
+  @Resource
+  private WordExistMapper existMapper;
 
   @Override
   public void load(String word, JSON.Valuer attr, int userId) {
@@ -182,6 +181,10 @@ public class WordDerivativesLoader extends WordBasicLoader {
   }
 
   private boolean has(String word) {
+    WordExist w = existMapper.findById(word);
+    if (w != null) {
+      return w.isHas();
+    }
     try {
       String resp = client
         .target("https://api.dictionaryapi.dev/api/v2/entries/en/" + word)
@@ -189,7 +192,9 @@ public class WordDerivativesLoader extends WordBasicLoader {
         .get()
         .readEntity(String.class);
       JSON.Valuer valuer = JSON.newValuer(resp);
-      return !"No Definitions Found".equals(valuer.get("title").asText(""));
+      boolean has = !"No Definitions Found".equals(valuer.get("title").asText(""));
+      existMapper.insert(new WordExist(word, has));
+      return has;
     } catch (Exception ex) {
       return false;
     }

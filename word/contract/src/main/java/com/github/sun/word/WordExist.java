@@ -15,11 +15,10 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "word_loader_code")
+@Table(name = "word_loader_exist")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WordCode {
+public class WordExist {
   @Id
   private String id;
-  private String type;
-  private long code;
+  private boolean has;
 }

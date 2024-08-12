@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "word_tag")
+@Table(name = "word_loader_tag")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WordTag {
   @Id

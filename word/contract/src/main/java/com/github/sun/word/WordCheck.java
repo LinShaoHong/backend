@@ -16,7 +16,7 @@ import javax.persistence.Transient;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "word_check")
+@Table(name = "word_loader_check")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WordCheck {
   @Id

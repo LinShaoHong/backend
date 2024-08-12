@@ -2,9 +2,7 @@ package com.github.sun.word.spider;
 
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.Strings;
-import com.github.sun.spider.Fetcher;
-import com.github.sun.spider.spi.JSoupFetcher;
-import com.github.sun.spider.spi.XPaths;
+import com.github.sun.spider.XPaths;
 import com.github.sun.word.WordAffix;
 import com.github.sun.word.WordAffixMapper;
 import com.github.sun.word.WordDict;
@@ -12,7 +10,6 @@ import com.github.sun.word.WordDictLoader;
 import com.ibm.icu.impl.data.ResourceReader;
 import lombok.Data;
 import org.apache.commons.text.StringEscapeUtils;
-import org.htmlcleaner.HtmlCleaner;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
@@ -31,8 +28,6 @@ import java.util.regex.Pattern;
 
 @Service
 public class WordXxEnSpider {
-  private static final Fetcher fetcher = new JSoupFetcher();
-  private static final HtmlCleaner hc = new HtmlCleaner();
   private final static ClassLoader loader = ResourceReader.class.getClassLoader();
 
   @Resource

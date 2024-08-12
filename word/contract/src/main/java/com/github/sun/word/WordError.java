@@ -16,7 +16,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "word_error")
+@Table(name = "word_loader_error")
 public class WordError {
   @Id
   private String id;

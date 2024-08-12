@@ -8,9 +8,9 @@ import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface WordCodeMapper extends CompositeMapper<WordCode> {
-  @Select("select * from word_code where id=#{id} for update")
+  @Select("select * from word_loader_code where id=#{id} for update")
   WordCode queryForUpdate(@Param("id") String id);
 
-  @Update("update word_code set `code`=#{code} where id=#{id}")
+  @Update("update word_loader_code set `code`=#{code} where id=#{id}")
   int updateById(@Param("id") String id, @Param("code") long code);
 }

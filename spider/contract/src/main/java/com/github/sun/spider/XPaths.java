@@ -1,4 +1,4 @@
-package com.github.sun.spider.spi;
+package com.github.sun.spider;
 
 import net.sf.saxon.xpath.XPathFactoryImpl;
 import org.w3c.dom.Node;

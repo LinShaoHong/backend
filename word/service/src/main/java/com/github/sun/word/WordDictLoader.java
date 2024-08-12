@@ -10,7 +10,6 @@ import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.spider.Fetcher;
-import com.github.sun.spider.spi.JSoupFetcher;
 import com.github.sun.word.loader.WordBasicLoader;
 import com.github.sun.word.loader.WordDerivativesLoader;
 import com.github.sun.word.loader.WordStructLoader;
@@ -40,7 +39,6 @@ import java.util.stream.Collectors;
 @Service
 @RefreshScope
 public class WordDictLoader {
-  private static final Fetcher fetcher = new JSoupFetcher();
   private static final HtmlCleaner hc = new HtmlCleaner();
   private final static ExecutorService executor = Executors.newFixedThreadPool(10);
   private final static Cache<String, Document> documents = Caffeine.newBuilder()
@@ -289,7 +287,7 @@ public class WordDictLoader {
   public static synchronized Document fetchDocument(String url) {
     return documents.get(url, u -> {
       try {
-        String html = fetcher.fetch(url);
+        String html = Fetcher.fetch(url);
         return new DomSerializer(new CleanerProperties()).createDOM(hc.clean(html));
       } catch (Exception ex) {
         throw new RuntimeException(ex);
@@ -457,6 +455,15 @@ public class WordDictLoader {
         mapper.updateByTemplate(template);
       }
     }
+  }
+
+  public List<WordDict> search(String q) {
+    SqlBuilder sb = factory.create();
+    SqlBuilder.Template template = sb.from(WordDict.class)
+      .where(sb.field("id").contains(q))
+      .select("id", "meaning", "loadState", "passed", "viewed", "sort", "loadTime")
+      .template();
+    return mapper.findByTemplate(template);
   }
 
   @Data
