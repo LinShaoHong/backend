@@ -63,12 +63,22 @@ public class WordDictLoader {
   @Resource
   private WordAffixMapper affixMapper;
   @Resource
+  private WordTagMapper tagMapper;
+  @Resource
   private WordStructLoader structLoader;
   @Resource
   private WordDerivativesLoader derivativesLoader;
 
   public String chat(String q) {
     return assistant.chat(apiKey, model, q);
+  }
+
+  public void fetch(int userId) {
+    SqlBuilder sb = factory.create();
+    SqlBuilder.Template template = sb.from(WordTag.class).limit(300, 500).template();
+    tagMapper.findByTemplate(template).forEach(tag -> {
+      loadAll(tag.getId(), userId);
+    });
   }
 
   public void loadAll(String words, int userId) {

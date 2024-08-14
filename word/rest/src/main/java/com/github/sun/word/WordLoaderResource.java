@@ -34,6 +34,13 @@ public class WordLoaderResource extends AbstractResource {
   }
 
   @GET
+  @Path("/fetch")
+  public Response fetch(@QueryParam("userId") int userId) {
+    loader.fetch(userId);
+    return responseOf();
+  }
+
+  @GET
   @Path("/all")
   public Response loadAll(@QueryParam("words") String words,
                           @QueryParam("userId") int userId) {

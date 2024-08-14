@@ -54,10 +54,16 @@ public class WordDerivativesLoader extends WordBasicLoader {
       List<String> words = new ArrayList<>();
       words.add(word);
       words.add(root);
-      WordXxEnSpider.fetchDerivative(dict.getId(),words::addAll);
+      WordXxEnSpider.fetchDerivative(dict.getId(), words::addAll);
       WordHcSpider.fetchDerivative(dict.getId(), words::addAll);
       WordJsSpider.fetchDerivative(dict.getId(), words::addAll);
       WordXdfSpider.fetchDerivative(dict.getId(), words::addAll);
+      if (!Objects.equals(word, root)) {
+        WordXxEnSpider.fetchDerivative(root, words::addAll);
+        WordHcSpider.fetchDerivative(root, words::addAll);
+        WordJsSpider.fetchDerivative(root, words::addAll);
+        WordXdfSpider.fetchDerivative(root, words::addAll);
+      }
 
       boolean hasRoot = dict.getStruct() != null && dict.getStruct().getParts().stream().anyMatch(WordDict.Part::isRoot);
       String resp;
@@ -72,7 +78,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
         resp = assistant.chat(apiKey, model, q.replace("$input", "直接列出单词\"" + word + "\"的所有派生词"));
       }
       JSON.Valuer valuer = JSON.newValuer(parse(resp));
-       for (JSON.Valuer v : valuer.asArray()) {
+      for (JSON.Valuer v : valuer.asArray()) {
         String w = v.get("word").asText("");
         if (StringUtils.hasText(w)) {
           words.add(w);
@@ -95,7 +101,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
     List<String> firsts = new ArrayList<>();
     list.stream().filter(v -> v.getIndex() == 1 && !Objects.equals(v.getWord(), word))
       .forEach(v -> {
-        WordXxEnSpider.fetchDerivative(v.getWord(),firsts::addAll);
+        WordXxEnSpider.fetchDerivative(v.getWord(), firsts::addAll);
         WordHcSpider.fetchDerivative(v.getWord(), firsts::addAll);
         WordJsSpider.fetchDerivative(v.getWord(), firsts::addAll);
         WordXdfSpider.fetchDerivative(v.getWord(), firsts::addAll);
@@ -125,6 +131,20 @@ public class WordDerivativesLoader extends WordBasicLoader {
       }
       return node;
     }).collect(Collectors.toList());
+
+    List<WordNode> fs = nodes.stream()
+      .filter(v -> Objects.equals(v.getParent(), word))
+      .sorted(Comparator.comparingInt(f -> f.getWord().length()))
+      .collect(Collectors.toList());
+    fs.forEach(f -> {
+      for (int i = fs.size() - 1; i >= 0; i--) {
+        String _word = fs.get(i).getWord();
+        if (f.getWord().contains(_word) && !Objects.equals(f.getWord(), _word)) {
+          f.setParent(_word);
+          break;
+        }
+      }
+    });
 
     List<WordDict.Derivative> derivatives = new ArrayList<>();
     if (nodes.size() > 1) {

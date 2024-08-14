@@ -20,5 +20,5 @@ import javax.persistence.Table;
 public class WordTag {
   @Id
   private String id;
-  private String tag;
+  private String scope;
 }
