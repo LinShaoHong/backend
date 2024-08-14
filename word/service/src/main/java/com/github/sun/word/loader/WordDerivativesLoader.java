@@ -54,6 +54,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
       List<String> words = new ArrayList<>();
       words.add(word);
       words.add(root);
+      WordXxEnSpider.fetchDerivative(dict.getId(),words::addAll);
       WordHcSpider.fetchDerivative(dict.getId(), words::addAll);
       WordJsSpider.fetchDerivative(dict.getId(), words::addAll);
       WordXdfSpider.fetchDerivative(dict.getId(), words::addAll);
@@ -61,13 +62,17 @@ public class WordDerivativesLoader extends WordBasicLoader {
       boolean hasRoot = dict.getStruct() != null && dict.getStruct().getParts().stream().anyMatch(WordDict.Part::isRoot);
       String resp;
       if (hasRoot) {
-        words.addAll(affixMapper.byRoot(root));
-        resp = assistant.chat(apiKey, model, q.replace("$input", "尽可能多的直接列出词根" + root + "(意思为:" + rootDesc + ")的派生词，要求这些派生词的词根也为" + root + "且其词根意义相近。"));
+        List<WordAffix> affixes = affixMapper.byRoot(root);
+        if (affixes.stream().map(WordAffix::getRootDesc).distinct().count() == 1L) {
+          affixes.forEach(a -> words.add(a.getId()));
+        }
+        q = q.replace("$input", word + "的词根为" + root + "(" + rootDesc + ")，以此直接列出它的所有同根词。注意移除含义已完全变化的单词");
+        resp = assistant.chat(apiKey, model, q);
       } else {
-        resp = assistant.chat(apiKey, model, q.replace("$input", "尽可能多的直接列出单词\"" + word + "\"的所有派生词"));
+        resp = assistant.chat(apiKey, model, q.replace("$input", "直接列出单词\"" + word + "\"的所有派生词"));
       }
       JSON.Valuer valuer = JSON.newValuer(parse(resp));
-      for (JSON.Valuer v : valuer.asArray()) {
+       for (JSON.Valuer v : valuer.asArray()) {
         String w = v.get("word").asText("");
         if (StringUtils.hasText(w)) {
           words.add(w);
@@ -90,6 +95,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
     List<String> firsts = new ArrayList<>();
     list.stream().filter(v -> v.getIndex() == 1 && !Objects.equals(v.getWord(), word))
       .forEach(v -> {
+        WordXxEnSpider.fetchDerivative(v.getWord(),firsts::addAll);
         WordHcSpider.fetchDerivative(v.getWord(), firsts::addAll);
         WordJsSpider.fetchDerivative(v.getWord(), firsts::addAll);
         WordXdfSpider.fetchDerivative(v.getWord(), firsts::addAll);
@@ -97,7 +103,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
     ws.addAll(firsts);
 
     ws.removeIf(v -> !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'"));
-    words = ws.stream().distinct().collect(Collectors.toList());
+    words = ws.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
     clearInvalid(words, dict, root);
     return build(word, root, words);
   }
@@ -106,11 +112,15 @@ public class WordDerivativesLoader extends WordBasicLoader {
     List<WordNode> nodes = ws.stream().map(w -> {
       WordNode node = new WordNode();
       node.setWord(w);
-      for (int i = ws.size() - 1; i >= 0; i--) {
-        String _word = ws.get(i);
-        if (w.contains(_word) && !Objects.equals(w, _word)) {
-          node.setParent(_word);
-          break;
+      if (w.contains(word) && !Objects.equals(w, word)) {
+        node.setParent(word);
+      } else {
+        for (int i = ws.size() - 1; i >= 0; i--) {
+          String _word = ws.get(i);
+          if (w.contains(_word) && !Objects.equals(w, _word)) {
+            node.setParent(_word);
+            break;
+          }
         }
       }
       return node;

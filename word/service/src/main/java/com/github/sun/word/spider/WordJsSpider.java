@@ -136,16 +136,24 @@ public class WordJsSpider {
     try {
       Set<String> words = new LinkedHashSet<>();
       Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + w);
-      List<Node> arr = XPaths.of(node, "//div[@class='Affix_affix__iiL_9']/ul/li/div/h5").asArray();
-      arr.forEach(a -> {
-        String name = a.getTextContent();
-        Strings.Parser parser = Strings.newParser().set(name);
-        parser.next(Pattern.compile("[a-z]*"));
-        String word = parser.left();
-        if (StringUtils.hasText(word)) {
-          words.add(word);
+      Node root = XPaths.of(node, "//div[@class='Affix_affix__iiL_9']").as();
+      if (root != null) {
+        String desc = XPaths.of(root, "./p[2]").as().getTextContent();
+        desc = StringEscapeUtils.unescapeHtml4(desc);
+
+        if (StringUtils.hasText(desc) && !desc.contains("1.") && !desc.contains("2.")) {
+          List<Node> arr = XPaths.of(root, "./ul/li/div/h5").asArray();
+          arr.forEach(a -> {
+            String name = a.getTextContent();
+            Strings.Parser parser = Strings.newParser().set(name);
+            parser.next(Pattern.compile("[a-z]*"));
+            String word = parser.left();
+            if (StringUtils.hasText(word)) {
+              words.add(word);
+            }
+          });
         }
-      });
+      }
       func.accept(words);
     } catch (Throwable ex) {
       //do nothing

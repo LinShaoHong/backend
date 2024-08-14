@@ -9,8 +9,8 @@ import java.util.List;
 
 @Mapper
 public interface WordAffixMapper extends CompositeMapper<WordAffix> {
-  @Select("select distinct id from word_loader_affix where root=#{root}")
-  List<String> byRoot(@Param("root") String root);
+  @Select("select * from word_loader_affix where root=#{root}")
+  List<WordAffix> byRoot(@Param("root") String root);
 
   @Select("select * from word_loader_affix where lower(id)=lower(#{word})")
   WordAffix byId(@Param("word") String word);

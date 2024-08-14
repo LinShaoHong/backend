@@ -20,9 +20,8 @@ public class WordYdSpider {
   public static void main(String[] args) {
     try {
       WordDict dict = new WordDict();
-      dict.setId("afternoon");
-      System.out.println(WordXxEnSpider.fetchDiffs(dict));
-      System.out.println(WordJsSpider.fetchDiffs(dict));
+      dict.setId("prepare");
+      WordXxEnSpider.fetchDerivative("prepare", System.out::println);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
