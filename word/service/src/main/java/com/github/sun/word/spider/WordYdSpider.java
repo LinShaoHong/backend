@@ -21,7 +21,8 @@ public class WordYdSpider {
     try {
       WordDict dict = new WordDict();
       dict.setId("prepare");
-      WordXxEnSpider.fetchDerivative("prepare", System.out::println);
+//      WordXxEnSpider.fetchDerivative("prepare", System.out::println);
+      WordHcSpider.fetchDerivative("territorial", "terri", System.out::println);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

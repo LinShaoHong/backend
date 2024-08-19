@@ -1,8 +1,6 @@
 package com.github.sun.word.loader;
 
 import com.github.sun.foundation.boot.utility.JSON;
-import com.github.sun.word.WordAffix;
-import com.github.sun.word.WordAffixMapper;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.spider.WordJsSpider;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -18,11 +16,11 @@ import java.util.Objects;
 @Service("struct")
 public class WordStructLoader extends WordBasicLoader {
   @Resource
-  private WordAffixMapper affixMapper;
+  private WordLoaderAffixMapper affixMapper;
 
   @Override
   public void load(String word, JSON.Valuer attr, int userId) {
-    WordAffix affix = affixMapper.findById(word);
+    WordLoaderAffix affix = affixMapper.findById(word);
     retry(word, userId, dict -> {
       String q = loadQ("cues/词根词缀.md");
       String resp;
@@ -73,8 +71,8 @@ public class WordStructLoader extends WordBasicLoader {
 //        }
 //      }
       struct.setParts(parts);
-      struct.setAnalysis(valuer.get("struct_analysis_zh").asText());
-      struct.setHistory(valuer.get("historical_cultural_zh").asText());
+      struct.setAnalysis(valuer.get("memory_formula_zh").asText());
+      struct.setHistory(valuer.get("origin_history_zh").asText());
       dict.setStruct(struct);
     }, "struct");
   }

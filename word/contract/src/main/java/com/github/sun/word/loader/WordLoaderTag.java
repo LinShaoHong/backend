@@ -1,4 +1,4 @@
-package com.github.sun.word;
+package com.github.sun.word.loader;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.sun.foundation.modelling.NamingStrategy;
@@ -15,14 +15,10 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "word_loader_affix")
+@Table(name = "word_loader_tag")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WordAffix {
+public class WordLoaderTag {
   @Id
   private String id;
-  private String root;
-  private String rootDesc;
-  private String wordDesc;
-  private String gptRoot;
-  private String gptAffix;
+  private String scope;
 }

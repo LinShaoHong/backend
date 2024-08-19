@@ -2,8 +2,8 @@ package com.github.sun.word.spider;
 
 import com.github.sun.spider.XPaths;
 import com.github.sun.word.WordDictLoader;
-import com.github.sun.word.WordTag;
-import com.github.sun.word.WordTagMapper;
+import com.github.sun.word.loader.WordLoaderTag;
+import com.github.sun.word.loader.WordLoaderTagMapper;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -19,9 +19,9 @@ import java.util.function.Consumer;
 @Service
 public class WordXdfSpider {
   @Resource
-  private WordTagMapper mapper;
+  private WordLoaderTagMapper mapper;
 
-  public static void fetchDerivative(String word, Consumer<Set<String>> func) {
+  public static void fetchDerivative(String word, String root, Consumer<Set<String>> func) {
     try {
       Set<String> words = new LinkedHashSet<>();
       Document node = WordDictLoader.fetchDocument("https://www.koolearn.com/dict/search/index?keywords=" + word);
@@ -39,7 +39,9 @@ public class WordXdfSpider {
           XPaths.of(div, "./a").asArray().forEach(a -> {
             String name = StringEscapeUtils.unescapeHtml4(a.getTextContent()).trim();
             if (name.split(" ").length == 1) {
-              words.add(name);
+              if ("同根词".equals(t) || name.contains(root)) {
+                words.add(name);
+              }
             }
           });
         }
@@ -58,7 +60,7 @@ public class WordXdfSpider {
       List<Node> arr = XPaths.of(node, "//a[@class='word']").asArray();
       arr.forEach(a -> {
         String word = a.getTextContent();
-        WordTag tag = mapper.findById(word);
+        WordLoaderTag tag = mapper.findById(word);
         String scope = tag == null ? null : tag.getScope();
         if (scope == null) {
           scope = sc;
@@ -70,7 +72,7 @@ public class WordXdfSpider {
           scope = String.join(",", list);
         }
         if (tag == null) {
-          tag = new WordTag();
+          tag = new WordLoaderTag();
         }
         tag.setScope(scope);
         if (tag.getId() == null) {

@@ -3,8 +3,8 @@ package com.github.sun.word.spider;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.Strings;
 import com.github.sun.spider.XPaths;
-import com.github.sun.word.WordAffix;
-import com.github.sun.word.WordAffixMapper;
+import com.github.sun.word.loader.WordLoaderAffix;
+import com.github.sun.word.loader.WordLoaderAffixMapper;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.WordDictLoader;
 import com.ibm.icu.impl.data.ResourceReader;
@@ -32,7 +32,7 @@ public class WordXxEnSpider {
   private final static ClassLoader loader = ResourceReader.class.getClassLoader();
 
   @Resource
-  private WordAffixMapper mapper;
+  private WordLoaderAffixMapper mapper;
 
   public static void fetchDerivative(String word, Consumer<Set<String>> func) {
     try {
@@ -103,9 +103,9 @@ public class WordXxEnSpider {
       String line = reader.readLine();
       while (StringUtils.hasText(line)) {
         String word = JSON.asJsonNode(line).get("word").asText("");
-        WordAffix affix = mapper.findById(word);
+        WordLoaderAffix affix = mapper.findById(word);
         if (affix == null) {
-          affix = new WordAffix();
+          affix = new WordLoaderAffix();
         }
         String content = JSON.asJsonNode(line).get("content").asText("");
         Strings.Parser parser = Strings.newParser().set(content);

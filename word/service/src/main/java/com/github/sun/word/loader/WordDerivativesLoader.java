@@ -2,7 +2,9 @@ package com.github.sun.word.loader;
 
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.StringSorts;
-import com.github.sun.word.*;
+import com.github.sun.word.WordDict;
+import com.github.sun.word.WordDictMapper;
+import com.github.sun.word.WordDictTreeMapper;
 import com.github.sun.word.spider.WordHcSpider;
 import com.github.sun.word.spider.WordJsSpider;
 import com.github.sun.word.spider.WordXdfSpider;
@@ -13,7 +15,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -22,14 +23,16 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RefreshScope
-@Service("derivatives")
+//@Service("derivatives")
 public class WordDerivativesLoader extends WordBasicLoader {
   @Resource
   private WordDictMapper dictMapper;
   @Resource
-  private WordAffixMapper affixMapper;
+  private WordLoaderAffixMapper affixMapper;
   @Resource
-  private WordExistMapper existMapper;
+  private WordLoaderExistMapper existMapper;
+  @Resource
+  private WordDictTreeMapper treeMapper;
 
   @Override
   public void load(String word, JSON.Valuer attr, int userId) {
@@ -55,21 +58,21 @@ public class WordDerivativesLoader extends WordBasicLoader {
       words.add(word);
       words.add(root);
       WordXxEnSpider.fetchDerivative(dict.getId(), words::addAll);
-      WordHcSpider.fetchDerivative(dict.getId(), words::addAll);
-      WordJsSpider.fetchDerivative(dict.getId(), words::addAll);
-      WordXdfSpider.fetchDerivative(dict.getId(), words::addAll);
+      WordHcSpider.fetchDerivative(dict.getId(), root, words::addAll);
+      WordJsSpider.fetchDerivative(dict.getId(), root, words::addAll);
+      WordXdfSpider.fetchDerivative(dict.getId(), root, words::addAll);
       if (!Objects.equals(word, root)) {
         WordXxEnSpider.fetchDerivative(root, words::addAll);
-        WordHcSpider.fetchDerivative(root, words::addAll);
-        WordJsSpider.fetchDerivative(root, words::addAll);
-        WordXdfSpider.fetchDerivative(root, words::addAll);
+        WordHcSpider.fetchDerivative(root, root, words::addAll);
+        WordJsSpider.fetchDerivative(root, root, words::addAll);
+        WordXdfSpider.fetchDerivative(root, root, words::addAll);
       }
 
       boolean hasRoot = dict.getStruct() != null && dict.getStruct().getParts().stream().anyMatch(WordDict.Part::isRoot);
       String resp;
       if (hasRoot) {
-        List<WordAffix> affixes = affixMapper.byRoot(root);
-        if (affixes.stream().map(WordAffix::getRootDesc).distinct().count() == 1L) {
+        List<WordLoaderAffix> affixes = affixMapper.byRoot(root);
+        if (affixes.stream().map(WordLoaderAffix::getRootDesc).distinct().count() == 1L) {
           affixes.forEach(a -> words.add(a.getId()));
         }
         q = q.replace("$input", word + "的词根为" + root + "(" + rootDesc + ")，以此直接列出它的所有同根词。注意移除含义已完全变化的单词");
@@ -102,9 +105,9 @@ public class WordDerivativesLoader extends WordBasicLoader {
     list.stream().filter(v -> v.getIndex() == 1 && !Objects.equals(v.getWord(), word))
       .forEach(v -> {
         WordXxEnSpider.fetchDerivative(v.getWord(), firsts::addAll);
-        WordHcSpider.fetchDerivative(v.getWord(), firsts::addAll);
-        WordJsSpider.fetchDerivative(v.getWord(), firsts::addAll);
-        WordXdfSpider.fetchDerivative(v.getWord(), firsts::addAll);
+        WordHcSpider.fetchDerivative(v.getWord(), root, firsts::addAll);
+        WordJsSpider.fetchDerivative(v.getWord(), root, firsts::addAll);
+        WordXdfSpider.fetchDerivative(v.getWord(), root, firsts::addAll);
       });
     ws.addAll(firsts);
 
@@ -114,11 +117,11 @@ public class WordDerivativesLoader extends WordBasicLoader {
     return build(word, root, words);
   }
 
-  private static List<WordDict.Derivative> build(String word, String root, List<String> ws) {
+  public static List<WordDict.Derivative> build(String word, String root, List<String> ws) {
     List<WordNode> nodes = ws.stream().map(w -> {
       WordNode node = new WordNode();
       node.setWord(w);
-      if (w.contains(word) && !Objects.equals(w, word)) {
+      if (w.contains(word) && !Objects.equals(w, word) && ws.contains(word)) {
         node.setParent(word);
       } else {
         for (int i = ws.size() - 1; i >= 0; i--) {
@@ -179,7 +182,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
         .map(v -> util.make(v, 0))
         .collect(Collectors.toList());
       sort(trees);
-      trees.stream().filter(t -> Objects.equals(t.getWord(), root)).forEach(util::walk);
+      trees.forEach(util::walk);
     }
     return derivatives;
   }
@@ -202,7 +205,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
       if (d != null) {
         return false;
       }
-      WordAffix a = affixMapper.findById(v);
+      WordLoaderAffix a = affixMapper.findById(v);
       if (a != null) {
         return false;
       }
@@ -211,12 +214,12 @@ public class WordDerivativesLoader extends WordBasicLoader {
   }
 
   private boolean has(String word) {
-    WordExist w = existMapper.findById(word);
+    WordLoaderExist w = existMapper.findById(word);
     if (w != null) {
       return w.isHas();
     }
     boolean has = WordXxEnSpider.has(word);
-    existMapper.insert(new WordExist(word, has));
+    existMapper.insert(new WordLoaderExist(word, has));
     return has;
   }
 

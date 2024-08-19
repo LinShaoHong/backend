@@ -1,4 +1,4 @@
-package com.github.sun.word;
+package com.github.sun.word.loader;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.sun.foundation.modelling.NamingStrategy;
@@ -9,26 +9,20 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "word_loader_check")
+@Table(name = "word_loader_affix")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WordCheck {
+public class WordLoaderAffix {
   @Id
   private String id;
-  private String date;
-  private int userId;
-  private int sort;
-  private boolean curr;
-  @Transient
-  private int viewed;
-  @Transient
-  private int passed;
-  @Transient
-  private int total;
+  private String root;
+  private String rootDesc;
+  private String wordDesc;
+  private String gptRoot;
+  private String gptAffix;
 }

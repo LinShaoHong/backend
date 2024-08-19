@@ -1,4 +1,4 @@
-package com.github.sun.word;
+package com.github.sun.word.loader;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.sun.foundation.modelling.NamingStrategy;
@@ -17,7 +17,7 @@ import javax.persistence.Table;
 @NamingStrategy
 @Table(name = "word_loader_exist")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WordExist {
+public class WordLoaderExist {
   @Id
   private String id;
   private boolean has;

@@ -33,7 +33,7 @@ public abstract class WordBasicLoader implements WordLoader {
   @Resource
   protected WordDictMapper mapper;
   @Resource
-  protected WordErrorMapper errorMapper;
+  protected WordLoaderErrorMapper errorMapper;
   @Resource(name = "qwen")
   protected Assistant assistant;
   @Resource(name = "mysql")
@@ -65,9 +65,9 @@ public abstract class WordBasicLoader implements WordLoader {
       }
     }
     if (ex != null) {
-      WordError error = errorMapper.findById(word);
+      WordLoaderError error = errorMapper.findById(word);
       if (error == null) {
-        error = new WordError();
+        error = new WordLoaderError();
         error.setId(word);
         error.setError(Throws.stackTraceOf(ex));
         errorMapper.insert(error);

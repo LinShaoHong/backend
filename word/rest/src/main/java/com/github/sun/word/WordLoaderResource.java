@@ -2,6 +2,8 @@ package com.github.sun.word;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.rest.AbstractResource;
+import com.github.sun.word.loader.WordLoaderAffix;
+import com.github.sun.word.loader.WordLoaderCheck;
 import com.github.sun.word.spider.WordXdfSpider;
 import com.github.sun.word.spider.WordXxEnSpider;
 import lombok.Data;
@@ -92,30 +94,36 @@ public class WordLoaderResource extends AbstractResource {
 
   @GET
   @Path("/move/derivative")
-  public Response moveDerivative(@QueryParam("id") String id,
-                                 @QueryParam("word") String word,
-                                 @QueryParam("op") String op) {
-    loader.moveDerivative(id, word, op);
-    return responseOf();
+  public SingleResponse<WordDictTree> moveDerivative(@QueryParam("id") String id,
+                                                     @QueryParam("version") int version,
+                                                     @QueryParam("word") String word,
+                                                     @QueryParam("op") String op) {
+    return responseOf(loader.moveDerivative(id, version, word, op));
   }
 
   @GET
   @Path("/add/derivative")
-  public Response addDerivative(@QueryParam("id") String id,
-                                @QueryParam("word") String word,
-                                @QueryParam("input") String input) {
-    loader.addDerivative(id, word, input);
+  public SingleResponse<WordDictTree> addDerivative(@QueryParam("id") String id,
+                                                    @QueryParam("word") String word,
+                                                    @QueryParam("input") String input,
+                                                    @QueryParam("version") int version) {
+    return responseOf(loader.addDerivative(id, word, input, version));
+  }
+
+  @POST
+  @Path("/remove/part")
+  public Response removePart(RemovePartReq q) {
+    loader.removePart(q.getWord(), q.getPart(), q.getPath(), q.getAttr(), q.getUserId());
     return responseOf();
   }
 
-  @GET
-  @Path("/remove/part")
-  public Response removePart(@QueryParam("word") String word,
-                             @QueryParam("part") String part,
-                             @QueryParam("path") String path,
-                             @QueryParam("userId") int userId) {
-    loader.removePart(word, part, path, userId);
-    return responseOf();
+  @Data
+  public static class RemovePartReq {
+    private String word;
+    private String part;
+    private String path;
+    private JsonNode attr;
+    private int userId;
   }
 
   @GET
@@ -147,14 +155,14 @@ public class WordLoaderResource extends AbstractResource {
 
   @GET
   @Path("/stat")
-  public SingleResponse<WordCheck> stat(@QueryParam("date") String date,
-                                        @QueryParam("userId") int userId) {
+  public SingleResponse<WordLoaderCheck> stat(@QueryParam("date") String date,
+                                              @QueryParam("userId") int userId) {
     return responseOf(loader.stat(date, userId));
   }
 
   @GET
   @Path("/stats")
-  public ListResponse<WordCheck> stats(@QueryParam("userId") int userId) {
+  public ListResponse<WordLoaderCheck> stats(@QueryParam("userId") int userId) {
     return responseOf(loader.stats(userId));
   }
 
@@ -179,8 +187,48 @@ public class WordLoaderResource extends AbstractResource {
 
   @GET
   @Path("/affix")
-  public SingleResponse<WordAffix> affix(@QueryParam("word") String word) {
+  public SingleResponse<WordLoaderAffix> affix(@QueryParam("word") String word) {
     return responseOf(loader.affix(word));
+  }
+
+  @GET
+  @Path("/differs")
+  public ListResponse<WordDictDiff> differs(@QueryParam("word") String word) {
+    return responseOf(loader.differs(word));
+  }
+
+  @GET
+  @Path("/trees")
+  public ListResponse<WordDictTree> trees(@QueryParam("root") String root) {
+    return responseOf(loader.trees(root));
+  }
+
+  @GET
+  @Path("findTree")
+  public ListResponse<WordDictTree> findTree(@QueryParam("word") String word) {
+    return responseOf(loader.findTree(word));
+  }
+
+  @GET
+  @Path("/createTree")
+  public Response createTree(@QueryParam("word") String word) {
+    loader.createTree(word);
+    return responseOf();
+  }
+
+  @GET
+  @Path("/mergeTree")
+  public SingleResponse<WordDictTree> mergeTree(@QueryParam("treeId") String treeId, @QueryParam("word") String word) {
+    return responseOf(loader.mergeTree(treeId, word));
+  }
+
+  @GET
+  @Path("/editTreeDesc")
+  public Response editTreeDesc(@QueryParam("treeId") String treeId,
+                               @QueryParam("desc") String desc,
+                               @QueryParam("version") int version) {
+    loader.editTreeDesc(treeId, desc, version);
+    return responseOf();
   }
 
   @GET

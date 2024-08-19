@@ -31,24 +31,25 @@ public class WordPhrasesLoader extends WordBasicLoader {
 
       List<WordDict.Phrase> ydPhrases = new ArrayList<>();
       WordYdSpider.fetchPhrase(dict, ydPhrases::add);
-      if (ydPhrases.size() > 5) {
-        ydPhrases = ydPhrases.subList(0, 5);
+      if (ydPhrases.size() > 2) {
+        ydPhrases = ydPhrases.subList(0, 2);
       }
       phrases.addAll(ydPhrases);
 
       List<WordDict.Phrase> hcPhrases = new ArrayList<>();
       WordHcSpider.fetchPhrase(dict, hcPhrases::add);
-      if (hcPhrases.size() > 5) {
-        hcPhrases = hcPhrases.subList(0, 5);
+      if (hcPhrases.size() > 2) {
+        hcPhrases = hcPhrases.subList(0, 2);
       }
       phrases.addAll(hcPhrases);
 
       List<WordDict.Phrase> xxEnPhrases = new ArrayList<>();
       WordXxEnSpider.fetchPhrase(dict, xxEnPhrases::add);
-      if (xxEnPhrases.size() > 5) {
-        xxEnPhrases = xxEnPhrases.subList(0, 5);
+      if (xxEnPhrases.size() > 2) {
+        xxEnPhrases = xxEnPhrases.subList(0, 2);
       }
       phrases.addAll(xxEnPhrases);
+      phrases.removeIf(v -> v.getEn().matches(".*[\\u4E00-\\u9FFF].*"));
 
       dict.setPhrases(new ArrayList<>(phrases));
     }, "phrases");

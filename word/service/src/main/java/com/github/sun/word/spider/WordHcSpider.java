@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 
 @Service
 public class WordHcSpider {
-  public static void fetchDerivative(String word, Consumer<Set<String>> func) {
+  public static void fetchDerivative(String word, String root, Consumer<Set<String>> func) {
     try {
       Set<String> words = new LinkedHashSet<>();
       Document node = WordDictLoader.fetchDocument("https://dict.cn/search?q=" + word);
@@ -26,6 +26,14 @@ public class WordHcSpider {
         String name = StringEscapeUtils.unescapeHtml4(v.getTextContent());
         for (String n : name.split("‖")) {
           words.add(n.split(" ")[0]);
+        }
+      });
+      arr = XPaths.of(node, "//div[@class='layout nwd']//a").asArray();
+      arr.forEach(v -> {
+        String name = StringEscapeUtils.unescapeHtml4(v.getTextContent());
+        name = name.trim().split(" ")[0];
+        if (name.contains(root)) {
+          words.add(name);
         }
       });
       func.accept(words);

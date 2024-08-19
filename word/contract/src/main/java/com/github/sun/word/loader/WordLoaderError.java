@@ -1,6 +1,5 @@
-package com.github.sun.word;
+package com.github.sun.word.loader;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,11 +14,9 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "word_loader_code")
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class WordCode {
+@Table(name = "word_loader_error")
+public class WordLoaderError {
   @Id
   private String id;
-  private String type;
-  private long code;
+  private String error;
 }

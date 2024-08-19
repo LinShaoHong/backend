@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -39,7 +38,7 @@ public class WordDict {
   @Converter(DerivativesHandler.class)
   private List<Derivative> derivatives;//派生树
   @Converter(DiffersHandler.class)
-  private List<Differ> differs;//辨析
+  private List<String> differs;//辨析
   @Converter(PhrasesHandler.class)
   private List<Phrase> phrases;//短语词组
   @Converter(SynAntHandler.class)
@@ -142,19 +141,7 @@ public class WordDict {
   public static class DerivativesHandler extends JsonHandler.ListHandler<Derivative> {
   }
 
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  public static class Differ {
-    private String word;
-    private String definition;
-    private String scenario;
-    private List<ExampleSentence> examples;
-  }
-
-  public static class DiffersHandler extends JsonHandler.ListHandler<Differ> {
+  public static class DiffersHandler extends JsonHandler.ListHandler<String> {
   }
 
   @Data

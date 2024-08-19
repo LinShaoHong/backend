@@ -1,4 +1,4 @@
-package com.github.sun.word;
+package com.github.sun.word.loader;
 
 import com.github.sun.foundation.boot.utility.JSON;
 
