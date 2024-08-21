@@ -13,7 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Data
 @Builder
@@ -39,8 +38,8 @@ public class WordDict {
   private List<Derivative> derivatives;//派生树
   @Converter(DiffersHandler.class)
   private List<String> differs;//辨析
-  @Converter(PhrasesHandler.class)
-  private List<Phrase> phrases;//短语词组
+  @Converter(CollocationHandler.class)
+  private Collocation collocation;//短语搭配
   @Converter(SynAntHandler.class)
   private SynAnt synAnts;//近反义词
   private String tags;//标签
@@ -149,25 +148,33 @@ public class WordDict {
   @NoArgsConstructor
   @AllArgsConstructor
   @JsonIgnoreProperties(ignoreUnknown = true)
+  public static class Formula {
+    private String en;
+    private String zh;
+    private List<ExampleSentence> examples;
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Phrase {
     private String en;
     private String zh;
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof Phrase)) return false;
-      Phrase phrase = (Phrase) o;
-      return getEn().equals(phrase.getEn());
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(getEn());
-    }
   }
 
-  public static class PhrasesHandler extends JsonHandler.ListHandler<Phrase> {
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public static class Collocation {
+    private List<Formula> formulas;
+    private List<Phrase> phrases;
+  }
+
+  public static class CollocationHandler extends JsonHandler<Collocation> {
   }
 
   @Data
@@ -196,7 +203,7 @@ public class WordDict {
     private boolean synAntsLoading;
     private boolean derivativesLoading;
     private boolean differsLoading;
-    private boolean phrasesLoading;
+    private boolean collocationLoading;
   }
 
   public static class LoadStateHandler extends JsonHandler<LoadState> {

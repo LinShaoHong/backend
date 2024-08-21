@@ -73,6 +73,9 @@ public class WordStructLoader extends WordBasicLoader {
       struct.setParts(parts);
       struct.setAnalysis(valuer.get("memory_formula_zh").asText());
       struct.setHistory(valuer.get("origin_history_zh").asText());
+      if (StringUtils.hasText(struct.getAnalysis())) {
+        struct.setAnalysis(struct.getAnalysis().replaceAll("-", ""));
+      }
       dict.setStruct(struct);
     }, "struct");
   }

@@ -134,11 +134,16 @@ public class WordDictLoader {
         dict.setPassed(false);
         mapper.update(dict);
         break;
-      case "phrases":
+      case "collocation":
         if (StringUtils.hasText(path)) {
-          dict.getPhrases().removeIf(d -> Objects.equals(d.getEn(), path));
+          String removed = path.endsWith(":phrase") ? path.substring(0, path.length() - 7) : path;
+          if (path.endsWith(":phrase")) {
+            dict.getCollocation().getPhrases().removeIf(d -> Objects.equals(d.getEn(), removed));
+          } else {
+            dict.getCollocation().getFormulas().removeIf(d -> Objects.equals(d.getEn(), removed));
+          }
         } else {
-          dict.setDerivatives(Collections.emptyList());
+          dict.setCollocation(null);
         }
         dict.setPassed(false);
         mapper.update(dict);
