@@ -5,7 +5,6 @@ import com.github.sun.word.WordDict;
 import com.github.sun.word.WordDictLoader;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -38,25 +37,6 @@ public class WordHcSpider {
       });
       func.accept(words);
     } catch (Throwable ex) {
-      //do nothing
-    }
-  }
-
-  public static void fetchPhrase(WordDict dict, Consumer<WordDict.Phrase> func) {
-    try {
-      Document node = WordDictLoader.fetchDocument("https://dict.cn/search?q=" + dict.getId());
-      List<Node> arr = XPaths.of(node, "//div[@class='layout coll']//li").asArray();
-      arr.addAll(XPaths.of(node, "//div[@class='layout anno']//li").asArray());
-      arr.forEach(v -> {
-        String name = XPaths.of(v, "./a/text()").asText().trim();
-        String desc = v.getTextContent().trim().substring(name.length()).trim();
-        name = StringEscapeUtils.unescapeHtml4(name);
-        desc = StringEscapeUtils.unescapeHtml4(desc);
-        if (StringUtils.hasText(name) && StringUtils.hasText(desc)) {
-          func.accept(new WordDict.Phrase(name, desc));
-        }
-      });
-    } catch (Exception ex) {
       //do nothing
     }
   }

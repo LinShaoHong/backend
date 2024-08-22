@@ -34,7 +34,7 @@ public class WordDiffersLoader extends WordBasicLoader {
           String w = String.join("、", _ws);
           try {
             String resp = assistant.chat(apiKey, model,
-              q.replace("$input", "直接精简地对单词" + w + "进行辨析，要求只要包含单词的强调概念，使用场景以及2个例句并附上中文翻译"));
+              q.replace("$word", w));
             JSON.Valuer valuer = JSON.newValuer(parse(resp));
             valuer.asArray().forEach(a -> {
               WordDictDiff differ = new WordDictDiff();

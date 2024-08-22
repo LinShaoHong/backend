@@ -55,24 +55,6 @@ public class WordXxEnSpider {
     }
   }
 
-  public static void fetchPhrase(WordDict dict, Consumer<WordDict.Phrase> func) {
-    try {
-      Document node = WordDictLoader.fetchDocument("https://www.xxenglish.com/w6/" + dict.getId());
-      List<Node> arr = XPaths.of(node, "//span[@class='CX']").asArray();
-      arr.forEach(v -> {
-        String name = XPaths.of(v, "./span[@class='YX']").asText();
-        String desc = XPaths.of(v, "./span[@class='JX']").asText();
-        name = StringEscapeUtils.unescapeHtml4(name);
-        desc = StringEscapeUtils.unescapeHtml4(desc);
-        if (StringUtils.hasText(name) && StringUtils.hasText(desc)) {
-          func.accept(new WordDict.Phrase(name, desc.substring(2)));
-        }
-      });
-    } catch (Exception ex) {
-      //do nothing
-    }
-  }
-
   public static Set<String> fetchDiffs(WordDict dict) {
     Set<String> set = new HashSet<>();
     try {

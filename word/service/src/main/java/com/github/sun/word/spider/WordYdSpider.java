@@ -13,16 +13,14 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 @Service
 public class WordYdSpider {
   public static void main(String[] args) {
     try {
-      WordDict dict = new WordDict();
-      dict.setId("prepare");
-//      WordXxEnSpider.fetchDerivative("prepare", System.out::println);
-      WordHcSpider.fetchDerivative("territorial", "terri", System.out::println);
+      Document node = WordDictLoader.fetchDocument("https://www.oxfordlearnersdictionaries.com/definition/english/readymade_1?q=readymade");
+      boolean has = XPaths.of(node, "//div[@id='didyoumean']").asArray().isEmpty();
+      System.out.println(has);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -116,21 +114,20 @@ public class WordYdSpider {
     }
   }
 
-  public static void fetchPhrase(WordDict dict, Consumer<WordDict.Phrase> func) {
+  public static boolean has(String word) {
     try {
-      Document node = WordDictLoader.fetchDocument("https://dict.youdao.com/result?lang=en&word=" + dict.getId());
-      List<Node> arr = XPaths.of(node, "//div[@class='webPhrase']//li[@class='mcols-layout']").asArray();
-      arr.forEach(v -> {
-        String name = XPaths.of(v, ".//a[@class='point']").asText().trim();
-        String desc = XPaths.of(v, ".//p").as().getTextContent().trim();
-        name = StringEscapeUtils.unescapeHtml4(name);
-        desc = StringEscapeUtils.unescapeHtml4(desc);
-        if (StringUtils.hasText(name) && StringUtils.hasText(desc)) {
-          func.accept(new WordDict.Phrase(name, desc));
-        }
-      });
+      Document node = WordDictLoader.fetchDocument("https://dict.youdao.com/result?lang=en&word=" + word);
+      boolean empty = XPaths.of(node, "//div[@class='maybe']").asArray().isEmpty();
+      if (!empty) {
+        return false;
+      }
+      WordDict dict = new WordDict();
+      dict.setId(word);
+      fetchPhonetic(dict);
+      return StringUtils.hasText(dict.getUkPhonetic()) || StringUtils.hasText(dict.getUsPhonetic());
     } catch (Exception ex) {
       //do nothing
     }
+    return false;
   }
 }

@@ -12,11 +12,9 @@ import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.spider.Fetcher;
+import com.github.sun.spider.XPaths;
 import com.github.sun.word.loader.*;
-import com.github.sun.word.spider.WordHcSpider;
-import com.github.sun.word.spider.WordJsSpider;
-import com.github.sun.word.spider.WordXdfSpider;
-import com.github.sun.word.spider.WordXxEnSpider;
+import com.github.sun.word.spider.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -618,7 +616,7 @@ public class WordDictLoader {
       if (Arrays.asList(words).contains(v)) {
         return false;
       }
-      boolean invalid = !v.toLowerCase().contains(root.toLowerCase()) || v.contains(" ") || v.contains("-") || v.contains("'");
+      boolean invalid = v.contains(" ") || v.contains("-") || v.contains("'");
       if (invalid) {
         return true;
       }
@@ -641,6 +639,17 @@ public class WordDictLoader {
       return w.isHas();
     }
     boolean has = WordXxEnSpider.has(word);
+    if (has) {
+      has = WordYdSpider.has(word);
+    }
+    if (has) {
+      try {
+        Document node = WordDictLoader.fetchDocument("https://www.oxfordlearnersdictionaries.com/definition/english/" + word + "_1?q=" + word);
+        has = XPaths.of(node, "//div[@id='didyoumean']").asArray().isEmpty();
+      } catch (Throwable ex) {
+        has = false;
+      }
+    }
     existMapper.insert(new WordLoaderExist(word, has));
     return has;
   }
