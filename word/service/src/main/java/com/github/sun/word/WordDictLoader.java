@@ -518,15 +518,16 @@ public class WordDictLoader {
 
   public WordDictTree mergeTree(String treeId, String word) {
     WordDictTree tree = treeMapper.findById(treeId);
+    String root = tree.getRoot();
     List<WordDictTree.Derivative> derivatives = tree.getDerivatives();
     List<String> ws = fetchDerivatives(tree.getRoot(), word);
-    ws.removeIf(v -> derivatives.stream().anyMatch(d -> Objects.equals(d.getWord(), v)));
+    ws.removeIf(v -> derivatives.stream().anyMatch(d -> Objects.equals(d.getWord(), v)) || root.contains(v));
     if (ws.isEmpty()) {
       return tree;
     }
-    ws.add(tree.getRoot());
+    ws.add(root);
     ws = ws.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
-    List<WordDict.Derivative> news = WordDerivativesLoader.build(word, tree.getRoot(), ws);
+    List<WordDict.Derivative> news = WordDerivativesLoader.build(word, root, ws);
     List<WordDictTree.Derivative> ds = tree.getDerivatives();
     for (int i = news.size() - 1; i >= 1; i--) {
       WordDict.Derivative n = news.get(i);
@@ -612,6 +613,7 @@ public class WordDictLoader {
       .map(String::toLowerCase)
       .distinct()
       .collect(Collectors.toList());
+    ret.removeIf(v -> !StringUtils.hasText(v.trim()));
     ret.removeIf(v -> {
       if (Arrays.asList(words).contains(v)) {
         return false;
