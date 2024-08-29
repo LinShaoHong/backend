@@ -652,7 +652,7 @@ public class WordDictLoader {
         has = false;
       }
     }
-    existMapper.insert(new WordLoaderExist(word, has));
+    existMapper.replace(new WordLoaderExist(word, has));
     return has;
   }
 
