@@ -494,7 +494,18 @@ public class WordDictLoader {
   }
 
   public List<WordDictTree> findTree(String word) {
-    return treeMapper.findTree("{\"word\":\"" + word + "\"}");
+    List<WordDictTree> list = treeMapper.findTree("{\"word\":\"" + word + "\"}");
+    if (list.isEmpty()) {
+      WordDict dict = mapper.findById(word);
+      if (dict != null) {
+        WordDict.Part part = dict.getStruct().getParts().stream()
+          .filter(WordDict.Part::isRoot).findFirst().orElse(null);
+        if (part != null) {
+          list = treeMapper.findTree("{\"word\":\"" + part.getPart() + "\"}");
+        }
+      }
+    }
+    return list;
   }
 
   public void createTree(String word) {
