@@ -3,13 +3,12 @@ package com.github.sun.word.spider;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.foundation.boot.utility.Strings;
 import com.github.sun.spider.XPaths;
-import com.github.sun.word.loader.WordLoaderAffix;
-import com.github.sun.word.loader.WordLoaderAffixMapper;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.WordDictLoader;
+import com.github.sun.word.loader.WordLoaderAffix;
+import com.github.sun.word.loader.WordLoaderAffixMapper;
 import com.ibm.icu.impl.data.ResourceReader;
 import lombok.Data;
-import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
@@ -74,7 +73,7 @@ public class WordXxEnSpider {
     } catch (Exception ex) {
       //do nothing
     }
-    return false;
+    return true;
   }
 
   // --------------------------------------- affix -----------------------------------

@@ -17,13 +17,13 @@ import java.util.Set;
 @Service
 public class WordYdSpider {
   public static void main(String[] args) {
-    try {
-      Document node = WordDictLoader.fetchDocument("https://www.oxfordlearnersdictionaries.com/definition/english/readymade_1?q=readymade");
-      boolean has = XPaths.of(node, "//div[@id='didyoumean']").asArray().isEmpty();
-      System.out.println(has);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+//    try {
+//      Document node = WordDictLoader.fetchDocument("https://www.oxfordlearnersdictionaries.com/definition/english/readymade_1?q=readymade");
+//      boolean has = XPaths.of(node, "//div[@id='didyoumean']").asArray().isEmpty();
+//      System.out.println(has);
+//    } catch (Exception e) {
+//      throw new RuntimeException(e);
+//    }
   }
 
   public static void fetchPhonetic(WordDict dict) {
