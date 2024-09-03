@@ -22,9 +22,13 @@ public class WordStructLoader extends WordBasicLoader {
     public void load(String word, JSON.Valuer attr, int userId) {
         WordLoaderAffix affix = affixMapper.findById(word);
         retry(word, userId, dict -> {
+            String model = attr == null ? null : attr.get("model").asText();
+            model = StringUtils.hasText(model) ? model : super.model;
+
             String q = loadQ("cues/词根词缀.md");
             q = q.replace("$word", word);
             String resp;
+            
             String root = attr == null ? null : attr.get("root").asText();
             root = StringUtils.hasText(root) ? root : (affix != null ? affix.getRoot() : null);
             root = StringUtils.hasText(root) ? root : WordJsSpider.fetchRoot(dict);
