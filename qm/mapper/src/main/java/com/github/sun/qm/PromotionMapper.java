@@ -9,6 +9,6 @@ import java.util.List;
 
 @Mapper
 public interface PromotionMapper extends CompositeMapper<Promotion> {
-  @Select("SELECT * FROM qm_promotion WHERE userId = #{userId} ORDER BY createTime DESC")
-  List<Promotion> findByUserId(@Param("userId") String userId);
+    @Select("SELECT * FROM qm_promotion WHERE userId = #{userId} ORDER BY createTime DESC")
+    List<Promotion> findByUserId(@Param("userId") String userId);
 }

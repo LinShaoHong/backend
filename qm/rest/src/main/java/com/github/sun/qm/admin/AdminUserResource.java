@@ -22,140 +22,140 @@ import java.util.*;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AdminUserResource extends AbstractResource {
-  private final UserMapper mapper;
-  private final SqlBuilder.Factory factory;
+    private final UserMapper mapper;
+    private final SqlBuilder.Factory factory;
 
-  @Inject
-  public AdminUserResource(UserMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
-    this.mapper = mapper;
-    this.factory = factory;
-  }
-
-  /**
-   * 分页获取用户信息
-   */
-  @GET
-  public PageResponse<ObjectNode> paged(@QueryParam("id") String id,
-                                        @QueryParam("username") String username,
-                                        @QueryParam("email") String email,
-                                        @QueryParam("lastLoginIp") String lastLoginIp,
-                                        @QueryParam("vip") Boolean vip,
-                                        @QueryParam("start") int start,
-                                        @QueryParam("count") int count,
-                                        @QueryParam("rank") @DefaultValue("createTime") String rank,
-                                        @Context Admin admin) {
-    SqlBuilder sb = factory.create();
-    Expression condition = Expression.nonEmpty(id).then(sb.field("id").eq(id))
-      .and(username == null || username.isEmpty() ? null : sb.field("username").eq(username.trim()))
-      .and(email == null || email.isEmpty() ? null : sb.field("email").eq(email))
-      .and(lastLoginIp == null || lastLoginIp.isEmpty() ? null : sb.field("lastLoginIp").eq(lastLoginIp))
-      .and(vip == null ? null : sb.field("vip").eq(vip));
-    int total = mapper.countByTemplate(sb.from(User.class).where(condition).count().template());
-    if (start < total) {
-      sb.clear();
-      SqlBuilder.Template template = sb.from(User.class)
-        .where(condition)
-        .desc(rank)
-        .limit(start, count)
-        .template();
-      List<User> list = mapper.findByTemplate(template);
-      return responseOf(total, JSON.deserializeAsList(list, ObjectNode.class));
-    }
-    return responseOf(total, Collections.emptyList());
-  }
-
-  /**
-   * 更改用户
-   */
-  @PUT
-  @Path("/${id}")
-  public Response update(@PathParam("id") String id,
-                         UserReq req,
-                         @Context Admin admin) {
-    User u = mapper.findById(id);
-    if (u != null) {
-      u.setAmount(req.getAmount());
-      mapper.update(u);
-    }
-    return responseOf();
-  }
-
-  @Data
-  private static class UserReq {
-    private BigDecimal amount;
-  }
-
-  /**
-   * 统计用户
-   */
-  @GET
-  @Path("/stat")
-  public SingleResponse<StatResp> statUser(@QueryParam("timeType") int timeType,
-                                           @Context Admin admin) {
-    SqlBuilder sb = factory.create();
-    Calendar c = Calendar.getInstance();
-    Date now = new Date();
-    c.setTime(now);
-    switch (timeType) {
-      case 1:
-        c.add(Calendar.DAY_OF_WEEK, -7);
-        break;
-      case 2:
-        c.add(Calendar.MONTH, -1);
-        break;
-      case 3:
-        c.add(Calendar.MONTH, -3);
-        break;
-      case 4:
-        c.add(Calendar.MONTH, -6);
-        break;
-      case 5:
-        c.add(Calendar.YEAR, -1);
-        break;
-    }
-    SqlBuilder.Template template = sb.from(User.class)
-      .select(sb.field("id").count())
-      .template();
-    int total = mapper.countByTemplate(template);
-
-    template = sb.from(User.class)
-      .where(sb.id("UNIX_TIMESTAMP").call(sb.field("createTime")).ge(c.getTimeInMillis() / 1000))
-      .groupBy(sb.field("substr").call(sb.field("createTime"), 1, 10))
-      .select(sb.field("substr").call(sb.field("createTime"), 1, 10), "time")
-      .select(sb.field("id").distinct().count(), "count")
-      .template();
-    List<Map<String, Object>> list = mapper.findByTemplateAsMap(template);
-
-    List<String> times = new ArrayList<>();
-    List<Integer> nums = new ArrayList<>();
-    List<Integer> totals = new ArrayList<>();
-
-    Collections.reverse(list);
-    for (Map<String, Object> map : list) {
-      times.add((String) map.get("time"));
-      Integer inc = ((Long) map.get("count")).intValue();
-      nums.add(inc);
-
-
-      totals.add(total);
-      total -= inc;
+    @Inject
+    public AdminUserResource(UserMapper mapper, @Named("mysql") SqlBuilder.Factory factory) {
+        this.mapper = mapper;
+        this.factory = factory;
     }
 
-    Collections.reverse(times);
-    Collections.reverse(nums);
-    Collections.reverse(totals);
-    return responseOf(StatResp.builder()
-      .times(times)
-      .nums(nums)
-      .totals(totals)
-      .build());
-  }
+    /**
+     * 分页获取用户信息
+     */
+    @GET
+    public PageResponse<ObjectNode> paged(@QueryParam("id") String id,
+                                          @QueryParam("username") String username,
+                                          @QueryParam("email") String email,
+                                          @QueryParam("lastLoginIp") String lastLoginIp,
+                                          @QueryParam("vip") Boolean vip,
+                                          @QueryParam("start") int start,
+                                          @QueryParam("count") int count,
+                                          @QueryParam("rank") @DefaultValue("createTime") String rank,
+                                          @Context Admin admin) {
+        SqlBuilder sb = factory.create();
+        Expression condition = Expression.nonEmpty(id).then(sb.field("id").eq(id))
+                .and(username == null || username.isEmpty() ? null : sb.field("username").eq(username.trim()))
+                .and(email == null || email.isEmpty() ? null : sb.field("email").eq(email))
+                .and(lastLoginIp == null || lastLoginIp.isEmpty() ? null : sb.field("lastLoginIp").eq(lastLoginIp))
+                .and(vip == null ? null : sb.field("vip").eq(vip));
+        int total = mapper.countByTemplate(sb.from(User.class).where(condition).count().template());
+        if (start < total) {
+            sb.clear();
+            SqlBuilder.Template template = sb.from(User.class)
+                    .where(condition)
+                    .desc(rank)
+                    .limit(start, count)
+                    .template();
+            List<User> list = mapper.findByTemplate(template);
+            return responseOf(total, JSON.deserializeAsList(list, ObjectNode.class));
+        }
+        return responseOf(total, Collections.emptyList());
+    }
 
-  @Data
-  @Builder
-  private static class StatResp {
-    private List<String> times;
-    private List<Integer> nums;
-    private List<Integer> totals;
-  }
+    /**
+     * 更改用户
+     */
+    @PUT
+    @Path("/${id}")
+    public Response update(@PathParam("id") String id,
+                           UserReq req,
+                           @Context Admin admin) {
+        User u = mapper.findById(id);
+        if (u != null) {
+            u.setAmount(req.getAmount());
+            mapper.update(u);
+        }
+        return responseOf();
+    }
+
+    @Data
+    private static class UserReq {
+        private BigDecimal amount;
+    }
+
+    /**
+     * 统计用户
+     */
+    @GET
+    @Path("/stat")
+    public SingleResponse<StatResp> statUser(@QueryParam("timeType") int timeType,
+                                             @Context Admin admin) {
+        SqlBuilder sb = factory.create();
+        Calendar c = Calendar.getInstance();
+        Date now = new Date();
+        c.setTime(now);
+        switch (timeType) {
+            case 1:
+                c.add(Calendar.DAY_OF_WEEK, -7);
+                break;
+            case 2:
+                c.add(Calendar.MONTH, -1);
+                break;
+            case 3:
+                c.add(Calendar.MONTH, -3);
+                break;
+            case 4:
+                c.add(Calendar.MONTH, -6);
+                break;
+            case 5:
+                c.add(Calendar.YEAR, -1);
+                break;
+        }
+        SqlBuilder.Template template = sb.from(User.class)
+                .select(sb.field("id").count())
+                .template();
+        int total = mapper.countByTemplate(template);
+
+        template = sb.from(User.class)
+                .where(sb.id("UNIX_TIMESTAMP").call(sb.field("createTime")).ge(c.getTimeInMillis() / 1000))
+                .groupBy(sb.field("substr").call(sb.field("createTime"), 1, 10))
+                .select(sb.field("substr").call(sb.field("createTime"), 1, 10), "time")
+                .select(sb.field("id").distinct().count(), "count")
+                .template();
+        List<Map<String, Object>> list = mapper.findByTemplateAsMap(template);
+
+        List<String> times = new ArrayList<>();
+        List<Integer> nums = new ArrayList<>();
+        List<Integer> totals = new ArrayList<>();
+
+        Collections.reverse(list);
+        for (Map<String, Object> map : list) {
+            times.add((String) map.get("time"));
+            Integer inc = ((Long) map.get("count")).intValue();
+            nums.add(inc);
+
+
+            totals.add(total);
+            total -= inc;
+        }
+
+        Collections.reverse(times);
+        Collections.reverse(nums);
+        Collections.reverse(totals);
+        return responseOf(StatResp.builder()
+                .times(times)
+                .nums(nums)
+                .totals(totals)
+                .build());
+    }
+
+    @Data
+    @Builder
+    private static class StatResp {
+        private List<String> times;
+        private List<Integer> nums;
+        private List<Integer> totals;
+    }
 }

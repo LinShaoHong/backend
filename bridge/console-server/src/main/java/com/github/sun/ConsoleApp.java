@@ -9,11 +9,11 @@ import org.springframework.context.ApplicationContext;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class ConsoleApp extends JerseyApplication {
-  public ConsoleApp(ApplicationContext context) {
-    super(context);
-  }
+    public ConsoleApp(ApplicationContext context) {
+        super(context);
+    }
 
-  public static void main(String[] args) {
-    new SpringApplicationBuilder(ConsoleApp.class).run(args);
-  }
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(ConsoleApp.class).run(args);
+    }
 }

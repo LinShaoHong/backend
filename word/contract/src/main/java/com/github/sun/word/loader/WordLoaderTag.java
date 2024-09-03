@@ -18,7 +18,7 @@ import javax.persistence.Table;
 @Table(name = "word_loader_tag")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WordLoaderTag {
-  @Id
-  private String id;
-  private String scope;
+    @Id
+    private String id;
+    private String scope;
 }

@@ -11,19 +11,19 @@ import java.util.List;
 @RefreshScope
 @Service("examples")
 public class WordExamplesLoader extends WordBasicLoader {
-  @Override
-  public void load(String word, JSON.Valuer attr, int userId) {
-    retry(word, userId, dict -> {
-      String q = loadQ("cues/例句.md");
-      q = q.replace("$word", word);
-      JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, q)));
-      List<WordDict.ExampleSentence> examples = new ArrayList<>();
-      valuer.get("example_sentences").asArray().forEach(e -> {
-        String sentence = e.get("sentence").asText();
-        String translation = e.get("translation").asText();
-        examples.add(new WordDict.ExampleSentence(sentence, translation));
-      });
-      dict.setExamples(examples);
-    }, "examples");
-  }
+    @Override
+    public void load(String word, JSON.Valuer attr, int userId) {
+        retry(word, userId, dict -> {
+            String q = loadQ("cues/例句.md");
+            q = q.replace("$word", word);
+            JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, q)));
+            List<WordDict.ExampleSentence> examples = new ArrayList<>();
+            valuer.get("example_sentences").asArray().forEach(e -> {
+                String sentence = e.get("sentence").asText();
+                String translation = e.get("translation").asText();
+                examples.add(new WordDict.ExampleSentence(sentence, translation));
+            });
+            dict.setExamples(examples);
+        }, "examples");
+    }
 }

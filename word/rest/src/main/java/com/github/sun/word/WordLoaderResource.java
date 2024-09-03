@@ -19,239 +19,239 @@ import java.io.InputStream;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class WordLoaderResource extends AbstractResource {
-  private final WordDictLoader loader;
-  private final WordPdfService pdfService;
-  private final WordXxEnSpider xxEnAffixSpider;
-  private final WordXdfSpider xdfSpider;
+    private final WordDictLoader loader;
+    private final WordPdfService pdfService;
+    private final WordXxEnSpider xxEnAffixSpider;
+    private final WordXdfSpider xdfSpider;
 
-  @Inject
-  public WordLoaderResource(WordDictLoader loader,
-                            WordPdfService pdfService,
-                            WordXxEnSpider xxEnAffixSpider,
-                            WordXdfSpider xdfSpider) {
-    this.loader = loader;
-    this.pdfService = pdfService;
-    this.xxEnAffixSpider = xxEnAffixSpider;
-    this.xdfSpider = xdfSpider;
-  }
+    @Inject
+    public WordLoaderResource(WordDictLoader loader,
+                              WordPdfService pdfService,
+                              WordXxEnSpider xxEnAffixSpider,
+                              WordXdfSpider xdfSpider) {
+        this.loader = loader;
+        this.pdfService = pdfService;
+        this.xxEnAffixSpider = xxEnAffixSpider;
+        this.xdfSpider = xdfSpider;
+    }
 
-  @GET
-  @Path("/fetch")
-  public Response fetch(@QueryParam("userId") int userId) {
-    loader.fetch(userId);
-    return responseOf();
-  }
+    @GET
+    @Path("/fetch")
+    public Response fetch(@QueryParam("userId") int userId) {
+        loader.fetch(userId);
+        return responseOf();
+    }
 
-  @GET
-  @Path("/all")
-  public Response loadAll(@QueryParam("words") String words,
-                          @QueryParam("userId") int userId) {
-    loader.loadAll(words, userId);
-    return responseOf();
-  }
+    @GET
+    @Path("/all")
+    public Response loadAll(@QueryParam("words") String words,
+                            @QueryParam("userId") int userId) {
+        loader.loadAll(words, userId);
+        return responseOf();
+    }
 
-  @POST
-  @Path("/part")
-  public Response loadPart(PartReq req) {
-    loader.loadPart(req.getWord(), req.getPart(), req.getAttr(), req.getUserId());
-    return responseOf();
-  }
+    @POST
+    @Path("/part")
+    public Response loadPart(PartReq req) {
+        loader.loadPart(req.getWord(), req.getPart(), req.getAttr(), req.getUserId());
+        return responseOf();
+    }
 
-  @Data
-  public static class PartReq {
-    private String word;
-    private String part;
-    private String path;
-    private int userId;
-    private JsonNode attr;
-  }
+    @Data
+    public static class PartReq {
+        private String word;
+        private String part;
+        private String path;
+        private int userId;
+        private JsonNode attr;
+    }
 
-  @POST
-  @Path("/edit/struct")
-  public Response editStruct(EditStructReq req) {
-    loader.editStruct(req.getId(), req.getStruct());
-    return responseOf();
-  }
+    @POST
+    @Path("/edit/struct")
+    public Response editStruct(EditStructReq req) {
+        loader.editStruct(req.getId(), req.getStruct());
+        return responseOf();
+    }
 
-  @Data
-  public static class EditStructReq {
-    private String id;
-    private WordDict.Struct struct;
-  }
+    @Data
+    public static class EditStructReq {
+        private String id;
+        private WordDict.Struct struct;
+    }
 
-  @POST
-  @Path("/edit/meaning")
-  public Response editMeaning(EditMeaningReq req) {
-    loader.editMeaning(req.getId(), req.getMeaning());
-    return responseOf();
-  }
+    @POST
+    @Path("/edit/meaning")
+    public Response editMeaning(EditMeaningReq req) {
+        loader.editMeaning(req.getId(), req.getMeaning());
+        return responseOf();
+    }
 
-  @Data
-  public static class EditMeaningReq {
-    private String id;
-    private WordDict.TranslatedMeaning meaning;
-  }
+    @Data
+    public static class EditMeaningReq {
+        private String id;
+        private WordDict.TranslatedMeaning meaning;
+    }
 
-  @GET
-  @Path("/move/derivative")
-  public SingleResponse<WordDictTree> moveDerivative(@QueryParam("id") String id,
-                                                     @QueryParam("version") int version,
-                                                     @QueryParam("word") String word,
-                                                     @QueryParam("op") String op) {
-    return responseOf(loader.moveDerivative(id, version, word, op));
-  }
+    @GET
+    @Path("/move/derivative")
+    public SingleResponse<WordDictTree> moveDerivative(@QueryParam("id") String id,
+                                                       @QueryParam("version") int version,
+                                                       @QueryParam("word") String word,
+                                                       @QueryParam("op") String op) {
+        return responseOf(loader.moveDerivative(id, version, word, op));
+    }
 
-  @GET
-  @Path("/add/derivative")
-  public SingleResponse<WordDictTree> addDerivative(@QueryParam("id") String id,
-                                                    @QueryParam("word") String word,
-                                                    @QueryParam("input") String input,
-                                                    @QueryParam("version") int version) {
-    return responseOf(loader.addDerivative(id, word, input, version));
-  }
+    @GET
+    @Path("/add/derivative")
+    public SingleResponse<WordDictTree> addDerivative(@QueryParam("id") String id,
+                                                      @QueryParam("word") String word,
+                                                      @QueryParam("input") String input,
+                                                      @QueryParam("version") int version) {
+        return responseOf(loader.addDerivative(id, word, input, version));
+    }
 
-  @POST
-  @Path("/remove/part")
-  public Response removePart(RemovePartReq q) {
-    loader.removePart(q.getWord(), q.getPart(), q.getPath(), q.getAttr(), q.getUserId());
-    return responseOf();
-  }
+    @POST
+    @Path("/remove/part")
+    public Response removePart(RemovePartReq q) {
+        loader.removePart(q.getWord(), q.getPart(), q.getPath(), q.getAttr(), q.getUserId());
+        return responseOf();
+    }
 
-  @Data
-  public static class RemovePartReq {
-    private String word;
-    private String part;
-    private String path;
-    private JsonNode attr;
-    private int userId;
-  }
+    @Data
+    public static class RemovePartReq {
+        private String word;
+        private String part;
+        private String path;
+        private JsonNode attr;
+        private int userId;
+    }
 
-  @GET
-  @Path("/remove")
-  public SingleResponse<Integer> remove(@QueryParam("word") String word) {
-    return responseOf(loader.remove(word));
-  }
+    @GET
+    @Path("/remove")
+    public SingleResponse<Integer> remove(@QueryParam("word") String word) {
+        return responseOf(loader.remove(word));
+    }
 
-  @GET
-  @Path("/pass")
-  public Response pass(@QueryParam("word") String word) {
-    loader.pass(word);
-    return responseOf();
-  }
+    @GET
+    @Path("/pass")
+    public Response pass(@QueryParam("word") String word) {
+        loader.pass(word);
+        return responseOf();
+    }
 
-  @GET
-  @Path("/dict")
-  public SingleResponse<WordDict> dict(@QueryParam("date") String date,
-                                       @QueryParam("sort") Integer sort,
-                                       @QueryParam("userId") int userId) {
-    return responseOf(loader.dict(date, sort, userId));
-  }
+    @GET
+    @Path("/dict")
+    public SingleResponse<WordDict> dict(@QueryParam("date") String date,
+                                         @QueryParam("sort") Integer sort,
+                                         @QueryParam("userId") int userId) {
+        return responseOf(loader.dict(date, sort, userId));
+    }
 
-  @GET
-  @Path("/root")
-  public SingleResponse<String> root(@QueryParam("word") String word) {
-    return responseOf(loader.root(word));
-  }
+    @GET
+    @Path("/root")
+    public SingleResponse<String> root(@QueryParam("word") String word) {
+        return responseOf(loader.root(word));
+    }
 
-  @GET
-  @Path("/stat")
-  public SingleResponse<WordLoaderCheck> stat(@QueryParam("date") String date,
-                                              @QueryParam("userId") int userId) {
-    return responseOf(loader.stat(date, userId));
-  }
+    @GET
+    @Path("/stat")
+    public SingleResponse<WordLoaderCheck> stat(@QueryParam("date") String date,
+                                                @QueryParam("userId") int userId) {
+        return responseOf(loader.stat(date, userId));
+    }
 
-  @GET
-  @Path("/stats")
-  public ListResponse<WordLoaderCheck> stats(@QueryParam("userId") int userId) {
-    return responseOf(loader.stats(userId));
-  }
+    @GET
+    @Path("/stats")
+    public ListResponse<WordLoaderCheck> stats(@QueryParam("userId") int userId) {
+        return responseOf(loader.stats(userId));
+    }
 
-  @GET
-  @Path("/dicts")
-  public ListResponse<WordDict> dicts(@QueryParam("date") String date) {
-    return responseOf(loader.dicts(date));
-  }
+    @GET
+    @Path("/dicts")
+    public ListResponse<WordDict> dicts(@QueryParam("date") String date) {
+        return responseOf(loader.dicts(date));
+    }
 
-  @GET
-  @Path("/search")
-  public ListResponse<WordDict> dict(@QueryParam("q") String q) {
-    return responseOf(loader.search(q));
-  }
+    @GET
+    @Path("/search")
+    public ListResponse<WordDict> dict(@QueryParam("q") String q) {
+        return responseOf(loader.search(q));
+    }
 
-  @GET
-  @Path("/spider/affix/xxEn")
-  public Response spiderXxEnAffix() throws Exception {
-    xxEnAffixSpider.fetchAffix();
-    return responseOf();
-  }
+    @GET
+    @Path("/spider/affix/xxEn")
+    public Response spiderXxEnAffix() throws Exception {
+        xxEnAffixSpider.fetchAffix();
+        return responseOf();
+    }
 
-  @GET
-  @Path("/affix")
-  public SingleResponse<WordLoaderAffix> affix(@QueryParam("word") String word) {
-    return responseOf(loader.affix(word));
-  }
+    @GET
+    @Path("/affix")
+    public SingleResponse<WordLoaderAffix> affix(@QueryParam("word") String word) {
+        return responseOf(loader.affix(word));
+    }
 
-  @GET
-  @Path("/differs")
-  public ListResponse<WordDictDiff> differs(@QueryParam("word") String word) {
-    return responseOf(loader.differs(word));
-  }
+    @GET
+    @Path("/differs")
+    public ListResponse<WordDictDiff> differs(@QueryParam("word") String word) {
+        return responseOf(loader.differs(word));
+    }
 
-  @GET
-  @Path("/trees")
-  public ListResponse<WordDictTree> trees(@QueryParam("root") String root) {
-    return responseOf(loader.trees(root));
-  }
+    @GET
+    @Path("/trees")
+    public ListResponse<WordDictTree> trees(@QueryParam("root") String root) {
+        return responseOf(loader.trees(root));
+    }
 
-  @GET
-  @Path("findTree")
-  public ListResponse<WordDictTree> findTree(@QueryParam("word") String word) {
-    return responseOf(loader.findTree(word));
-  }
+    @GET
+    @Path("findTree")
+    public ListResponse<WordDictTree> findTree(@QueryParam("word") String word) {
+        return responseOf(loader.findTree(word));
+    }
 
-  @GET
-  @Path("/createTree")
-  public Response createTree(@QueryParam("word") String word) {
-    loader.createTree(word);
-    return responseOf();
-  }
+    @GET
+    @Path("/createTree")
+    public Response createTree(@QueryParam("word") String word) {
+        loader.createTree(word);
+        return responseOf();
+    }
 
-  @GET
-  @Path("/mergeTree")
-  public SingleResponse<WordDictTree> mergeTree(@QueryParam("treeId") String treeId, @QueryParam("word") String word) {
-    return responseOf(loader.mergeTree(treeId, word));
-  }
+    @GET
+    @Path("/mergeTree")
+    public SingleResponse<WordDictTree> mergeTree(@QueryParam("treeId") String treeId, @QueryParam("word") String word) {
+        return responseOf(loader.mergeTree(treeId, word));
+    }
 
-  @GET
-  @Path("/editTreeDesc")
-  public Response editTreeDesc(@QueryParam("treeId") String treeId,
-                               @QueryParam("desc") String desc,
-                               @QueryParam("version") int version) {
-    loader.editTreeDesc(treeId, desc, version);
-    return responseOf();
-  }
+    @GET
+    @Path("/editTreeDesc")
+    public Response editTreeDesc(@QueryParam("treeId") String treeId,
+                                 @QueryParam("desc") String desc,
+                                 @QueryParam("version") int version) {
+        loader.editTreeDesc(treeId, desc, version);
+        return responseOf();
+    }
 
-  @GET
-  @Path("/chat")
-  public SingleResponse<String> chat(@QueryParam("q") String q) {
-    return responseOf(loader.chat(q));
-  }
+    @GET
+    @Path("/chat")
+    public SingleResponse<String> chat(@QueryParam("q") String q) {
+        return responseOf(loader.chat(q));
+    }
 
-  @POST
-  @Path("/pdf")
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
-  public Response upload(@FormDataParam("file") InputStream in,
-                         @FormDataParam("file") FormDataContentDisposition meta) throws Exception {
-    pdfService.parseRoot(in);
-    return responseOf();
-  }
+    @POST
+    @Path("/pdf")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response upload(@FormDataParam("file") InputStream in,
+                           @FormDataParam("file") FormDataContentDisposition meta) throws Exception {
+        pdfService.parseRoot(in);
+        return responseOf();
+    }
 
-  @GET
-  @Path("/tag")
-  public Response tag(@QueryParam("uri") String uri,
-                      @QueryParam("start") int start,
-                      @QueryParam("end") int end) {
-    xdfSpider.fetchWords(uri, start, end);
-    return responseOf();
-  }
+    @GET
+    @Path("/tag")
+    public Response tag(@QueryParam("uri") String uri,
+                        @QueryParam("start") int start,
+                        @QueryParam("end") int end) {
+        xdfSpider.fetchWords(uri, start, end);
+        return responseOf();
+    }
 }

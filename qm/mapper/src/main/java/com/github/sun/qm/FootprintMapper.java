@@ -10,11 +10,11 @@ import java.util.Date;
 
 @Mapper
 public interface FootprintMapper extends CompositeMapper<Footprint> {
-  @Update("UPDATE qm_footprint SET updateTime = #{updateTime} WHERE id = #{id}")
-  void updateTime(@Param("id") String id, @Param("updateTime") Date updateTime);
+    @Update("UPDATE qm_footprint SET updateTime = #{updateTime} WHERE id = #{id}")
+    void updateTime(@Param("id") String id, @Param("updateTime") Date updateTime);
 
-  @Insert("INSERT INTO `qm_footprint`(`id`, `userId`, `girlId`) " +
-    "VALUES(#{id}, #{userId}, #{girlId}) " +
-    "ON DUPLICATE KEY UPDATE `userId` = #{userId}, `girlId` = #{girlId}")
-  void insertOrUpdate(Footprint v);
+    @Insert("INSERT INTO `qm_footprint`(`id`, `userId`, `girlId`) " +
+            "VALUES(#{id}, #{userId}, #{girlId}) " +
+            "ON DUPLICATE KEY UPDATE `userId` = #{userId}, `girlId` = #{girlId}")
+    void insertOrUpdate(Footprint v);
 }

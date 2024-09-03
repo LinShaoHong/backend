@@ -16,18 +16,18 @@ import java.io.InputStream;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class CardStoreResource extends AbstractResource {
-  private final CardStoreService service;
+    private final CardStoreService service;
 
-  @Inject
-  public CardStoreResource(CardStoreService service) {
-    this.service = service;
-  }
+    @Inject
+    public CardStoreResource(CardStoreService service) {
+        this.service = service;
+    }
 
-  @POST
-  @Path("/put")
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
-  public SingleResponse<String> upload(@FormDataParam("file") InputStream in,
-                                       @FormDataParam("file") FormDataContentDisposition meta) {
-    return responseOf(service.put(in, meta.getFileName()));
-  }
+    @POST
+    @Path("/put")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public SingleResponse<String> upload(@FormDataParam("file") InputStream in,
+                                         @FormDataParam("file") FormDataContentDisposition meta) {
+        return responseOf(service.put(in, meta.getFileName()));
+    }
 }

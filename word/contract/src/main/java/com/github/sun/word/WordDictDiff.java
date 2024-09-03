@@ -20,10 +20,10 @@ import java.util.List;
 @Table(name = "word_dict_diff")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WordDictDiff {
-  @Id
-  private String id;
-  private String definition;
-  private String scenario;
-  @Converter(WordDict.ExamplesHandler.class)
-  private List<WordDict.ExampleSentence> examples;
+    @Id
+    private String id;
+    private String definition;
+    private String scenario;
+    @Converter(WordDict.ExamplesHandler.class)
+    private List<WordDict.ExampleSentence> examples;
 }

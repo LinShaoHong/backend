@@ -23,22 +23,22 @@ import java.util.Objects;
 @NamingStrategy
 @Table(name = "scheduler_job")
 public class SchedulerJob {
-  @Id
-  private String id;
-  private long startTime;
-  private String rate;
-  @Converter(JsonHandler.JsonNodeHandler.class)
-  private JsonNode profiles;
-  private boolean publish;
-  @Transient
-  @JsonIgnore
-  private Date createTime;
-  @Transient
-  @JsonIgnore
-  private Date updateTime;
+    @Id
+    private String id;
+    private long startTime;
+    private String rate;
+    @Converter(JsonHandler.JsonNodeHandler.class)
+    private JsonNode profiles;
+    private boolean publish;
+    @Transient
+    @JsonIgnore
+    private Date createTime;
+    @Transient
+    @JsonIgnore
+    private Date updateTime;
 
-  public boolean needReschedule(SchedulerJob updated) {
-    return !Objects.equals(this.startTime, updated.getStartTime()) ||
-      !Objects.equals(this.rate, updated.getRate());
-  }
+    public boolean needReschedule(SchedulerJob updated) {
+        return !Objects.equals(this.startTime, updated.getStartTime()) ||
+                !Objects.equals(this.rate, updated.getRate());
+    }
 }

@@ -19,28 +19,28 @@ import java.util.Date;
 @NamingStrategy
 @Table(name = "qm_comment")
 public class Comment {
-  public static final String SYSTEM = "SYSTEM";
+    public static final String SYSTEM = "SYSTEM";
 
-  @Id
-  private String id;
-  private String sessionId;
-  private String girlId;
-  private String commentatorId;
-  private String replierId;
-  private String content;
-  private boolean read;
-  private boolean privately;
-  private long likes;
-  private long hates;
-  private long time;
-  @Transient
-  @JsonIgnore
-  private Date createTime;
-  @Transient
-  @JsonIgnore
-  private Date updateTime;
+    @Id
+    private String id;
+    private String sessionId;
+    private String girlId;
+    private String commentatorId;
+    private String replierId;
+    private String content;
+    private boolean read;
+    private boolean privately;
+    private long likes;
+    private long hates;
+    private long time;
+    @Transient
+    @JsonIgnore
+    private Date createTime;
+    @Transient
+    @JsonIgnore
+    private Date updateTime;
 
-  public boolean isSystem() {
-    return SYSTEM.equals(commentatorId);
-  }
+    public boolean isSystem() {
+        return SYSTEM.equals(commentatorId);
+    }
 }

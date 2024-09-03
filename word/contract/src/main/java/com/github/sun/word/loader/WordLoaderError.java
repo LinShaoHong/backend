@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @NamingStrategy
 @Table(name = "word_loader_error")
 public class WordLoaderError {
-  @Id
-  private String id;
-  private String error;
+    @Id
+    private String id;
+    private String error;
 }

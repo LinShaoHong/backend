@@ -10,11 +10,11 @@ import org.springframework.context.ApplicationContext;
 @EnableDiscoveryClient
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class CardApp extends JerseyApplication {
-  public CardApp(ApplicationContext context) {
-    super(context);
-  }
+    public CardApp(ApplicationContext context) {
+        super(context);
+    }
 
-  public static void main(String[] args) {
-    new SpringApplicationBuilder(CardApp.class).run(args);
-  }
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(CardApp.class).run(args);
+    }
 }

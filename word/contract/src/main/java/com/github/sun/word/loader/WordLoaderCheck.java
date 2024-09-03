@@ -19,16 +19,16 @@ import javax.persistence.Transient;
 @Table(name = "word_loader_check")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WordLoaderCheck {
-  @Id
-  private String id;
-  private String date;
-  private int userId;
-  private int sort;
-  private boolean curr;
-  @Transient
-  private int viewed;
-  @Transient
-  private int passed;
-  @Transient
-  private int total;
+    @Id
+    private String id;
+    private String date;
+    private int userId;
+    private int sort;
+    private boolean curr;
+    @Transient
+    private int viewed;
+    @Transient
+    private int passed;
+    @Transient
+    private int total;
 }

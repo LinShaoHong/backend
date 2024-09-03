@@ -27,37 +27,37 @@ import java.util.Set;
 @NamingStrategy
 @Table(name = "qm_user")
 public class User {
-  @Id
-  private String id;
-  private String username;
-  private String nickName;
-  private String password;
-  private String avatar;
-  private String email;
-  private BigDecimal amount;
-  private boolean vip;
-  private Date vipStartTime;
-  private Date vipEndTime;
-  private Date signInTime;
-  private int signInCount;
-  private Date lastLoginTime;
-  private String lastLoginIp;
-  private String location;
-  @Converter(JsonHandler.SetStringHandler.class)
-  private Set<String> readSystemMessageIds;
-  @Transient
-  private Date createTime;
-  @Transient
-  private Date updateTime;
+    @Id
+    private String id;
+    private String username;
+    private String nickName;
+    private String password;
+    private String avatar;
+    private String email;
+    private BigDecimal amount;
+    private boolean vip;
+    private Date vipStartTime;
+    private Date vipEndTime;
+    private Date signInTime;
+    private int signInCount;
+    private Date lastLoginTime;
+    private String lastLoginIp;
+    private String location;
+    @Converter(JsonHandler.SetStringHandler.class)
+    private Set<String> readSystemMessageIds;
+    @Transient
+    private Date createTime;
+    @Transient
+    private Date updateTime;
 
-  public static String hashPassword(String password) {
-    try {
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      byte[] input = password.getBytes(StandardCharsets.UTF_8);
-      byte[] output = md.digest(input);
-      return Hex.bytes2readable(output);
-    } catch (NoSuchAlgorithmException ex) {
-      throw new UnexpectedException("呃！出错了");
+    public static String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] input = password.getBytes(StandardCharsets.UTF_8);
+            byte[] output = md.digest(input);
+            return Hex.bytes2readable(output);
+        } catch (NoSuchAlgorithmException ex) {
+            throw new UnexpectedException("呃！出错了");
+        }
     }
-  }
 }

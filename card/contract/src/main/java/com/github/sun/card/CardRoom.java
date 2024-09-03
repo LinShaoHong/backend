@@ -18,14 +18,14 @@ import java.util.Date;
 @NamingStrategy
 @Table(name = "card_room")
 public class CardRoom {
-  @Id
-  private String id;
-  private String mainUserId;
-  private String userId;
-  private boolean hks;
-  private Date enterTime;
-  @Transient
-  private Date createTime;
-  @Transient
-  private Date updateTime;
+    @Id
+    private String id;
+    private String mainUserId;
+    private String userId;
+    private boolean hks;
+    private Date enterTime;
+    @Transient
+    private Date createTime;
+    @Transient
+    private Date updateTime;
 }

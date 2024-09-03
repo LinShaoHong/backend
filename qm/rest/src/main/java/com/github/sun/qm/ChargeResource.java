@@ -25,148 +25,148 @@ import java.util.stream.Collectors;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class ChargeResource extends AbstractResource {
-  private final ChargeService service;
-  private final ChargeMapper.YQMapper yqMapper;
-  private final GirlMapper girlMapper;
-  private final PayLogMapper payLogMapper;
-  private final SqlBuilder.Factory factory;
+    private final ChargeService service;
+    private final ChargeMapper.YQMapper yqMapper;
+    private final GirlMapper girlMapper;
+    private final PayLogMapper payLogMapper;
+    private final SqlBuilder.Factory factory;
 
-  @Inject
-  public ChargeResource(ChargeService service,
-                        ChargeMapper.YQMapper yqMapper,
-                        GirlMapper girlMapper,
-                        PayLogMapper payLogMapper,
-                        @Named("mysql") SqlBuilder.Factory factory) {
-    this.service = service;
-    this.yqMapper = yqMapper;
-    this.girlMapper = girlMapper;
-    this.payLogMapper = payLogMapper;
-    this.factory = factory;
-  }
+    @Inject
+    public ChargeResource(ChargeService service,
+                          ChargeMapper.YQMapper yqMapper,
+                          GirlMapper girlMapper,
+                          PayLogMapper payLogMapper,
+                          @Named("mysql") SqlBuilder.Factory factory) {
+        this.service = service;
+        this.yqMapper = yqMapper;
+        this.girlMapper = girlMapper;
+        this.payLogMapper = payLogMapper;
+        this.factory = factory;
+    }
 
-  /**
-   * 充值
-   */
-  @POST
-  @Path("/recharge")
-  public Response recharge(@Valid @NotNull(message = "require body") RechargeReq req,
-                           @Context User user) {
-    service.recharge(req.getCardNo().replaceAll(" ", ""), user);
-    return responseOf();
-  }
+    /**
+     * 充值
+     */
+    @POST
+    @Path("/recharge")
+    public Response recharge(@Valid @NotNull(message = "require body") RechargeReq req,
+                             @Context User user) {
+        service.recharge(req.getCardNo().replaceAll(" ", ""), user);
+        return responseOf();
+    }
 
-  @Data
-  private static class RechargeReq {
-    @NotEmpty(message = "缺少卡号")
-    private String cardNo;
-    private Charge.Type type;
-  }
+    @Data
+    private static class RechargeReq {
+        @NotEmpty(message = "缺少卡号")
+        private String cardNo;
+        private Charge.Type type;
+    }
 
-  /**
-   * 消费
-   */
-  @POST
-  @Path("/consume")
-  public Response consume(@Valid @NotNull(message = "require body") ConsumeReq req,
-                          @Context User user) {
-    service.consume(req.getGirlId(), user);
-    return responseOf();
-  }
+    /**
+     * 消费
+     */
+    @POST
+    @Path("/consume")
+    public Response consume(@Valid @NotNull(message = "require body") ConsumeReq req,
+                            @Context User user) {
+        service.consume(req.getGirlId(), user);
+        return responseOf();
+    }
 
-  @Data
-  private static class ConsumeReq {
-    @NotEmpty
-    private String girlId;
-  }
+    @Data
+    private static class ConsumeReq {
+        @NotEmpty
+        private String girlId;
+    }
 
-  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-  /**
-   * 付款流水
-   */
-  @GET
-  @Path("/flow")
-  public PageResponse<FlowRes> flow(@QueryParam("start") int start,
-                                    @QueryParam("count") int count,
-                                    @QueryParam("type") String type,
-                                    @Context User user) {
-    SqlBuilder sb = factory.create();
-    Expression condition = sb.field("userId").eq(user.getId())
-      .and(type == null || type.isEmpty() ? null : sb.field("type").eq(type));
-    int total = payLogMapper.countByTemplate(sb.from(PayLog.class).where(condition).count().template());
-    if (total > 0) {
-      sb.clear();
-      SqlBuilder.Template template = sb.from(PayLog.class)
-        .where(condition)
-        .desc("createTime")
-        .limit(start, count)
-        .template();
-      List<PayLog> list = payLogMapper.findByTemplate(template);
-      Set<String> girlIds = list.stream().map(PayLog::getGirlId).filter(Objects::nonNull).collect(Collectors.toSet());
-      Map<String, Girl> girls = girlIds.isEmpty() ? new HashMap<>()
-        : girlMapper.findByIds(girlIds).stream().collect(Collectors.toMap(Girl::getId, v -> v));
-      return responseOf(total, list.stream().map(v -> {
-        Girl girl = null;
-        if (v.getGirlId() != null) {
-          girl = girls.get(v.getGirlId());
-          if (girl == null) {
-            return null;
-          }
+    /**
+     * 付款流水
+     */
+    @GET
+    @Path("/flow")
+    public PageResponse<FlowRes> flow(@QueryParam("start") int start,
+                                      @QueryParam("count") int count,
+                                      @QueryParam("type") String type,
+                                      @Context User user) {
+        SqlBuilder sb = factory.create();
+        Expression condition = sb.field("userId").eq(user.getId())
+                .and(type == null || type.isEmpty() ? null : sb.field("type").eq(type));
+        int total = payLogMapper.countByTemplate(sb.from(PayLog.class).where(condition).count().template());
+        if (total > 0) {
+            sb.clear();
+            SqlBuilder.Template template = sb.from(PayLog.class)
+                    .where(condition)
+                    .desc("createTime")
+                    .limit(start, count)
+                    .template();
+            List<PayLog> list = payLogMapper.findByTemplate(template);
+            Set<String> girlIds = list.stream().map(PayLog::getGirlId).filter(Objects::nonNull).collect(Collectors.toSet());
+            Map<String, Girl> girls = girlIds.isEmpty() ? new HashMap<>()
+                    : girlMapper.findByIds(girlIds).stream().collect(Collectors.toMap(Girl::getId, v -> v));
+            return responseOf(total, list.stream().map(v -> {
+                Girl girl = null;
+                if (v.getGirlId() != null) {
+                    girl = girls.get(v.getGirlId());
+                    if (girl == null) {
+                        return null;
+                    }
+                }
+                return FlowRes.builder()
+                        .amount(v.getAmount())
+                        .type(v.getType())
+                        .chargeType(v.getChargeType())
+                        .girl(girl == null ? null : GirlRes.from(girl))
+                        .time(FORMATTER.format(v.getCreateTime()))
+                        .build();
+            }).filter(Objects::nonNull).collect(Collectors.toList()));
         }
-        return FlowRes.builder()
-          .amount(v.getAmount())
-          .type(v.getType())
-          .chargeType(v.getChargeType())
-          .girl(girl == null ? null : GirlRes.from(girl))
-          .time(FORMATTER.format(v.getCreateTime()))
-          .build();
-      }).filter(Objects::nonNull).collect(Collectors.toList()));
+        return responseOf(total, Collections.emptyList());
     }
-    return responseOf(total, Collections.emptyList());
-  }
 
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  private static class FlowRes {
-    private BigDecimal amount;
-    private PayLog.Type type;
-    private String chargeType;
-    private GirlRes girl;
-    private String time;
-  }
-
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  private static class GirlRes {
-    private String id;
-    private String name;
-    private String city;
-    private Girl.Type type;
-    private String mainImage;
-    private boolean onService;
-
-    private static GirlRes from(Girl v) {
-      return GirlRes.builder()
-        .id(v.getId())
-        .name(v.getName())
-        .city(v.getCity())
-        .type(v.getType())
-        .mainImage(v.getMainImage())
-        .onService(v.isOnService())
-        .build();
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class FlowRes {
+        private BigDecimal amount;
+        private PayLog.Type type;
+        private String chargeType;
+        private GirlRes girl;
+        private String time;
     }
-  }
 
-  /**
-   * 易千支付
-   */
-  @GET
-  @Path("/yq")
-  public ListResponse<Charge.YQ> qyAll(@Context User user) {
-    return responseOf(yqMapper.findAll());
-  }
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class GirlRes {
+        private String id;
+        private String name;
+        private String city;
+        private Girl.Type type;
+        private String mainImage;
+        private boolean onService;
+
+        private static GirlRes from(Girl v) {
+            return GirlRes.builder()
+                    .id(v.getId())
+                    .name(v.getName())
+                    .city(v.getCity())
+                    .type(v.getType())
+                    .mainImage(v.getMainImage())
+                    .onService(v.isOnService())
+                    .build();
+        }
+    }
+
+    /**
+     * 易千支付
+     */
+    @GET
+    @Path("/yq")
+    public ListResponse<Charge.YQ> qyAll(@Context User user) {
+        return responseOf(yqMapper.findAll());
+    }
 }

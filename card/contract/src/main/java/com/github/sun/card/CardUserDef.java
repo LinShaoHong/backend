@@ -23,40 +23,40 @@ import java.util.List;
 @NamingStrategy
 @Table(name = "card_user_def")
 public class CardUserDef {
-  @Id
-  private String id;
-  private String userId;
-  @Converter(DefsHandler.class)
-  private List<Def> defs;
-  @Transient
-  private Date createTime;
-  @Transient
-  private Date updateTime;
-
-  @Data
-  public static class Def {
-    private String name;
-    private List<Item> items;
-  }
-
-  @Data
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  public static class Item {
+    @Id
     private String id;
-    private String title;
-    private String content;
-    private String src;
-    private boolean defaulted;
-    private boolean enable;
-  }
+    private String userId;
+    @Converter(DefsHandler.class)
+    private List<Def> defs;
+    @Transient
+    private Date createTime;
+    @Transient
+    private Date updateTime;
 
-  public static class DefsHandler extends JsonHandler.ListHandler<Def> {
-  }
-
-  public List<Def> getDefs() {
-    if (defs == null) {
-      defs = new ArrayList<>();
+    @Data
+    public static class Def {
+        private String name;
+        private List<Item> items;
     }
-    return defs;
-  }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Item {
+        private String id;
+        private String title;
+        private String content;
+        private String src;
+        private boolean defaulted;
+        private boolean enable;
+    }
+
+    public static class DefsHandler extends JsonHandler.ListHandler<Def> {
+    }
+
+    public List<Def> getDefs() {
+        if (defs == null) {
+            defs = new ArrayList<>();
+        }
+        return defs;
+    }
 }

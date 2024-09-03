@@ -7,6 +7,6 @@ import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface CardUserDefMapper extends CompositeMapper<CardUserDef> {
-  @Select("select * from card_user_def where userId=#{userId}")
-  CardUserDef byUserId(@Param("userId") String userId);
+    @Select("select * from card_user_def where userId=#{userId}")
+    CardUserDef byUserId(@Param("userId") String userId);
 }

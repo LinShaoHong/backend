@@ -11,9 +11,9 @@ import java.util.List;
 
 @Mapper
 public interface WordLoaderCheckMapper extends CompositeMapper<WordLoaderCheck> {
-  @Update("update word_loader_check set curr=0 where userId=#{userId} and id<>#{id}")
-  void past(@Param("id")String id, @Param("userId")int userId );
+    @Update("update word_loader_check set curr=0 where userId=#{userId} and id<>#{id}")
+    void past(@Param("id") String id, @Param("userId") int userId);
 
-  @Select("select distinct date from word_loader_check order by date")
-  List<String> dates();
+    @Select("select distinct date from word_loader_check order by date")
+    List<String> dates();
 }

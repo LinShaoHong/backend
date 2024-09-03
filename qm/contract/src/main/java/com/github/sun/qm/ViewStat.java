@@ -16,16 +16,16 @@ import javax.persistence.Table;
 @NamingStrategy
 @Table(name = "qm_view_stat")
 public class ViewStat {
-  @Id
-  private String id;
-  private Girl.Type type;
-  private String date;
-  private long visits;
+    @Id
+    private String id;
+    private Girl.Type type;
+    private String date;
+    private long visits;
 
-  public static String makeId(Girl.Type type, String city, String date) {
-    if (city != null && !city.isEmpty()) {
-      return type.name() + ":" + city + ":" + date;
+    public static String makeId(Girl.Type type, String city, String date) {
+        if (city != null && !city.isEmpty()) {
+            return type.name() + ":" + city + ":" + date;
+        }
+        return type.name() + ":TOTAL:" + date;
     }
-    return type.name() + ":TOTAL:" + date;
-  }
 }

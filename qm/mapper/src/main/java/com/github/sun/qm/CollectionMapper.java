@@ -8,9 +8,9 @@ import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface CollectionMapper extends CompositeMapper<Collection> {
-  @Select("SELECT COUNT(0) FROM qm_collection WHERE userId = #{userId} AND girlId = #{girlId}")
-  int countByUserIdAndGirlId(@Param("userId") String userId, @Param("girlId") String girlId);
+    @Select("SELECT COUNT(0) FROM qm_collection WHERE userId = #{userId} AND girlId = #{girlId}")
+    int countByUserIdAndGirlId(@Param("userId") String userId, @Param("girlId") String girlId);
 
-  @Delete("DELETE FROM qm_collection WHERE userId = #{userId} AND girlId = #{girlId}")
-  void deleteByUserIdAndGirlId(@Param("userId") String userId, @Param("girlId") String girlId);
+    @Delete("DELETE FROM qm_collection WHERE userId = #{userId} AND girlId = #{girlId}")
+    void deleteByUserIdAndGirlId(@Param("userId") String userId, @Param("girlId") String girlId);
 }

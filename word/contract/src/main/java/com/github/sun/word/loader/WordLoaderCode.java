@@ -18,8 +18,8 @@ import javax.persistence.Table;
 @Table(name = "word_loader_code")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WordLoaderCode {
-  @Id
-  private String id;
-  private String type;
-  private long code;
+    @Id
+    private String id;
+    private String type;
+    private long code;
 }

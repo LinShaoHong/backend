@@ -16,22 +16,22 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class CardAiResource extends AbstractResource {
-  private final CardAiService service;
+    private final CardAiService service;
 
-  @Inject
-  public CardAiResource(CardAiService service) {
-    this.service = service;
-  }
+    @Inject
+    public CardAiResource(CardAiService service) {
+        this.service = service;
+    }
 
 
-  @POST
-  @Path("/chat")
-  public SingleResponse<String> chat(@Valid AiReq q) {
-    return responseOf(service.chat(q.getQ()));
-  }
+    @POST
+    @Path("/chat")
+    public SingleResponse<String> chat(@Valid AiReq q) {
+        return responseOf(service.chat(q.getQ()));
+    }
 
-  @Data
-  public static class AiReq {
-    private List<String> q;
-  }
+    @Data
+    public static class AiReq {
+        private List<String> q;
+    }
 }

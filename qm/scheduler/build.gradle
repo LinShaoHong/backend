@@ -1,7 +1,7 @@
 dependencies {
-  api project(":$rootName-quartz")
-  api project(":$rootName-scheduler-mapper")
-  implementation "com.jcraft:jsch:$vers.jsch"
+    api project(":$rootName-quartz")
+    api project(":$rootName-scheduler-mapper")
+    implementation "com.jcraft:jsch:$vers.jsch"
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

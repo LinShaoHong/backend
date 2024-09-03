@@ -1,9 +1,9 @@
 dependencies {
-  api project(":$rootName-mybatis")
-  api project(":$rootName-spider-contract")
+    api project(":$rootName-mybatis")
+    api project(":$rootName-spider-contract")
 
-  api project(":$rootName-test")
-  api project(":$rootName-quartz")
+    api project(":$rootName-test")
+    api project(":$rootName-quartz")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

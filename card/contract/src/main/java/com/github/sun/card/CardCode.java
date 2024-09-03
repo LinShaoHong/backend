@@ -16,8 +16,8 @@ import javax.persistence.Table;
 @NamingStrategy
 @Table(name = "card_code")
 public class CardCode {
-  @Id
-  private String id;
-  private String type;
-  private Long code;
+    @Id
+    private String id;
+    private String type;
+    private Long code;
 }

@@ -1,8 +1,8 @@
 dependencies {
-  api project(":$rootName-rest")
-  api project(":$rootName-qm-service")
+    api project(":$rootName-rest")
+    api project(":$rootName-qm-service")
 
-  implementation "com.hankcs:hanlp:$vers.hanlp"
+    implementation "com.hankcs:hanlp:$vers.hanlp"
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

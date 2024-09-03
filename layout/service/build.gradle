@@ -1,6 +1,6 @@
 dependencies {
-  api project(":$rootName-layout-contract")
-  implementation "com.github.ben-manes.caffeine:caffeine:$vers.caffeine"
+    api project(":$rootName-layout-contract")
+    implementation "com.github.ben-manes.caffeine:caffeine:$vers.caffeine"
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

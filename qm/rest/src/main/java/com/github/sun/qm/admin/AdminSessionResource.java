@@ -19,35 +19,35 @@ import javax.ws.rs.core.MediaType;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AdminSessionResource extends AbstractResource {
-  private final String secretKey;
-  private final String username;
-  private final String password;
+    private final String secretKey;
+    private final String username;
+    private final String password;
 
-  @Inject
-  public AdminSessionResource(Environment env) {
-    this.username = env.getProperty("admin.username");
-    this.password = env.getProperty("admin.password");
-    this.secretKey = env.getProperty("base64.secret.key");
-  }
-
-  /**
-   * 登录
-   */
-  @POST
-  @Path("/login")
-  public SingleResponse<String> login(@Valid @NotNull(message = "require body") LoginReq req) {
-    if (username.equals(req.getUsername()) && password.equals(req.getPassword())) {
-      return responseOf(AES.encrypt(username + ":" + password, secretKey));
-    } else {
-      throw new UnAuthorizedException("username or password is wrong");
+    @Inject
+    public AdminSessionResource(Environment env) {
+        this.username = env.getProperty("admin.username");
+        this.password = env.getProperty("admin.password");
+        this.secretKey = env.getProperty("base64.secret.key");
     }
-  }
 
-  @Data
-  private static class LoginReq {
-    @NotNull(message = "缺少用户")
-    private String username;
-    @NotNull(message = "缺少密码")
-    private String password;
-  }
+    /**
+     * 登录
+     */
+    @POST
+    @Path("/login")
+    public SingleResponse<String> login(@Valid @NotNull(message = "require body") LoginReq req) {
+        if (username.equals(req.getUsername()) && password.equals(req.getPassword())) {
+            return responseOf(AES.encrypt(username + ":" + password, secretKey));
+        } else {
+            throw new UnAuthorizedException("username or password is wrong");
+        }
+    }
+
+    @Data
+    private static class LoginReq {
+        @NotNull(message = "缺少用户")
+        private String username;
+        @NotNull(message = "缺少密码")
+        private String password;
+    }
 }

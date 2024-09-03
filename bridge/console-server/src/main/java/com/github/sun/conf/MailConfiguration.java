@@ -12,14 +12,14 @@ import java.util.Properties;
 @Slf4j
 @Configuration
 public class MailConfiguration {
-  @Bean(name = "qmailProps")
-  @ConfigurationProperties("qmail")
-  public Properties properties() {
-    return new Properties();
-  }
+    @Bean(name = "qmailProps")
+    @ConfigurationProperties("qmail")
+    public Properties properties() {
+        return new Properties();
+    }
 
-  @Bean(name = "qmail")
-  public EmailSender gmailSender(@Qualifier("qmailProps") Properties props) {
-    return new EmailSender(props);
-  }
+    @Bean(name = "qmail")
+    public EmailSender gmailSender(@Qualifier("qmailProps") Properties props) {
+        return new EmailSender(props);
+    }
 }

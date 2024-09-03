@@ -8,9 +8,9 @@ import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface CardCodeMapper extends CompositeMapper<CardCode> {
-  @Select("select * from card_code where id=#{id} for update")
-  CardCode queryForUpdate(@Param("id") String id);
+    @Select("select * from card_code where id=#{id} for update")
+    CardCode queryForUpdate(@Param("id") String id);
 
-  @Update("update card_code set `code`=#{code} where id=#{id}")
-  int updateById(@Param("id") String id, @Param("code") Long code);
+    @Update("update card_code set `code`=#{code} where id=#{id}")
+    int updateById(@Param("id") String id, @Param("code") Long code);
 }

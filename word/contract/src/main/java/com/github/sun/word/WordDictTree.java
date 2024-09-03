@@ -21,26 +21,26 @@ import java.util.List;
 @Table(name = "word_dict_tree")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WordDictTree {
-  @Id
-  private String id;
-  private String root;
-  private String rootDesc;
-  @Converter(DerivativesHandler.class)
-  private List<Derivative> derivatives;
-  private int version;
-
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  public static class Derivative {
-    private String word;
-    private int index;
+    @Id
+    private String id;
+    private String root;
+    private String rootDesc;
+    @Converter(DerivativesHandler.class)
+    private List<Derivative> derivatives;
     private int version;
-    private boolean merged;
-  }
 
-  public static class DerivativesHandler extends JsonHandler.ListHandler<Derivative> {
-  }
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Derivative {
+        private String word;
+        private int index;
+        private int version;
+        private boolean merged;
+    }
+
+    public static class DerivativesHandler extends JsonHandler.ListHandler<Derivative> {
+    }
 }

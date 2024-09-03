@@ -1,6 +1,6 @@
 dependencies {
-  api project(":$rootName-qm-service")
-  api project(":$rootName-spider-contract")
+    api project(":$rootName-qm-service")
+    api project(":$rootName-spider-contract")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

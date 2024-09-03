@@ -18,11 +18,11 @@ import javax.persistence.Table;
 @Table(name = "word_loader_affix")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WordLoaderAffix {
-  @Id
-  private String id;
-  private String root;
-  private String rootDesc;
-  private String wordDesc;
-  private String gptRoot;
-  private String gptAffix;
+    @Id
+    private String id;
+    private String root;
+    private String rootDesc;
+    private String wordDesc;
+    private String gptRoot;
+    private String gptAffix;
 }

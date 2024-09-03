@@ -10,17 +10,17 @@ import java.util.Set;
 
 @Mapper
 public interface GirlMapper extends CompositeMapper<Girl> {
-  @Select("SELECT ID FROM `qm_girl` WHERE `name` = #{name}")
-  Set<String> findIdsByName(@Param("name") String name);
+    @Select("SELECT ID FROM `qm_girl` WHERE `name` = #{name}")
+    Set<String> findIdsByName(@Param("name") String name);
 
-  @Mapper
-  interface Category extends CompositeMapper<Girl.Category> {
-    @Insert("INSERT INTO `qm_girl_category`(`id`, `type`, `name`, `nameSpell`, `count`) " +
-      "VALUES(#{id}, #{type}, #{name}, #{nameSpell}, #{count}) " +
-      "ON DUPLICATE KEY UPDATE `count` = `count` + 1")
-    void insertOrUpdate(Girl.Category category);
+    @Mapper
+    interface Category extends CompositeMapper<Girl.Category> {
+        @Insert("INSERT INTO `qm_girl_category`(`id`, `type`, `name`, `nameSpell`, `count`) " +
+                "VALUES(#{id}, #{type}, #{name}, #{nameSpell}, #{count}) " +
+                "ON DUPLICATE KEY UPDATE `count` = `count` + 1")
+        void insertOrUpdate(Girl.Category category);
 
-    @Insert("UPDATE `qm_girl_category` SET count = count - 1 WHERE id = #{id}")
-    void dec(@Param("id") String id);
-  }
+        @Insert("UPDATE `qm_girl_category` SET count = count - 1 WHERE id = #{id}")
+        void dec(@Param("id") String id);
+    }
 }

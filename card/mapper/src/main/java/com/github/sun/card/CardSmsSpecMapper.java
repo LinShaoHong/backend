@@ -9,6 +9,6 @@ import java.util.List;
 
 @Mapper
 public interface CardSmsSpecMapper extends CompositeMapper<CardSmsSpec> {
-  @Select("select distinct content from card_sms_spec where type=#{type} order by sort asc")
-  List<String> byType(@Param("type") String type);
+    @Select("select distinct content from card_sms_spec where type=#{type} order by sort asc")
+    List<String> byType(@Param("type") String type);
 }

@@ -10,20 +10,20 @@ import org.springframework.util.StringUtils;
 @RefreshScope
 @Service("inflection")
 public class WordInflectionLoader extends WordBasicLoader {
-  @Override
-  public void load(String word, JSON.Valuer attr, int userId) {
-    retry(word, userId, dict -> {
-      try {
-        WordYdSpider.fetchPhonetic(dict);
-        if (!StringUtils.hasText(dict.getUsPhonetic()) ||
-          !StringUtils.hasText(dict.getUkPhonetic())) {
-          WordJsSpider.fetchPhonetic(dict);
-        }
-        WordYdSpider.fetchInflection(dict);
-        WordJsSpider.fetchInflection(dict);
-      } catch (Exception ex) {
-        throw new RuntimeException(ex);
-      }
-    }, "ukPhonetic", "usPhonetic", "inflection");
-  }
+    @Override
+    public void load(String word, JSON.Valuer attr, int userId) {
+        retry(word, userId, dict -> {
+            try {
+                WordYdSpider.fetchPhonetic(dict);
+                if (!StringUtils.hasText(dict.getUsPhonetic()) ||
+                        !StringUtils.hasText(dict.getUkPhonetic())) {
+                    WordJsSpider.fetchPhonetic(dict);
+                }
+                WordYdSpider.fetchInflection(dict);
+                WordJsSpider.fetchInflection(dict);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }, "ukPhonetic", "usPhonetic", "inflection");
+    }
 }

@@ -9,13 +9,13 @@ import java.util.List;
 
 @Mapper
 public interface CardSmsMapper extends CompositeMapper<CardSms> {
-  @Select("select * from card_sms where userId=#{userId}")
-  List<CardSms> byUserId(@Param("userId") String userId);
+    @Select("select * from card_sms where userId=#{userId}")
+    List<CardSms> byUserId(@Param("userId") String userId);
 
-  @Select("select * from card_sms where toPhone=#{toPhone}")
-  List<CardSms> byToPhone(@Param("toPhone") String toPhone);
+    @Select("select * from card_sms where toPhone=#{toPhone}")
+    List<CardSms> byToPhone(@Param("toPhone") String toPhone);
 
-  @Select("select * from card_sms where fromPhone=#{fromPhone} and toPhone=#{toPhone}")
-  List<CardSms> byFromPhoneAndToPhone(@Param("fromPhone") String fromPhone,
-                                      @Param("toPhone") String toPhone);
+    @Select("select * from card_sms where fromPhone=#{fromPhone} and toPhone=#{toPhone}")
+    List<CardSms> byFromPhoneAndToPhone(@Param("fromPhone") String fromPhone,
+                                        @Param("toPhone") String toPhone);
 }

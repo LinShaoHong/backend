@@ -1,6 +1,5 @@
 package com.github.sun.qm;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.sun.foundation.modelling.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,12 +18,12 @@ import java.util.Date;
 @NamingStrategy
 @Table(name = "qm_collection")
 public class Collection {
-  @Id
-  private String id;
-  private String userId;
-  private String girlId;
-  @Transient
-  private Date createTime;
-  @Transient
-  private Date updateTime;
+    @Id
+    private String id;
+    private String userId;
+    private String girlId;
+    @Transient
+    private Date createTime;
+    @Transient
+    private Date updateTime;
 }

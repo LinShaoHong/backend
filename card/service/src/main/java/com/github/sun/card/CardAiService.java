@@ -13,13 +13,13 @@ import java.util.List;
 @RefreshScope
 @RequiredArgsConstructor
 public class CardAiService {
-  @Value("${qwen.key}")
-  private String apiKey;
-  @Value("${qwen.model}")
-  private String model;
-  private final @Named("qwen") Assistant assistant;
+    @Value("${qwen.key}")
+    private String apiKey;
+    @Value("${qwen.model}")
+    private String model;
+    private final @Named("qwen") Assistant assistant;
 
-  public String chat(List<String> q) {
-    return assistant.chat(apiKey, model, q);
-  }
+    public String chat(List<String> q) {
+        return assistant.chat(apiKey, model, q);
+    }
 }

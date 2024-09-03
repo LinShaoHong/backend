@@ -8,10 +8,10 @@ import java.math.BigDecimal;
 
 @Mapper
 public interface ChargeMapper extends CompositeMapper<Charge> {
-  @Select("SELECT SUM(amount) FROM sun.qm_pay_log WHERE type = 'RECHARGE'")
-  BigDecimal rechargeTotal();
+    @Select("SELECT SUM(amount) FROM sun.qm_pay_log WHERE type = 'RECHARGE'")
+    BigDecimal rechargeTotal();
 
-  @Mapper
-  interface YQMapper extends CompositeMapper<Charge.YQ> {
-  }
+    @Mapper
+    interface YQMapper extends CompositeMapper<Charge.YQ> {
+    }
 }

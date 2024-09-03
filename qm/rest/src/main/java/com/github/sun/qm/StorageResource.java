@@ -20,45 +20,45 @@ import java.io.InputStream;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class StorageResource extends AbstractResource {
-  private final StorageService storageService;
+    private final StorageService storageService;
 
-  @Inject
-  public StorageResource(StorageService storageService) {
-    this.storageService = storageService;
-  }
-
-  /**
-   * 上传文件
-   */
-  @POST
-  @Path("/upload")
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
-  public SingleResponse<String> upload(@FormDataParam("file") InputStream in,
-                                       @FormDataParam("file") FormDataContentDisposition meta,
-                                       @Context User user) {
-    try {
-      String path = storageService.upload(in, meta.getFileName());
-      return responseOf(path);
-    } catch (IOException ex) {
-      log.error("Upload File Error: \n", ex);
-      throw new Message(5001);
+    @Inject
+    public StorageResource(StorageService storageService) {
+        this.storageService = storageService;
     }
-  }
 
-  /**
-   * 删除文件
-   */
-  @DELETE
-  public Response delete(@Valid DeleteReq path) {
-    final String p = path.getPath();
-    if (p != null && !p.isEmpty()) {
-      storageService.delete(p);
+    /**
+     * 上传文件
+     */
+    @POST
+    @Path("/upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public SingleResponse<String> upload(@FormDataParam("file") InputStream in,
+                                         @FormDataParam("file") FormDataContentDisposition meta,
+                                         @Context User user) {
+        try {
+            String path = storageService.upload(in, meta.getFileName());
+            return responseOf(path);
+        } catch (IOException ex) {
+            log.error("Upload File Error: \n", ex);
+            throw new Message(5001);
+        }
     }
-    return responseOf();
-  }
 
-  @Data
-  private static class DeleteReq {
-    private String path;
-  }
+    /**
+     * 删除文件
+     */
+    @DELETE
+    public Response delete(@Valid DeleteReq path) {
+        final String p = path.getPath();
+        if (p != null && !p.isEmpty()) {
+            storageService.delete(p);
+        }
+        return responseOf();
+    }
+
+    @Data
+    private static class DeleteReq {
+        private String path;
+    }
 }

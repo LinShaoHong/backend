@@ -10,11 +10,11 @@ import org.springframework.context.ApplicationContext;
 @EnableDiscoveryClient
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class WordApp extends JerseyApplication {
-  public WordApp(ApplicationContext context) {
-    super(context);
-  }
+    public WordApp(ApplicationContext context) {
+        super(context);
+    }
 
-  public static void main(String[] args) {
-    new SpringApplicationBuilder(WordApp.class).run(args);
-  }
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(WordApp.class).run(args);
+    }
 }

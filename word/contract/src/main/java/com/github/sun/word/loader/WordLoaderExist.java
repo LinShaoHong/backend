@@ -18,7 +18,7 @@ import javax.persistence.Table;
 @Table(name = "word_loader_exist")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WordLoaderExist {
-  @Id
-  private String id;
-  private boolean has;
+    @Id
+    private String id;
+    private boolean has;
 }

@@ -14,41 +14,41 @@ import java.util.Set;
 @RefreshScope
 @Service("synAnts")
 public class WordSynAntsLoader extends WordBasicLoader {
-  @Override
-  public void load(String word, JSON.Valuer attr, int userId) {
-    retry(word, userId, dict -> {
-      Set<String> synonyms = new LinkedHashSet<>();
-      Set<String> antonyms = new LinkedHashSet<>();
+    @Override
+    public void load(String word, JSON.Valuer attr, int userId) {
+        retry(word, userId, dict -> {
+            Set<String> synonyms = new LinkedHashSet<>();
+            Set<String> antonyms = new LinkedHashSet<>();
 
-      String q = loadQ("cues/近反义词.md");
-      String resp = assistant.chat(apiKey, model, q.replace("$word", word));
-      JSON.Valuer valuer = JSON.newValuer(parse(resp));
+            String q = loadQ("cues/近反义词.md");
+            String resp = assistant.chat(apiKey, model, q.replace("$word", word));
+            JSON.Valuer valuer = JSON.newValuer(parse(resp));
 
-      WordDict.SynAnt synAnt = new WordDict.SynAnt();
+            WordDict.SynAnt synAnt = new WordDict.SynAnt();
 
-      valuer.get("synonyms").asArray().forEach(f -> synonyms.add(f.get("word").asText()));
-      valuer.get("antonyms").asArray().forEach(f -> antonyms.add(f.get("word").asText()));
+            valuer.get("synonyms").asArray().forEach(f -> synonyms.add(f.get("word").asText()));
+            valuer.get("antonyms").asArray().forEach(f -> antonyms.add(f.get("word").asText()));
 
-      WordHcSpider.fetchSynAnts(dict, vs -> {
-        if (vs.getSynonyms().size() > 2) {
-          synonyms.addAll(vs.getSynonyms().subList(0, 2));
-        } else {
-          synonyms.addAll(vs.getSynonyms());
-        }
-        if (vs.getAntonyms().size() > 2) {
-          antonyms.addAll(vs.getAntonyms().subList(0, 2));
-        } else {
-          antonyms.addAll(vs.getAntonyms());
-        }
-      });
+            WordHcSpider.fetchSynAnts(dict, vs -> {
+                if (vs.getSynonyms().size() > 2) {
+                    synonyms.addAll(vs.getSynonyms().subList(0, 2));
+                } else {
+                    synonyms.addAll(vs.getSynonyms());
+                }
+                if (vs.getAntonyms().size() > 2) {
+                    antonyms.addAll(vs.getAntonyms().subList(0, 2));
+                } else {
+                    antonyms.addAll(vs.getAntonyms());
+                }
+            });
 
-      synonyms.removeIf(v -> Objects.equals(v, word));
-      synAnt.setSynonyms(new ArrayList<>(synonyms));
+            synonyms.removeIf(v -> Objects.equals(v, word));
+            synAnt.setSynonyms(new ArrayList<>(synonyms));
 
-      antonyms.removeIf(v -> Objects.equals(v, word));
-      synAnt.setAntonyms(new ArrayList<>(antonyms));
+            antonyms.removeIf(v -> Objects.equals(v, word));
+            synAnt.setAntonyms(new ArrayList<>(antonyms));
 
-      dict.setSynAnts(synAnt);
-    }, "synAnts");
-  }
+            dict.setSynAnts(synAnt);
+        }, "synAnts");
+    }
 }

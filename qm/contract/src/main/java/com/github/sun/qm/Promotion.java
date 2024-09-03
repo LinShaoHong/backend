@@ -21,18 +21,18 @@ import java.util.List;
 @NamingStrategy
 @Table(name = "qm_promotion")
 public class Promotion {
-  public enum Status {
-    PASS, APPROVING, REJECT
-  }
+    public enum Status {
+        PASS, APPROVING, REJECT
+    }
 
-  @Id
-  private String id;
-  private String userId;
-  @Converter(JsonHandler.ListStringHandler.class)
-  private List<String> images;
-  private Status status;
-  @Transient
-  private Date createTime;
-  @Transient
-  private Date updateTime;
+    @Id
+    private String id;
+    private String userId;
+    @Converter(JsonHandler.ListStringHandler.class)
+    private List<String> images;
+    private Status status;
+    @Transient
+    private Date createTime;
+    @Transient
+    private Date updateTime;
 }

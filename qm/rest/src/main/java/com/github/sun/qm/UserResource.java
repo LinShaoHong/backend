@@ -25,109 +25,109 @@ import java.util.Objects;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class UserResource extends AbstractResource {
-  private final UserService service;
-  private final UserMapper userMapper;
-  private final PayLogMapper payLogMapper;
-  private final StorageService storageService;
+    private final UserService service;
+    private final UserMapper userMapper;
+    private final PayLogMapper payLogMapper;
+    private final StorageService storageService;
 
-  @Inject
-  public UserResource(UserService service, UserMapper userMapper, PayLogMapper payLogMapper, StorageService storageService) {
-    this.service = service;
-    this.userMapper = userMapper;
-    this.payLogMapper = payLogMapper;
-    this.storageService = storageService;
-  }
-
-  /**
-   * 签到
-   */
-  @PUT
-  @Path("/signIn")
-  public SingleResponse<UserResp> signIn(@Context User user) {
-    return responseOf(UserResp.from(service.signIn(user)));
-  }
-
-  /**
-   * 用户信息
-   */
-  @GET
-  @Path("/info")
-  public SingleResponse<UserResp> info(@Context User user) {
-    BigDecimal paymentTotal = payLogMapper.sumByUserId(user.getId());
-    UserResp info = UserResp.from(user);
-    info.setPaymentTotal(paymentTotal);
-    return responseOf(info);
-  }
-
-  private static final SimpleDateFormat DAY_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
-  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-  @Data
-  @Builder
-  private static class UserResp {
-    private String id;
-    private String name;
-    private String avatar;
-    private BigDecimal amount;
-    private boolean vip;
-    private String vipEndTime;
-    private String signInTime;
-    private int signInCount;
-    private boolean canSignIn;
-    private BigDecimal paymentTotal;
-
-    private static UserResp from(User v) {
-      String signTime = v.getSignInTime() == null ? null : DAY_FORMATTER.format(v.getSignInTime());
-      String today = DAY_FORMATTER.format(new Date());
-      return UserResp.builder()
-        .id(v.getId())
-        .name(v.getUsername())
-        .avatar(v.getAvatar())
-        .amount(v.getAmount())
-        .vip(v.isVip())
-        .vipEndTime(v.getVipEndTime() == null ? null : FORMATTER.format(v.getVipEndTime()))
-        .signInTime(v.getSignInTime() == null ? null : FORMATTER.format(v.getSignInTime()))
-        .signInCount(v.getSignInCount())
-        .canSignIn(!Objects.equals(signTime, today))
-        .build();
+    @Inject
+    public UserResource(UserService service, UserMapper userMapper, PayLogMapper payLogMapper, StorageService storageService) {
+        this.service = service;
+        this.userMapper = userMapper;
+        this.payLogMapper = payLogMapper;
+        this.storageService = storageService;
     }
-  }
 
-  /**
-   * 上传头像
-   */
-  @POST
-  @Path("/upload/avatar")
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
-  public SingleResponse<String> uploadAvatar(@FormDataParam("file") InputStream in,
-                                             @FormDataParam("file") FormDataContentDisposition meta,
-                                             @Context User user) {
-    try {
-      String avatar = storageService.upload(in, meta.getFileName());
-      user.setAvatar(avatar);
-      userMapper.update(user);
-      return responseOf(avatar);
-    } catch (IOException ex) {
-      log.error("Upload Avatar Error: \n", ex);
-      throw new Message(5001);
+    /**
+     * 签到
+     */
+    @PUT
+    @Path("/signIn")
+    public SingleResponse<UserResp> signIn(@Context User user) {
+        return responseOf(UserResp.from(service.signIn(user)));
     }
-  }
 
-  /**
-   * 删除头像
-   */
-  @DELETE
-  @Path("/delete/avatar")
-  public Response deleteImage(@Valid DeleteReq path) {
-    final String p = path.getPath();
-    if (p != null && !p.isEmpty() && !Objects.equals("/avatar.jpg", p)) {
-      storageService.delete(p);
+    /**
+     * 用户信息
+     */
+    @GET
+    @Path("/info")
+    public SingleResponse<UserResp> info(@Context User user) {
+        BigDecimal paymentTotal = payLogMapper.sumByUserId(user.getId());
+        UserResp info = UserResp.from(user);
+        info.setPaymentTotal(paymentTotal);
+        return responseOf(info);
     }
-    return responseOf();
-  }
 
-  @Data
-  private static class DeleteReq {
-    private String path;
-  }
+    private static final SimpleDateFormat DAY_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    @Data
+    @Builder
+    private static class UserResp {
+        private String id;
+        private String name;
+        private String avatar;
+        private BigDecimal amount;
+        private boolean vip;
+        private String vipEndTime;
+        private String signInTime;
+        private int signInCount;
+        private boolean canSignIn;
+        private BigDecimal paymentTotal;
+
+        private static UserResp from(User v) {
+            String signTime = v.getSignInTime() == null ? null : DAY_FORMATTER.format(v.getSignInTime());
+            String today = DAY_FORMATTER.format(new Date());
+            return UserResp.builder()
+                    .id(v.getId())
+                    .name(v.getUsername())
+                    .avatar(v.getAvatar())
+                    .amount(v.getAmount())
+                    .vip(v.isVip())
+                    .vipEndTime(v.getVipEndTime() == null ? null : FORMATTER.format(v.getVipEndTime()))
+                    .signInTime(v.getSignInTime() == null ? null : FORMATTER.format(v.getSignInTime()))
+                    .signInCount(v.getSignInCount())
+                    .canSignIn(!Objects.equals(signTime, today))
+                    .build();
+        }
+    }
+
+    /**
+     * 上传头像
+     */
+    @POST
+    @Path("/upload/avatar")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public SingleResponse<String> uploadAvatar(@FormDataParam("file") InputStream in,
+                                               @FormDataParam("file") FormDataContentDisposition meta,
+                                               @Context User user) {
+        try {
+            String avatar = storageService.upload(in, meta.getFileName());
+            user.setAvatar(avatar);
+            userMapper.update(user);
+            return responseOf(avatar);
+        } catch (IOException ex) {
+            log.error("Upload Avatar Error: \n", ex);
+            throw new Message(5001);
+        }
+    }
+
+    /**
+     * 删除头像
+     */
+    @DELETE
+    @Path("/delete/avatar")
+    public Response deleteImage(@Valid DeleteReq path) {
+        final String p = path.getPath();
+        if (p != null && !p.isEmpty() && !Objects.equals("/avatar.jpg", p)) {
+            storageService.delete(p);
+        }
+        return responseOf();
+    }
+
+    @Data
+    private static class DeleteReq {
+        private String path;
+    }
 }

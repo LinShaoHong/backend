@@ -21,95 +21,95 @@ import java.util.Objects;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class RetrievePassResource extends AbstractResource {
-  private static final String key = "retrieve.password.key";
-  private static final int expire = 5;
+    private static final String key = "retrieve.password.key";
+    private static final int expire = 5;
 
-  @Autowired
-  private Environment env;
+    @Autowired
+    private Environment env;
 
-  private final UserMapper userMapper;
-  private final EmailSender mailService;
+    private final UserMapper userMapper;
+    private final EmailSender mailService;
 
-  @Inject
-  public RetrievePassResource(UserMapper userMapper, @Named("gmail") EmailSender mailService) {
-    this.userMapper = userMapper;
-    this.mailService = mailService;
-  }
-
-  /**
-   * 生成验证链接
-   */
-  @POST
-  @Path("/url")
-  public Response genUrl(@NotNull(message = "缺乏实体") GenReq req) {
-    User user = userMapper.findByEmail(req.getEmail());
-    if (user == null) {
-      throw new Message(4000);
+    @Inject
+    public RetrievePassResource(UserMapper userMapper, @Named("gmail") EmailSender mailService) {
+        this.userMapper = userMapper;
+        this.mailService = mailService;
     }
-    String KEY = env.getProperty(key);
-    long timestamp = System.currentTimeMillis();
-    String sign = User.hashPassword(user.getId() + ":" + timestamp + ":" + KEY);
-    String url = String.format("sign=%s&timestamp=%s&id=%s", URLEncoder.encode(sign, StandardCharsets.UTF_8), timestamp, user.getId());
-    new Thread(() -> {
-      String href = env.getProperty("server.http.domain") + "?" + url;
-      String html = "親愛的用戶 " + user.getUsername() + "： 您好<br/>&nbsp;&nbsp;&nbsp;&nbsp;請訪問： <a href='" + href + "'>" + href + "</a>  更改您的密碼";
-      mailService.sendHTML("尋芳閣", "更改密碼", html, req.getEmail());
-    }).start();
-    return responseOf();
-  }
 
-  @Data
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  private static class GenReq {
-    private String email;
-  }
-
-  /**
-   * 校验
-   */
-  @POST
-  @Path("/check")
-  public Response check(@NotNull(message = "缺乏实体") CheckReq req) {
-    String KEY = env.getProperty(key);
-    String sign = User.hashPassword(req.getId() + ":" + req.getTimestamp() + ":" + KEY);
-    if (!Objects.equals(sign, req.getSign())) {
-      throw new Message(4001);
+    /**
+     * 生成验证链接
+     */
+    @POST
+    @Path("/url")
+    public Response genUrl(@NotNull(message = "缺乏实体") GenReq req) {
+        User user = userMapper.findByEmail(req.getEmail());
+        if (user == null) {
+            throw new Message(4000);
+        }
+        String KEY = env.getProperty(key);
+        long timestamp = System.currentTimeMillis();
+        String sign = User.hashPassword(user.getId() + ":" + timestamp + ":" + KEY);
+        String url = String.format("sign=%s&timestamp=%s&id=%s", URLEncoder.encode(sign, StandardCharsets.UTF_8), timestamp, user.getId());
+        new Thread(() -> {
+            String href = env.getProperty("server.http.domain") + "?" + url;
+            String html = "親愛的用戶 " + user.getUsername() + "： 您好<br/>&nbsp;&nbsp;&nbsp;&nbsp;請訪問： <a href='" + href + "'>" + href + "</a>  更改您的密碼";
+            mailService.sendHTML("尋芳閣", "更改密碼", html, req.getEmail());
+        }).start();
+        return responseOf();
     }
-    long now = System.currentTimeMillis();
-    if (now - req.getTimestamp() > expire * 60 * 1000) {
-      throw new Message(4002);
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class GenReq {
+        private String email;
     }
-    return responseOf();
-  }
 
-  @Data
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  private static class CheckReq {
-    private String id;
-    private String sign;
-    private long timestamp;
-  }
-
-  /**
-   * 更改
-   */
-  @PUT
-  @Path("/change")
-  public Response change(@NotNull(message = "缺乏实体") ChangeReq req) {
-    User user = userMapper.findById(req.getId());
-    if (user != null) {
-      user.setPassword(User.hashPassword(req.getPassword()));
-      userMapper.update(user);
-    } else {
-      throw new Message(4003);
+    /**
+     * 校验
+     */
+    @POST
+    @Path("/check")
+    public Response check(@NotNull(message = "缺乏实体") CheckReq req) {
+        String KEY = env.getProperty(key);
+        String sign = User.hashPassword(req.getId() + ":" + req.getTimestamp() + ":" + KEY);
+        if (!Objects.equals(sign, req.getSign())) {
+            throw new Message(4001);
+        }
+        long now = System.currentTimeMillis();
+        if (now - req.getTimestamp() > expire * 60 * 1000) {
+            throw new Message(4002);
+        }
+        return responseOf();
     }
-    return responseOf();
-  }
 
-  @Data
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  private static class ChangeReq {
-    private String id;
-    private String password;
-  }
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class CheckReq {
+        private String id;
+        private String sign;
+        private long timestamp;
+    }
+
+    /**
+     * 更改
+     */
+    @PUT
+    @Path("/change")
+    public Response change(@NotNull(message = "缺乏实体") ChangeReq req) {
+        User user = userMapper.findById(req.getId());
+        if (user != null) {
+            user.setPassword(User.hashPassword(req.getPassword()));
+            userMapper.update(user);
+        } else {
+            throw new Message(4003);
+        }
+        return responseOf();
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class ChangeReq {
+        private String id;
+        private String password;
+    }
 }

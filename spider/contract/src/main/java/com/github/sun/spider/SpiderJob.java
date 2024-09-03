@@ -23,33 +23,33 @@ import java.util.Objects;
 @NamingStrategy
 @Table(name = "spider_job")
 public class SpiderJob {
-  @Id
-  private String id;
-  private String group;
-  private boolean publish;
-  private long startTime;
-  private String rate;
-  @Converter(SettingHandler.class)
-  private Setting setting;
-  @Converter(JsonHandler.JsonNodeHandler.class)
-  private JsonNode schema;
-  @Converter(CheckpointHandler.class)
-  private Spider.Checkpoint checkpoint;
-  @Transient
-  @JsonIgnore
-  private Date createTime;
-  @Transient
-  @JsonIgnore
-  private Date updateTime;
+    @Id
+    private String id;
+    private String group;
+    private boolean publish;
+    private long startTime;
+    private String rate;
+    @Converter(SettingHandler.class)
+    private Setting setting;
+    @Converter(JsonHandler.JsonNodeHandler.class)
+    private JsonNode schema;
+    @Converter(CheckpointHandler.class)
+    private Spider.Checkpoint checkpoint;
+    @Transient
+    @JsonIgnore
+    private Date createTime;
+    @Transient
+    @JsonIgnore
+    private Date updateTime;
 
-  public boolean needReschedule(SpiderJob updated) {
-    return !Objects.equals(this.startTime, updated.getStartTime()) ||
-      !Objects.equals(this.rate, updated.getRate());
-  }
+    public boolean needReschedule(SpiderJob updated) {
+        return !Objects.equals(this.startTime, updated.getStartTime()) ||
+                !Objects.equals(this.rate, updated.getRate());
+    }
 
-  public static class SettingHandler extends JsonHandler<Setting> {
-  }
+    public static class SettingHandler extends JsonHandler<Setting> {
+    }
 
-  public static class CheckpointHandler extends JsonHandler<Spider.Checkpoint> {
-  }
+    public static class CheckpointHandler extends JsonHandler<Spider.Checkpoint> {
+    }
 }

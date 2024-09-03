@@ -18,24 +18,24 @@ import java.util.Date;
 @NamingStrategy
 @Table(name = "card_user")
 public class CardUser {
-  @Id
-  private String id;
-  private String code;
-  private String shareCode;
-  private String openId;
-  private String os;
-  private int avatar;
-  private String nickname;
-  private String phone;
-  private int playCount;
-  private int loverPlayCount;
-  private int smsCount;
-  private int vip;
-  private String prepayId;
-  private String ip;
-  private String location;
-  @Transient
-  private Date createTime;
-  @Transient
-  private Date updateTime;
+    @Id
+    private String id;
+    private String code;
+    private String shareCode;
+    private String openId;
+    private String os;
+    private int avatar;
+    private String nickname;
+    private String phone;
+    private int playCount;
+    private int loverPlayCount;
+    private int smsCount;
+    private int vip;
+    private String prepayId;
+    private String ip;
+    private String location;
+    @Transient
+    private Date createTime;
+    @Transient
+    private Date updateTime;
 }

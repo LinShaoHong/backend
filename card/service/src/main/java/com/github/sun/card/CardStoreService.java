@@ -17,46 +17,46 @@ import java.util.Date;
 @RefreshScope
 @RequiredArgsConstructor
 public class CardStoreService {
-  private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM");
+    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM");
 
-  @Value("${image.store.dir}")
-  private String basePath;
+    @Value("${image.store.dir}")
+    private String basePath;
 
-  @SuppressWarnings("Duplicates")
-  public String put(InputStream in, String name) {
-    try {
-      int i = name.lastIndexOf(".");
-      String ext = ".jpg";
-      if (i > 0) {
-        ext = name.substring(i + 1);
-      }
-      String id = IdGenerator.next();
-      String month = FORMATTER.format(new Date());
-      String path = basePath + "/" + month + "/" + id + "." + ext;
-      File file = new File(path);
-      if (!file.exists()) {
-        File dir = new File(file.getParent());
-        dir.mkdirs();
-        file.createNewFile();
-      }
-      OutputStream out = new FileOutputStream(file);
-      byte[] bytes = new byte[2048];
-      int n;
-      while ((n = in.read(bytes, 0, bytes.length)) != -1) {
-        out.write(bytes, 0, n);
-      }
-      in.close();
-      out.close();
-      return "/" + month + "/" + id + "." + ext;
-    } catch (Throwable ex) {
-      throw new RuntimeException(ex);
+    @SuppressWarnings("Duplicates")
+    public String put(InputStream in, String name) {
+        try {
+            int i = name.lastIndexOf(".");
+            String ext = ".jpg";
+            if (i > 0) {
+                ext = name.substring(i + 1);
+            }
+            String id = IdGenerator.next();
+            String month = FORMATTER.format(new Date());
+            String path = basePath + "/" + month + "/" + id + "." + ext;
+            File file = new File(path);
+            if (!file.exists()) {
+                File dir = new File(file.getParent());
+                dir.mkdirs();
+                file.createNewFile();
+            }
+            OutputStream out = new FileOutputStream(file);
+            byte[] bytes = new byte[2048];
+            int n;
+            while ((n = in.read(bytes, 0, bytes.length)) != -1) {
+                out.write(bytes, 0, n);
+            }
+            in.close();
+            out.close();
+            return "/" + month + "/" + id + "." + ext;
+        } catch (Throwable ex) {
+            throw new RuntimeException(ex);
+        }
     }
-  }
 
-  public void remove(String path) {
-    File file = new File(basePath + path);
-    if (file.exists()) {
-      file.delete();
+    public void remove(String path) {
+        File file = new File(basePath + path);
+        if (file.exists()) {
+            file.delete();
+        }
     }
-  }
 }

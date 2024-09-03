@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @NamingStrategy
 @Table(name = "card_sms_spec")
 public class CardSmsSpec {
-  private String type;
-  private String content;
-  private int sort;
+    private String type;
+    private String content;
+    private int sort;
 }

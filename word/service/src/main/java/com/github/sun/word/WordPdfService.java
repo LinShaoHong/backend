@@ -11,8 +11,8 @@ import java.io.InputStream;
 @Service
 @RefreshScope
 public class WordPdfService {
-  public void parseRoot(InputStream in) throws IOException {
-    FDFDocument doc = Loader.loadFDF(in);
+    public void parseRoot(InputStream in) throws IOException {
+        FDFDocument doc = Loader.loadFDF(in);
 
-  }
+    }
 }

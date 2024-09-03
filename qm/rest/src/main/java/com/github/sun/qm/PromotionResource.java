@@ -24,73 +24,73 @@ import java.util.stream.Collectors;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class PromotionResource extends AbstractResource {
-  private final PromotionMapper mapper;
+    private final PromotionMapper mapper;
 
-  @Autowired
-  private Environment env;
+    @Autowired
+    private Environment env;
 
-  @Inject
-  public PromotionResource(PromotionMapper mapper) {
-    this.mapper = mapper;
-  }
+    @Inject
+    public PromotionResource(PromotionMapper mapper) {
+        this.mapper = mapper;
+    }
 
-  /**
-   * 查询推广记录
-   */
-  @GET
-  public ListResponse<PromotionRes> get(@Context User user) {
-    List<Promotion> list = mapper.findByUserId(user.getId());
-    return responseOf(list.stream().map(v -> PromotionRes.builder()
-      .id(v.getId())
-      .passed(v.getStatus() == Promotion.Status.PASS)
-      .images(v.getImages())
-      .applyTime(Dates.simpleTime(v.getCreateTime()))
-      .build()).collect(Collectors.toList()));
-  }
+    /**
+     * 查询推广记录
+     */
+    @GET
+    public ListResponse<PromotionRes> get(@Context User user) {
+        List<Promotion> list = mapper.findByUserId(user.getId());
+        return responseOf(list.stream().map(v -> PromotionRes.builder()
+                .id(v.getId())
+                .passed(v.getStatus() == Promotion.Status.PASS)
+                .images(v.getImages())
+                .applyTime(Dates.simpleTime(v.getCreateTime()))
+                .build()).collect(Collectors.toList()));
+    }
 
-  /**
-   * 获取推广文案
-   */
-  @GET
-  @Path("/treatment")
-  public SingleResponse<String> getTreatment(@Context User user) {
-    return responseOf(env.getProperty("promotion.treatment"));
-  }
+    /**
+     * 获取推广文案
+     */
+    @GET
+    @Path("/treatment")
+    public SingleResponse<String> getTreatment(@Context User user) {
+        return responseOf(env.getProperty("promotion.treatment"));
+    }
 
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  private static class PromotionRes {
-    private String id;
-    private List<String> images;
-    private String applyTime;
-    private boolean passed;
-  }
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class PromotionRes {
+        private String id;
+        private List<String> images;
+        private String applyTime;
+        private boolean passed;
+    }
 
-  /**
-   * 提交推广
-   */
-  @POST
-  public Response create(@Valid @NotNull(message = "缺少实体") PromotionReq req,
-                         @Context User user) {
-    Promotion p = Promotion.builder()
-      .id(IdGenerator.next())
-      .userId(user.getId())
-      .images(req.getImages())
-      .status(Promotion.Status.APPROVING)
-      .build();
-    mapper.insert(p);
-    return responseOf();
-  }
+    /**
+     * 提交推广
+     */
+    @POST
+    public Response create(@Valid @NotNull(message = "缺少实体") PromotionReq req,
+                           @Context User user) {
+        Promotion p = Promotion.builder()
+                .id(IdGenerator.next())
+                .userId(user.getId())
+                .images(req.getImages())
+                .status(Promotion.Status.APPROVING)
+                .build();
+        mapper.insert(p);
+        return responseOf();
+    }
 
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  private static class PromotionReq {
-    @NotNull(message = "缺少验证图片")
-    @Size(min = 1, message = "缺少验证图片")
-    private List<String> images;
-  }
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class PromotionReq {
+        @NotNull(message = "缺少验证图片")
+        @Size(min = 1, message = "缺少验证图片")
+        private List<String> images;
+    }
 }

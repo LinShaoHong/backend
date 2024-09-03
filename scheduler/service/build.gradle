@@ -1,7 +1,7 @@
 dependencies {
-  api project(":$rootName-quartz")
-  api project(":$rootName-common-service")
-  api project(":$rootName-scheduler-mapper")
+    api project(":$rootName-quartz")
+    api project(":$rootName-common-service")
+    api project(":$rootName-scheduler-mapper")
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")

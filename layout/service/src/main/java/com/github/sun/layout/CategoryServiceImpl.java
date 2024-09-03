@@ -14,28 +14,28 @@ import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
-  @Value("${category.cache.expire}")
-  private int expire;
+    @Value("${category.cache.expire}")
+    private int expire;
 
-  private final Cache<String, List<Category>> cache = Caffeine.newBuilder()
-    .expireAfterWrite(expire, TimeUnit.SECONDS)
-    .maximumSize(100)
-    .build();
+    private final Cache<String, List<Category>> cache = Caffeine.newBuilder()
+            .expireAfterWrite(expire, TimeUnit.SECONDS)
+            .maximumSize(100)
+            .build();
 
-  @Autowired
-  private Map<String, CategoryProvider> providers;
+    @Autowired
+    private Map<String, CategoryProvider> providers;
 
-  @Override
-  public List<Category> getAll() {
-    return CategoryProvider.TYPES.stream().flatMap(type -> {
-      CategoryProvider provider = providers.get(type);
-      if (provider != null) {
-        List<Category> list = cache.get(type, t -> provider.provide());
-        if (list != null && !list.isEmpty()) {
-          return list.stream();
-        }
-      }
-      return null;
-    }).filter(Objects::nonNull).collect(Collectors.toList());
-  }
+    @Override
+    public List<Category> getAll() {
+        return CategoryProvider.TYPES.stream().flatMap(type -> {
+            CategoryProvider provider = providers.get(type);
+            if (provider != null) {
+                List<Category> list = cache.get(type, t -> provider.provide());
+                if (list != null && !list.isEmpty()) {
+                    return list.stream();
+                }
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+    }
 }

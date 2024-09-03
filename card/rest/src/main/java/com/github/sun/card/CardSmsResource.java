@@ -14,50 +14,50 @@ import javax.ws.rs.core.MediaType;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class CardSmsResource extends AbstractResource {
-  private final CardSmsService service;
+    private final CardSmsService service;
 
-  @Inject
-  public CardSmsResource(CardSmsService service) {
-    this.service = service;
-  }
+    @Inject
+    public CardSmsResource(CardSmsService service) {
+        this.service = service;
+    }
 
-  @GET
-  @Path("/getSpecsByType")
-  public ListResponse<String> byId(@QueryParam("type") String type) {
-    return responseOf(service.getSpecsByType(type));
-  }
+    @GET
+    @Path("/getSpecsByType")
+    public ListResponse<String> byId(@QueryParam("type") String type) {
+        return responseOf(service.getSpecsByType(type));
+    }
 
-  @POST
-  @Path("/send")
-  public Response getOpenIdByCode(@Valid SendReq req) {
-    service.send(req.getUserId(), req.getFromPhone(), req.getToPhone(), req.getMessage());
-    return responseOf();
-  }
+    @POST
+    @Path("/send")
+    public Response getOpenIdByCode(@Valid SendReq req) {
+        service.send(req.getUserId(), req.getFromPhone(), req.getToPhone(), req.getMessage());
+        return responseOf();
+    }
 
-  @GET
-  @Path("/records")
-  public ListResponse<CardSmsService.Record> records(@QueryParam("userId") String userId) {
-    return responseOf(service.records(userId));
-  }
+    @GET
+    @Path("/records")
+    public ListResponse<CardSmsService.Record> records(@QueryParam("userId") String userId) {
+        return responseOf(service.records(userId));
+    }
 
-  @GET
-  @Path("/chats")
-  public ListResponse<CardSmsService.Chat> chats(@QueryParam("userId") String userId,
-                                                 @QueryParam("phone") String phone) {
-    return responseOf(service.chats(userId, phone));
-  }
+    @GET
+    @Path("/chats")
+    public ListResponse<CardSmsService.Chat> chats(@QueryParam("userId") String userId,
+                                                   @QueryParam("phone") String phone) {
+        return responseOf(service.chats(userId, phone));
+    }
 
-  @GET
-  @Path("/recPhones")
-  public ListResponse<String> recPhones(@QueryParam("userId") String userId) {
-    return responseOf(service.recPhones(userId));
-  }
+    @GET
+    @Path("/recPhones")
+    public ListResponse<String> recPhones(@QueryParam("userId") String userId) {
+        return responseOf(service.recPhones(userId));
+    }
 
-  @Data
-  public static class SendReq {
-    private String userId;
-    private String fromPhone;
-    private String toPhone;
-    private String message;
-  }
+    @Data
+    public static class SendReq {
+        private String userId;
+        private String fromPhone;
+        private String toPhone;
+        private String message;
+    }
 }

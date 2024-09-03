@@ -19,28 +19,30 @@ import java.util.Objects;
 @NamingStrategy
 @Table(name = "card_sms")
 public class CardSms {
-  @Id
-  private String id;
-  private String userId;
-  private String fromPhone;
-  private String toPhone;
-  private String message;
-  private Date time;
-  @Transient
-  private Date createTime;
-  @Transient
-  private Date updateTime;
+    @Id
+    private String id;
+    private String userId;
+    private String fromPhone;
+    private String toPhone;
+    private String message;
+    private Date time;
+    @Transient
+    private Date createTime;
+    @Transient
+    private Date updateTime;
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof CardSms)) return false;
-    CardSms cardSms = (CardSms) o;
-    return getId().equals(cardSms.getId());
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof CardSms))
+            return false;
+        CardSms cardSms = (CardSms) o;
+        return getId().equals(cardSms.getId());
+    }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(getId());
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
 }

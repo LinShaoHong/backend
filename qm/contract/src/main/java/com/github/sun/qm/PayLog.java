@@ -19,19 +19,19 @@ import java.util.Date;
 @NamingStrategy
 @Table(name = "qm_pay_log")
 public class PayLog {
-  public enum Type {
-    SING_IN, RECHARGE, PAYMENT, PROMOTION
-  }
+    public enum Type {
+        SING_IN, RECHARGE, PAYMENT, PROMOTION
+    }
 
-  @Id
-  private String id;
-  private String userId;
-  private BigDecimal amount;
-  private Type type;
-  private String chargeType;
-  private String girlId;
-  @Transient
-  private Date createTime;
-  @Transient
-  private Date updateTime;
+    @Id
+    private String id;
+    private String userId;
+    private BigDecimal amount;
+    private Type type;
+    private String chargeType;
+    private String girlId;
+    @Transient
+    private Date createTime;
+    @Transient
+    private Date updateTime;
 }

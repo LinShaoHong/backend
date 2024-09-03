@@ -9,9 +9,9 @@ import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface WordLoaderCodeMapper extends CompositeMapper<WordLoaderCode> {
-  @Select("select * from word_loader_code where id=#{id} for update")
-  WordLoaderCode queryForUpdate(@Param("id") String id);
+    @Select("select * from word_loader_code where id=#{id} for update")
+    WordLoaderCode queryForUpdate(@Param("id") String id);
 
-  @Update("update word_loader_code set `code`=#{code} where id=#{id}")
-  int updateById(@Param("id") String id, @Param("code") long code);
+    @Update("update word_loader_code set `code`=#{code} where id=#{id}")
+    int updateById(@Param("id") String id, @Param("code") long code);
 }

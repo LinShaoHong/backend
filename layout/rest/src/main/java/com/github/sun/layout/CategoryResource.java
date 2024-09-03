@@ -13,18 +13,18 @@ import javax.ws.rs.core.MediaType;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class CategoryResource extends AbstractResource {
-  private final CategoryService service;
+    private final CategoryService service;
 
-  @Inject
-  public CategoryResource(CategoryService service) {
-    this.service = service;
-  }
+    @Inject
+    public CategoryResource(CategoryService service) {
+        this.service = service;
+    }
 
-  /**
-   * 获取目录列表
-   */
-  @GET
-  public ListResponse<Category> getAll() {
-    return responseOf(service.getAll());
-  }
+    /**
+     * 获取目录列表
+     */
+    @GET
+    public ListResponse<Category> getAll() {
+        return responseOf(service.getAll());
+    }
 }

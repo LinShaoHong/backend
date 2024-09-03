@@ -13,17 +13,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Category {
-  private String type;
-  private String subType;
-  private List<Item> items;
+    private String type;
+    private String subType;
+    private List<Item> items;
 
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class Item {
-    private String label;
-    private String name;
-    private long count;
-  }
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Item {
+        private String label;
+        private String name;
+        private long count;
+    }
 }

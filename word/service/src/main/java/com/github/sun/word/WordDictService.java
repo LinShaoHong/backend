@@ -8,10 +8,10 @@ import javax.annotation.Resource;
 @Service
 @RefreshScope
 public class WordDictService {
-  @Resource
-  private WordDictMapper mapper;
+    @Resource
+    private WordDictMapper mapper;
 
-  public WordDict byId(String id) {
-    return mapper.findById(id);
-  }
+    public WordDict byId(String id) {
+        return mapper.findById(id);
+    }
 }

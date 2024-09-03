@@ -1,6 +1,6 @@
 dependencies {
-  api project(":$rootName-boot")
-  api "com.sun.mail:javax.mail:$vers.mail"
+    api project(":$rootName-boot")
+    api "com.sun.mail:javax.mail:$vers.mail"
 }
 
 apply from: rootProject.file("buildscript/gradle/sub_maven.gradle")
