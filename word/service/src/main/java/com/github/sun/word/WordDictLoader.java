@@ -402,18 +402,20 @@ public class WordDictLoader {
                 grandParent = StringUtils.hasText(parent.getParent()) ?
                         util.find(nodes, parent.getParent()) : null;
             }
+            int i;
+            List<Node> brs;
             switch (op) {
                 case "left":
                     if (parent != null) {
-                        List<Node> brs = grandParent != null ? grandParent.getChildren() : nodes;
+                        brs = grandParent != null ? grandParent.getChildren() : nodes;
                         parent.getChildren().remove(curr);
-                        int i = brs.indexOf(parent);
+                        i = brs.indexOf(parent);
                         brs.add(i + 1, curr);
                     }
                     break;
                 case "right":
-                    List<Node> brs = parent == null ? nodes : parent.getChildren();
-                    int i = brs.indexOf(curr);
+                    brs = parent == null ? nodes : parent.getChildren();
+                    i = brs.indexOf(curr);
                     if (i > 0) {
                         brs.remove(curr);
                         brs.get(i - 1).getChildren().add(curr);
