@@ -17,19 +17,16 @@ import java.util.Set;
 @Service
 public class WordYdSpider {
     public static void main(String[] args) {
-        //    try {
-        //      Document node = WordDictLoader.fetchDocument("https://www.oxfordlearnersdictionaries.com/definition/english/readymade_1?q=readymade");
-        //      boolean has = XPaths.of(node, "//div[@id='didyoumean']").asArray().isEmpty();
-        //      System.out.println(has);
-        //    } catch (Exception e) {
-        //      throw new RuntimeException(e);
-        //    }
+        try {
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void fetchPhonetic(WordDict dict) {
         Document node = WordDictLoader.fetchDocument("https://dict.youdao.com/result?lang=en&word=" + dict.getId());
         List<Node> arr = XPaths.of(node, "//div[@class='per-phone']").asArray();
-        if (arr.size() > 0) {
+        if (!arr.isEmpty()) {
             String uk = XPaths.of(arr.get(0), ".//span[@class='phonetic']/text()").asText();
             uk = StringEscapeUtils.unescapeHtml4(uk);
             dict.setUkPhonetic(uk);

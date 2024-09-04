@@ -313,9 +313,16 @@ public class WordDictLoader {
     }
 
     public static synchronized Document fetchDocument(String url) {
+        return fetchDocument(url, null);
+    }
+
+    public static synchronized Document fetchDocument(String url, Map<String, String> headers) {
         return documents.get(url, u -> {
             try {
-                String html = Fetcher.fetch(url);
+                String html = Fetcher.builder()
+                        .uri(url)
+                        .headers(headers)
+                        .fetch();
                 return new DomSerializer(new CleanerProperties()).createDOM(hc.clean(html));
             } catch (Exception ex) {
                 throw new RuntimeException(ex);

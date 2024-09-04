@@ -169,7 +169,7 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
     Node get(String url) {
         try {
             return Retry.execute(getSetting().getRetryCount(), getSetting().getRetryDelays(),
-                    () -> new DomSerializer(new CleanerProperties()).createDOM(hc.clean(Fetcher.fetch(url))));
+                    () -> new DomSerializer(new CleanerProperties()).createDOM(hc.clean(Fetcher.builder().uri(url).fetch())));
         } catch (Exception ex) {
             throw new SpiderException("Error get html from url: " + url, ex);
         }
@@ -178,7 +178,13 @@ abstract class AbstractSpider extends SchemaParser implements Spider {
     Node get(Request req) {
         try {
             return Retry.execute(getSetting().getRetryCount(), getSetting().getRetryDelays(), () -> {
-                String body = Fetcher.fetch(req.uri, req.timeout, req.method, req.body, req.charset);
+                String body = Fetcher.builder()
+                        .uri(req.uri)
+                        .timeout(req.timeout)
+                        .method(req.method)
+                        .body(req.body)
+                        .charset(req.charset)
+                        .fetch();
                 return new DomSerializer(new CleanerProperties()).createDOM(hc.clean(body));
             });
         } catch (Exception ex) {
