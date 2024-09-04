@@ -499,12 +499,12 @@ public class WordDictLoader {
         List<WordDictTree> list = treeMapper.findTree("{\"word\":\"" + word + "\"}");
         if (list.isEmpty()) {
             WordDict dict = mapper.findById(word);
-            if (dict != null) {
-                WordDict.Part part = dict.getStruct().getParts().stream()
-                        .filter(WordDict.Part::isRoot).findFirst().orElse(null);
-                if (part != null) {
-                    list = treeMapper.findTree("{\"word\":\"" + part.getPart() + "\"}");
-                }
+            if (dict != null && dict.getStruct() != null && dict.getStruct().getParts() != null) {
+                return dict.getStruct().getParts().stream()
+                        .filter(WordDict.Part::isRoot)
+                        .flatMap(p ->
+                                treeMapper.findTree("{\"word\":\"" + p.getPart() + "\"}").stream())
+                        .collect(Collectors.toList());
             }
         }
         return list;
