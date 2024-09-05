@@ -5,8 +5,11 @@ import com.github.sun.foundation.boot.Injector;
 import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.foundation.boot.utility.Throws;
 import com.github.sun.foundation.boot.utility.Tuple;
+import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
-import com.github.sun.word.*;
+import com.github.sun.word.WordCodeService;
+import com.github.sun.word.WordDict;
+import com.github.sun.word.WordDictMapper;
 import com.ibm.icu.impl.data.ResourceReader;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -106,6 +109,8 @@ public abstract class WordBasicLoader implements WordLoader {
         if (db == null) {
             db = new WordDict();
             db.setId(word);
+            db.setUsAudioId(IdGenerator.next());
+            db.setUkAudioId(IdGenerator.next());
             WordDict.LoadState loadState = new WordDict.LoadState();
             db.setLoadState(loadState);
             db.setLoadTime(new Date());

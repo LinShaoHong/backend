@@ -1,6 +1,7 @@
 package com.github.sun.word.loader;
 
 import com.github.sun.foundation.boot.utility.JSON;
+import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.word.WordDict;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class WordCollocationLoader extends WordBasicLoader {
                     List<WordDict.ExampleSentence> examples = new ArrayList<>();
                     a.get("examples").asArray().forEach(e -> {
                         WordDict.ExampleSentence example = new WordDict.ExampleSentence();
+                        example.setAudioId(IdGenerator.next());
                         example.setSentence(e.get("sentence").asText());
                         example.setTranslation(e.get("translation").asText());
                         examples.add(example);

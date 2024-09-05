@@ -1,6 +1,7 @@
 package com.github.sun.word.loader;
 
 import com.github.sun.foundation.boot.utility.JSON;
+import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.word.WordDict;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class WordExamplesLoader extends WordBasicLoader {
             valuer.get("example_sentences").asArray().forEach(e -> {
                 String sentence = e.get("sentence").asText();
                 String translation = e.get("translation").asText();
-                examples.add(new WordDict.ExampleSentence(sentence, translation));
+                examples.add(new WordDict.ExampleSentence(IdGenerator.next(), sentence, translation));
             });
             dict.setExamples(examples);
         }, "examples");

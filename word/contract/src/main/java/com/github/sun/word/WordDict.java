@@ -24,7 +24,9 @@ import java.util.List;
 public class WordDict {
     @Id
     private String id;
+    private String ukAudioId;//英式音频
     private String ukPhonetic;//英式音标
+    private String usAudioId;//美式音频
     private String usPhonetic;//美式音标
     @Converter(MeaningHandler.class)
     private TranslatedMeaning meaning;//中文释义
@@ -73,6 +75,7 @@ public class WordDict {
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ExampleSentence {
+        private String audioId;
         private String sentence;
         private String translation;
     }
