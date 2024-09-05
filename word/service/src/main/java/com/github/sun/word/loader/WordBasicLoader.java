@@ -19,10 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -46,7 +43,8 @@ public abstract class WordBasicLoader implements WordLoader {
         Throwable ex = null;
         WordDict dict = init(word, userId);
         mapper.noPass(word);
-        Arrays.asList(fields).forEach(f -> mapper.loading(word, "'$." + f + "Loading'"));
+        List<String> fs = Arrays.asList(fields);
+        fs.forEach(f -> mapper.loading(word, "'$." + f + "Loading'"));
         for (int i = 0; i < 2; i++) {
             try {
                 run.accept(dict);
@@ -79,7 +77,7 @@ public abstract class WordBasicLoader implements WordLoader {
                 errorMapper.update(error);
             }
         }
-        Arrays.asList(fields).forEach(f -> mapper.loaded(word, "'$." + f + "Loading'"));
+        fs.forEach(f -> mapper.loaded(word, "'$." + f + "Loading'"));
     }
 
     protected String parse(String resp) {

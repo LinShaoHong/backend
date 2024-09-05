@@ -25,10 +25,10 @@ public class WordStructLoader extends WordBasicLoader {
             String model = attr == null ? null : attr.get("model").asText();
             model = StringUtils.hasText(model) ? model : super.model;
 
+            //词根词缀
             String q = loadQ("cues/词根词缀.md");
             q = q.replace("$word", word);
             String resp;
-            
             String root = attr == null ? null : attr.get("root").asText();
             root = StringUtils.hasText(root) ? root : (affix != null ? affix.getRoot() : null);
             root = StringUtils.hasText(root) ? root : WordJsSpider.fetchRoot(dict);
@@ -69,11 +69,9 @@ public class WordStructLoader extends WordBasicLoader {
             });
             struct.setParts(parts);
             struct.setAnalysis(valuer.get("memory_formula_zh").asText());
-            struct.setHistory(valuer.get("origin_history_zh").asText());
             if (StringUtils.hasText(struct.getAnalysis())) {
                 struct.setAnalysis(struct.getAnalysis().replaceAll("-", ""));
             }
-            dict.setStruct(struct);
         }, "struct");
     }
 }

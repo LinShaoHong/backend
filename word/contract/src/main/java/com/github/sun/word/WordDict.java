@@ -33,7 +33,8 @@ public class WordDict {
     @Converter(ExamplesHandler.class)
     private List<ExampleSentence> examples;//例句
     @Converter(StructHandler.class)
-    private Struct struct;//组成结构
+    private Struct struct;//词根词缀结构
+    private String origin;//词源历史
     @Converter(InflectionHandler.class)
     private Inflection inflection;//派生词
     @Converter(DerivativesHandler.class)
@@ -91,7 +92,6 @@ public class WordDict {
     public static class Struct {
         private List<Part> parts;
         private String analysis;
-        private String history;
     }
 
     @Data
@@ -203,6 +203,7 @@ public class WordDict {
         private boolean examplesLoading;
         private boolean inflectionLoading;
         private boolean structLoading;
+        private boolean originLoading;
         private boolean synAntsLoading;
         private boolean derivativesLoading;
         private boolean differsLoading;
