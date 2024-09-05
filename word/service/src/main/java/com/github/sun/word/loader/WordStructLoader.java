@@ -22,7 +22,7 @@ public class WordStructLoader extends WordBasicLoader {
     public void load(String word, JSON.Valuer attr, int userId) {
         WordLoaderAffix affix = affixMapper.findById(word);
         retry(word, userId, dict -> {
-            String model = attr == null ? null : attr.get("model").asText();
+            String model = attr == null ? null : attr.get("model").asText("");
             model = StringUtils.hasText(model) ? model : super.model;
 
             //词根词缀
@@ -72,6 +72,7 @@ public class WordStructLoader extends WordBasicLoader {
             if (StringUtils.hasText(struct.getAnalysis())) {
                 struct.setAnalysis(struct.getAnalysis().replaceAll("-", ""));
             }
+            dict.setStruct(struct);
         }, "struct");
     }
 }
