@@ -46,7 +46,13 @@ public class WordDiffersLoader extends WordBasicLoader {
                             a.get("examples").asArray().forEach(e -> {
                                 WordDict.ExampleSentence example = new WordDict.ExampleSentence();
                                 example.setAudioId(IdGenerator.next());
-                                example.setSentence(e.get("sentence").asText(""));
+
+                                String sentence = e.get("sentence").asText("");
+                                sentence = sentence.replaceAll("’", "'");
+                                sentence = sentence.replaceAll("，", ",");
+                                sentence = sentence.replaceAll("。", ".");
+                                example.setSentence(sentence);
+
                                 example.setTranslation(e.get("translation").asText(""));
                                 examples.add(example);
                             });

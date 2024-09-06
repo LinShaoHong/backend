@@ -21,7 +21,12 @@ public class WordExamplesLoader extends WordBasicLoader {
             List<WordDict.ExampleSentence> examples = new ArrayList<>();
             valuer.get("example_sentences").asArray().forEach(e -> {
                 String sentence = e.get("sentence").asText();
+                sentence = sentence.replaceAll("’", "'");
+                sentence = sentence.replaceAll("，", ",");
+                sentence = sentence.replaceAll("。", ".");
+
                 String translation = e.get("translation").asText();
+
                 examples.add(new WordDict.ExampleSentence(IdGenerator.next(), sentence, translation));
             });
             dict.setExamples(examples);

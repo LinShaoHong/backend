@@ -30,7 +30,13 @@ public class WordCollocationLoader extends WordBasicLoader {
                     a.get("examples").asArray().forEach(e -> {
                         WordDict.ExampleSentence example = new WordDict.ExampleSentence();
                         example.setAudioId(IdGenerator.next());
-                        example.setSentence(e.get("sentence").asText());
+
+                        String sentence = e.get("sentence").asText();
+                        sentence = sentence.replaceAll("’", "'");
+                        sentence = sentence.replaceAll("，", ",");
+                        sentence = sentence.replaceAll("。", ".");
+                        example.setSentence(sentence);
+
                         example.setTranslation(e.get("translation").asText());
                         examples.add(example);
                     });
@@ -39,7 +45,13 @@ public class WordCollocationLoader extends WordBasicLoader {
                 });
                 valuer.get("phrases").asArray().forEach(a -> {
                     WordDict.Phrase phrase = new WordDict.Phrase();
-                    phrase.setEn(a.get("phrase").asText());
+
+                    String p = a.get("phrase").asText();
+                    p = p.replaceAll("’", "'");
+                    p = p.replaceAll("，", ",");
+                    p = p.replaceAll("。", ".");
+                    phrase.setEn(p);
+
                     phrase.setZh(a.get("translation").asText());
                     if (formulas.stream().noneMatch(f -> Objects.equals(f.getEn(), phrase.getEn()))) {
                         phrases.add(phrase);
