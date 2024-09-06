@@ -51,8 +51,8 @@ public class WordXdfSpider {
 
     @SuppressWarnings("Duplicates")
     public void fetchWords(String uri,
-                           String category,
                            String tag,
+                           String name,
                            int start,
                            int end) {
         for (int i = start; i <= end; i++) {
@@ -64,15 +64,15 @@ public class WordXdfSpider {
                 WordLoaderBook book = mapper.findById(word);
                 List<WordLoaderBook.Scope> scopes = book == null ? new ArrayList<>() : book.getScopes();
                 WordLoaderBook.Scope scope = scopes.stream()
-                        .filter(s -> Objects.equals(s.getCategory(), category))
+                        .filter(s -> Objects.equals(s.getTag(), tag))
                         .findFirst().orElse(null);
                 if (scope == null) {
                     scope = new WordLoaderBook.Scope();
-                    scope.setCategory(category);
-                    scope.setTags(new HashSet<>());
+                    scope.setTag(tag);
+                    scope.setNames(new HashSet<>());
                     scopes.add(scope);
                 }
-                scope.getTags().add(tag);
+                scope.getNames().add(name);
 
                 book = book == null ? new WordLoaderBook() : book;
                 book.setScopes(scopes);

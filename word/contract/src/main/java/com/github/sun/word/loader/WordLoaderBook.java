@@ -33,8 +33,8 @@ public class WordLoaderBook {
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Scope {
-        private String category;
-        private Set<String> tags;
+        private String tag;
+        private Set<String> names;
     }
 
     public static class ScopesHandler extends JsonHandler.ListHandler<Scope> {
