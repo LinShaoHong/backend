@@ -66,7 +66,7 @@ public class WordDictLoader {
     @Resource
     private WordDictTreeMapper treeMapper;
     @Resource
-    private WordLoaderTagMapper tagMapper;
+    private WordLoaderBookMapper tagMapper;
     @Resource
     private WordLoaderExistMapper existMapper;
 
@@ -76,7 +76,7 @@ public class WordDictLoader {
 
     public void fetch(int userId) {
         SqlBuilder sb = factory.create();
-        SqlBuilder.Template template = sb.from(WordLoaderTag.class).limit(300, 500).template();
+        SqlBuilder.Template template = sb.from(WordLoaderBook.class).limit(300, 500).template();
         tagMapper.findByTemplate(template).forEach(tag -> {
             loadAll(tag.getId(), userId);
         });
@@ -107,6 +107,16 @@ public class WordDictLoader {
     public void removePart(String word, String part, String path, JsonNode attr, int userId) {
         WordDict dict = WordBasicLoader.init(word, userId);
         switch (part) {
+            case "phonetic":
+                if ("uk".equals(path)) {
+                    dict.setUkPhonetic(null);
+                    dict.setUkAudioId(null);
+                } else {
+                    dict.setUsPhonetic(null);
+                    dict.setUsAudioId(null);
+                }
+                mapper.update(dict);
+                break;
             case "meaning":
                 if (StringUtils.hasText(path)) {
                     Reflections.setValue(dict.getMeaning(), path, "");
@@ -617,7 +627,6 @@ public class WordDictLoader {
         });
         List<String> _ws = ws.stream()
                 .flatMap(v -> Arrays.stream(v.split("/")))
-                .map(String::toLowerCase)
                 .distinct()
                 .collect(Collectors.toList());
         _ws.forEach(w -> {
@@ -630,7 +639,6 @@ public class WordDictLoader {
         });
         List<String> ret = ws.stream()
                 .flatMap(v -> Arrays.stream(v.split("/")))
-                .map(String::toLowerCase)
                 .distinct()
                 .collect(Collectors.toList());
         ret.removeIf(v -> !StringUtils.hasText(v.trim()));

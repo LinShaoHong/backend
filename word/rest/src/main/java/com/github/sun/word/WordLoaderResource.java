@@ -249,9 +249,11 @@ public class WordLoaderResource extends AbstractResource {
     @GET
     @Path("/tag")
     public Response tag(@QueryParam("uri") String uri,
+                        @QueryParam("category") String category,
+                        @QueryParam("tag") String tag,
                         @QueryParam("start") int start,
                         @QueryParam("end") int end) {
-        xdfSpider.fetchWords(uri, start, end);
+        xdfSpider.fetchWords(uri, category, tag, start, end);
         return responseOf();
     }
 }

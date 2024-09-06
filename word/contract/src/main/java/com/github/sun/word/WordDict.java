@@ -45,7 +45,6 @@ public class WordDict {
     private Collocation collocation;//短语搭配
     @Converter(SynAntHandler.class)
     private SynAnt synAnts;//近反义词
-    private String tags;//标签
     //----------- loader ----------
     @Converter(LoadStateHandler.class)
     private LoadState loadState;//获取状态

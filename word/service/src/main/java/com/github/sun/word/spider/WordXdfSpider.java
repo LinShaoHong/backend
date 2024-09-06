@@ -2,24 +2,21 @@ package com.github.sun.word.spider;
 
 import com.github.sun.spider.XPaths;
 import com.github.sun.word.WordDictLoader;
-import com.github.sun.word.loader.WordLoaderTag;
-import com.github.sun.word.loader.WordLoaderTagMapper;
+import com.github.sun.word.loader.WordLoaderBook;
+import com.github.sun.word.loader.WordLoaderBookMapper;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Service
 public class WordXdfSpider {
     @Resource
-    private WordLoaderTagMapper mapper;
+    private WordLoaderBookMapper mapper;
 
     public static void fetchDerivative(String word, String root, Consumer<Set<String>> func) {
         try {
@@ -52,34 +49,38 @@ public class WordXdfSpider {
         }
     }
 
-    public void fetchWords(String uri, int start, int end) {
-        String sc = "zk";
+    @SuppressWarnings("Duplicates")
+    public void fetchWords(String uri,
+                           String category,
+                           String tag,
+                           int start,
+                           int end) {
         for (int i = start; i <= end; i++) {
             String url = String.format(uri, i);
             Document node = WordDictLoader.fetchDocument(url);
             List<Node> arr = XPaths.of(node, "//a[@class='word']").asArray();
             arr.forEach(a -> {
                 String word = a.getTextContent();
-                WordLoaderTag tag = mapper.findById(word);
-                String scope = tag == null ? null : tag.getScope();
+                WordLoaderBook book = mapper.findById(word);
+                List<WordLoaderBook.Scope> scopes = book == null ? new ArrayList<>() : book.getScopes();
+                WordLoaderBook.Scope scope = scopes.stream()
+                        .filter(s -> Objects.equals(s.getCategory(), category))
+                        .findFirst().orElse(null);
                 if (scope == null) {
-                    scope = sc;
-                } else {
-                    List<String> list = Arrays.asList(scope.split(","));
-                    if (!list.contains(sc)) {
-                        list.add(sc);
-                    }
-                    scope = String.join(",", list);
+                    scope = new WordLoaderBook.Scope();
+                    scope.setCategory(category);
+                    scope.setTags(new HashSet<>());
+                    scopes.add(scope);
                 }
-                if (tag == null) {
-                    tag = new WordLoaderTag();
-                }
-                tag.setScope(scope);
-                if (tag.getId() == null) {
-                    tag.setId(word);
-                    mapper.insert(tag);
+                scope.getTags().add(tag);
+
+                book = book == null ? new WordLoaderBook() : book;
+                book.setScopes(scopes);
+                if (book.getId() == null) {
+                    book.setId(word);
+                    mapper.insert(book);
                 } else {
-                    mapper.update(tag);
+                    mapper.update(book);
                 }
             });
         }
