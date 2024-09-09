@@ -652,46 +652,49 @@ public class WordDictLoader {
                 .distinct()
                 .collect(Collectors.toList());
         ret.removeIf(v -> !StringUtils.hasText(v.trim()));
-        ret.removeIf(v -> {
+        return ret.stream().map(v -> {
             if (Arrays.asList(words).contains(v)) {
-                return false;
+                return v;
             }
             boolean invalid = v.contains(" ") || v.contains("-") || v.contains("'");
             if (invalid) {
-                return true;
+                return null;
             }
             WordDict d = mapper.findById(v);
             if (d != null) {
-                return false;
+                return v;
             }
             WordLoaderAffix a = affixMapper.findById(v);
             if (a != null) {
-                return false;
+                return v;
             }
-            return !has(v);
-        });
-        return ret;
+            return has(v);
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    private boolean has(String word) {
-        WordLoaderExist w = existMapper.findById(word);
-        if (w != null) {
-            return w.isHas();
+    private String has(String word) {
+        String w = word;
+        WordLoaderExist e = existMapper.findById(w);
+        if (e != null) {
+            return e.isHas() ? w : null;
         }
-        boolean has = WordXxEnSpider.has(word);
+        boolean has = WordXxEnSpider.has(w);
         if (has) {
-            has = WordYdSpider.has(word);
+            has = WordYdSpider.has(w);
         }
         if (has) {
             try {
-                Document node = WordDictLoader.fetchDocument("https://www.oxfordlearnersdictionaries.com/definition/english/" + word + "_1?q=" + word);
+                Document node = WordDictLoader.fetchDocument("https://www.oxfordlearnersdictionaries.com/definition/english/" + w + "_1?q=" + w);
                 has = XPaths.of(node, "//div[@id='didyoumean']").asArray().isEmpty();
+                if (has) {
+                    w = XPaths.of(node, "//h1[@class='headword']").asText();
+                }
             } catch (Throwable ex) {
                 has = false;
             }
         }
-        existMapper.replace(new WordLoaderExist(word, has));
-        return has;
+        existMapper.replace(new WordLoaderExist(w, has));
+        return has ? w : null;
     }
 
     @Data
