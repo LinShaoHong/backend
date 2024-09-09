@@ -196,12 +196,9 @@ public class WordDictLoader {
                 break;
             case "differs":
                 if (StringUtils.hasText(path)) {
-                    dict.getDiffers().removeIf(d -> Objects.equals(d, path));
-                } else {
-                    dict.setDiffers(Collections.emptyList());
+                    diffMapper.deleteById(path);
                 }
-                dict.setPassed(false);
-                mapper.update(dict);
+                mapper.noPass(word);
                 break;
             case "synonym":
                 if (StringUtils.hasText(path)) {
@@ -498,14 +495,27 @@ public class WordDictLoader {
         return mapper.findByTemplate(template);
     }
 
-    public List<WordDictDiff> differs(String word) {
-        WordDict dict = mapper.findById(word);
-        if (dict != null && dict.getDiffers() != null && !dict.getDiffers().isEmpty()) {
-            List<WordDictDiff> ret = diffMapper.findByIds(new HashSet<>(dict.getDiffers()));
-            ret.sort(Comparator.comparingInt(v -> dict.getDiffers().indexOf(v.getId())));
-            return ret;
-        }
-        return new ArrayList<>();
+    public List<Differs> differs(String word) {
+        List<WordDictDiff> list = diffMapper.byWord(word);
+        return list.stream().map(v -> {
+            Differs differs = new Differs();
+            differs.setMeaning(v.getMean());
+            List<String> ws = v.getWords();
+            int i = ws.indexOf(word);
+            if (i > 0) {
+                Collections.swap(ws, 0, i);
+            }
+            List<WordDictDiff> words = diffMapper.byDiffId(v.getDiffId());
+            words.sort(Comparator.comparingInt(w -> ws.indexOf(w.getWord())));
+            differs.setWords(words);
+            return differs;
+        }).sorted(Comparator.comparingInt(v -> v.getWords().size())).collect(Collectors.toList());
+    }
+
+    @Data
+    public static class Differs {
+        private String meaning;
+        private List<WordDictDiff> words;
     }
 
     public List<WordDictTree> trees(String root) {

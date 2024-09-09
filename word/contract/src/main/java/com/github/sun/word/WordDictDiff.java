@@ -23,6 +23,7 @@ import java.util.List;
 public class WordDictDiff {
     @Id
     private String id;
+    private String word;
     private String diffId;
     private String mean;
     @Converter(Handler.class)

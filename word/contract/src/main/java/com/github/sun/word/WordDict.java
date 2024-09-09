@@ -39,8 +39,6 @@ public class WordDict {
     private Inflection inflection;//派生词
     @Converter(DerivativesHandler.class)
     private List<Derivative> derivatives;//派生树
-    @Converter(DiffersHandler.class)
-    private List<String> differs;//辨析
     @Converter(CollocationHandler.class)
     private Collocation collocation;//短语搭配
     @Converter(SynAntHandler.class)

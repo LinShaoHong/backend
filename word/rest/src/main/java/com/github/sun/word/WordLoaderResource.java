@@ -182,7 +182,7 @@ public class WordLoaderResource extends AbstractResource {
 
     @GET
     @Path("/differs")
-    public ListResponse<WordDictDiff> differs(@QueryParam("word") String word) {
+    public ListResponse<WordDictLoader.Differs> differs(@QueryParam("word") String word) {
         return responseOf(loader.differs(word));
     }
 

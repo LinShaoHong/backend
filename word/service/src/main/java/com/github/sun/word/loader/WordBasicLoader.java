@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
@@ -42,6 +43,8 @@ public abstract class WordBasicLoader implements WordLoader {
     protected void retry(String word, int userId, Consumer<WordDict> run, String... fields) {
         Throwable ex = null;
         WordDict dict = init(word, userId);
+        List<String> dictFS = Arrays.stream(WordDict.class.getDeclaredFields())
+                .map(Field::getName).collect(Collectors.toList());
         mapper.noPass(word);
         List<String> fs = Arrays.asList(fields);
         fs.forEach(f -> mapper.loading(word, "'$." + f + "Loading'"));
@@ -49,12 +52,15 @@ public abstract class WordBasicLoader implements WordLoader {
             try {
                 run.accept(dict);
                 ex = null;
-                SqlBuilder sb = factory.create();
-                SqlBuilder.Template template = sb.from(WordDict.class)
-                        .where(sb.field("id").eq(word)).update()
-                        .set(Arrays.asList(fields), f -> Tuple.of(f, Reflections.getValue(dict, f)))
-                        .template();
-                mapper.updateByTemplate(template);
+                List<String> _fs = fs.stream().filter(dictFS::contains).collect(Collectors.toList());
+                if (!_fs.isEmpty()) {
+                    SqlBuilder sb = factory.create();
+                    SqlBuilder.Template template = sb.from(WordDict.class)
+                            .where(sb.field("id").eq(word)).update()
+                            .set(_fs, f -> Tuple.of(f, Reflections.getValue(dict, f)))
+                            .template();
+                    mapper.updateByTemplate(template);
+                }
                 break;
             } catch (Throwable e) {
                 ex = e;
