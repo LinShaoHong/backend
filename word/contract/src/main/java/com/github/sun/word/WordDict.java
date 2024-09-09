@@ -205,6 +205,8 @@ public class WordDict {
         private boolean derivativesLoading;
         private boolean differsLoading;
         private boolean collocationLoading;
+        private boolean createTreeLoading;
+        private boolean mergeTreeLoading;
     }
 
     public static class LoadStateHandler extends JsonHandler<LoadState> {

@@ -30,6 +30,7 @@ import org.w3c.dom.Document;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +70,8 @@ public class WordDictLoader {
     private WordLoaderBookMapper tagMapper;
     @Resource
     private WordLoaderExistMapper existMapper;
+    @Resource
+    private WordDictLemmaMapper lemmaMapper;
 
     public String chat(String q) {
         return assistant.chat(apiKey, model, q);
@@ -540,6 +543,7 @@ public class WordDictLoader {
     public void createTree(String word) {
         WordDict dict = mapper.findById(word);
         if (dict != null) {
+            mapper.loading(word, "'$.createTreeLoading'");
             dict.getStruct().getParts().stream().filter(WordDict.Part::isRoot).forEach(part -> {
                 String root = part.getPart();
                 String desc = part.getMeaningTrans();
@@ -553,10 +557,12 @@ public class WordDictLoader {
                     editTree(root, desc, 0, derivatives);
                 }
             });
+            mapper.loaded(word, "'$.createTreeLoading'");
         }
     }
 
     public WordDictTree mergeTree(String treeId, String word) {
+        mapper.loading(word, "'$.mergeTreeLoading'");
         WordDictTree tree = treeMapper.findById(treeId);
         String root = tree.getRoot();
         List<WordDictTree.Derivative> derivatives = tree.getDerivatives();
@@ -572,12 +578,16 @@ public class WordDictLoader {
         for (int i = news.size() - 1; i >= 1; i--) {
             WordDict.Derivative n = news.get(i);
             if (n.getIndex() == 0) {
-                ds.add(new WordDictTree.Derivative(n.getWord(), 0, tree.getVersion() + 1, true));
+                if (!n.getWord().equalsIgnoreCase(root)) {
+                    ds.add(new WordDictTree.Derivative(n.getWord(), 0, tree.getVersion() + 1, true));
+                }
             } else {
                 ds.add(1, new WordDictTree.Derivative(n.getWord(), n.getIndex(), tree.getVersion() + 1, true));
             }
         }
-        return editTree(tree.getRoot(), tree.getRootDesc(), tree.getVersion(), ds);
+        WordDictTree ret = editTree(tree.getRoot(), tree.getRootDesc(), tree.getVersion(), ds);
+        mapper.loaded(word, "'$.mergeTreeLoading'");
+        return ret;
     }
 
     public void editTreeDesc(String treeId, String desc, int version) {
@@ -652,7 +662,8 @@ public class WordDictLoader {
                 .distinct()
                 .collect(Collectors.toList());
         ret.removeIf(v -> !StringUtils.hasText(v.trim()));
-        return ret.stream().map(v -> {
+        //去除无效
+        ret = ret.stream().map(v -> {
             if (Arrays.asList(words).contains(v)) {
                 return v;
             }
@@ -661,21 +672,32 @@ public class WordDictLoader {
                 return null;
             }
             WordDict d = mapper.findById(v);
-            if (d != null) {
+            if (d != null && Objects.equals(d.getId(), v)) {
                 return v;
             }
             WordLoaderAffix a = affixMapper.findById(v);
-            if (a != null) {
+            if (a != null && Objects.equals(a.getId(), v)) {
                 return v;
             }
             return has(v);
         }).filter(Objects::nonNull).collect(Collectors.toList());
+        //去除lemmas
+        for (String r : new CopyOnWriteArrayList<>(ret)) {
+            WordDictLemma lemma = lemmaMapper.byInf(r);
+            if (lemma != null) {
+                ret.add(lemma.getId());
+            }
+        }
+        List<WordDictLemma> lemmas = lemmaMapper.findByIds(new HashSet<>(ret));
+        Set<String> vis = lemmas.stream().flatMap(v -> v.getInflections().stream()).collect(Collectors.toSet());
+        ret.removeAll(vis);
+        return ret;
     }
 
     private String has(String word) {
         String w = word;
         WordLoaderExist e = existMapper.findById(w);
-        if (e != null) {
+        if (e != null && Objects.equals(e.getId(), w)) {
             return e.isHas() ? w : null;
         }
         boolean has = WordXxEnSpider.has(w);
@@ -688,6 +710,7 @@ public class WordDictLoader {
                 has = XPaths.of(node, "//div[@id='didyoumean']").asArray().isEmpty();
                 if (has) {
                     w = XPaths.of(node, "//h1[@class='headword']").asText();
+                    w = w.replaceAll("-", "");
                 }
             } catch (Throwable ex) {
                 has = false;

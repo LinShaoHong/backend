@@ -1,10 +1,8 @@
 package com.github.sun.word.loader;
 
+import com.github.sun.foundation.boot.Injector;
 import com.github.sun.foundation.boot.utility.JSON;
-import com.github.sun.foundation.boot.utility.StringSorts;
-import com.github.sun.word.WordDict;
-import com.github.sun.word.WordDictMapper;
-import com.github.sun.word.WordDictTreeMapper;
+import com.github.sun.word.*;
 import com.github.sun.word.spider.WordHcSpider;
 import com.github.sun.word.spider.WordJsSpider;
 import com.github.sun.word.spider.WordXdfSpider;
@@ -224,14 +222,23 @@ public class WordDerivativesLoader extends WordBasicLoader {
     }
 
     private static void sort(List<WordNode> nodes) {
-        List<String> all = nodes.stream().map(WordNode::getWord).collect(Collectors.toList());
-        all = StringSorts.sort(all, 0.7);
-        List<String> _all = all;
-        nodes.sort(Comparator.comparingInt(v -> _all.indexOf(v.getWord())));
-        List<String> has = nodes.stream().filter(WordNode::isHas).map(WordNode::getWord).collect(Collectors.toList());
-        List<String> nos = nodes.stream().filter(v -> !v.isHas()).map(WordNode::getWord).collect(Collectors.toList());
-        has.addAll(nos);
-        nodes.sort(Comparator.comparingInt(v -> has.indexOf(v.getWord())));
+        //        List<String> all = nodes.stream().map(WordNode::getWord).collect(Collectors.toList());
+        //        all = StringSorts.sort(all, 0.7);
+        //        List<String> _all = all;
+        //        nodes.sort(Comparator.comparingInt(v -> _all.indexOf(v.getWord())));
+        //        List<String> has = nodes.stream().filter(WordNode::isHas).map(WordNode::getWord).collect(Collectors.toList());
+        //        List<String> nos = nodes.stream().filter(v -> !v.isHas()).map(WordNode::getWord).collect(Collectors.toList());
+        //        has.addAll(nos);
+        //        nodes.sort(Comparator.comparingInt(v -> has.indexOf(v.getWord())));
+        WordDictFreqMapper mapper = Injector.getInstance(WordDictFreqMapper.class);
+        Set<String> ids = nodes.stream().map(v -> v.getWord().toLowerCase()).collect(Collectors.toSet());
+        if (!ids.isEmpty()) {
+            List<WordDictFreq> list = mapper.findByIds(ids);
+            List<String> ws = list.stream().sorted(Comparator.comparingInt(WordDictFreq::getSort))
+                    .map(WordDictFreq::getId).collect(Collectors.toList());
+            nodes.sort(Comparator.comparingInt(v -> ws.stream().noneMatch(w -> w.equalsIgnoreCase(v.getWord())) ?
+                    Integer.MAX_VALUE : ws.indexOf(v.getWord().toLowerCase())));
+        }
     }
 
     @Data
@@ -246,3 +253,4 @@ public class WordDerivativesLoader extends WordBasicLoader {
         private List<WordNode> children;
     }
 }
+

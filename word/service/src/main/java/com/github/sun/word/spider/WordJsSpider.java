@@ -10,7 +10,10 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -158,17 +161,5 @@ public class WordJsSpider {
         } catch (Throwable ex) {
             //do nothing
         }
-    }
-
-    public static Set<String> fetchDiffs(WordDict dict) {
-        Set<String> set = new HashSet<>();
-        try {
-            Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + dict.getId());
-            List<Node> arr = XPaths.of(node, "//div[@class='SameAnalysis_sameAnalysis__fkwr8'][1]//span[@class='jsx-1012413381']").asArray();
-            arr.forEach(a -> set.add(a.getTextContent()));
-        } catch (Exception ex) {
-            //do nothing
-        }
-        return set;
     }
 }
