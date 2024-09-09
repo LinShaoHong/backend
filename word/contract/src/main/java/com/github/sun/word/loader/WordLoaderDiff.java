@@ -1,4 +1,4 @@
-package com.github.sun.word;
+package com.github.sun.word.loader;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.sun.foundation.modelling.Converter;
@@ -18,19 +18,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamingStrategy
-@Table(name = "word_dict_diff")
+@Table(name = "word_loader_diff")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WordDictDiff {
+public class WordLoaderDiff {
     @Id
     private String id;
-    private String diffId;
     private String mean;
     @Converter(Handler.class)
     private List<String> words;
-    private String definition;
-    private String scenario;
-    @Converter(WordDict.ExamplesHandler.class)
-    private List<WordDict.ExampleSentence> examples;
 
     public static class Handler extends JsonHandler.ListHandler<String> {
     }
