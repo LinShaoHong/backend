@@ -684,13 +684,14 @@ public class WordDictLoader {
         //去除lemmas
         for (String r : new CopyOnWriteArrayList<>(ret)) {
             WordDictLemma lemma = lemmaMapper.byInf(r);
-            if (lemma != null) {
+            if (lemma != null && !root.contains(lemma.getId())) {
                 ret.add(lemma.getId());
             }
         }
         List<WordDictLemma> lemmas = lemmaMapper.findByIds(new HashSet<>(ret));
         Set<String> vis = lemmas.stream().flatMap(v -> v.getInflections().stream()).collect(Collectors.toSet());
         ret.removeAll(vis);
+        ret.removeIf(v -> v.contains(root));
         return ret;
     }
 
