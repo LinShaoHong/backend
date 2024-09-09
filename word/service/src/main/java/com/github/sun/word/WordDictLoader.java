@@ -691,7 +691,7 @@ public class WordDictLoader {
         List<WordDictLemma> lemmas = lemmaMapper.findByIds(new HashSet<>(ret));
         Set<String> vis = lemmas.stream().flatMap(v -> v.getInflections().stream()).collect(Collectors.toSet());
         ret.removeAll(vis);
-        ret.removeIf(v -> v.contains(root));
+        ret.removeIf(v -> !v.contains(root));
         return ret;
     }
 
