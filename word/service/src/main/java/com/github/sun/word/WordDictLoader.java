@@ -700,13 +700,12 @@ public class WordDictLoader {
         }).filter(Objects::nonNull).collect(Collectors.toList());
         //去除lemmas
         for (String r : new CopyOnWriteArrayList<>(ret)) {
-            try {
-                WordDictLemma lemma = lemmaMapper.byInf(r);
-                if (lemma != null && !root.contains(lemma.getId())) {
+            WordDictLemma lemma = lemmaMapper.byInf(r);
+            while (lemma != null) {
+                if (!root.contains(lemma.getId())) {
                     ret.add(lemma.getId());
                 }
-            } catch (Exception ex) {
-                System.out.println(r);
+                lemma = lemmaMapper.byInf(lemma.getId());
             }
         }
         List<WordDictLemma> lemmas = lemmaMapper.findByIds(new HashSet<>(ret));
