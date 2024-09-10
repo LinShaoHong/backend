@@ -14,7 +14,10 @@ import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.spider.Fetcher;
 import com.github.sun.spider.XPaths;
 import com.github.sun.word.loader.*;
-import com.github.sun.word.spider.*;
+import com.github.sun.word.spider.WordHcSpider;
+import com.github.sun.word.spider.WordJsSpider;
+import com.github.sun.word.spider.WordXdfSpider;
+import com.github.sun.word.spider.WordXxEnSpider;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -552,54 +555,56 @@ public class WordDictLoader {
     public void createTree(String word) {
         WordDict dict = mapper.findById(word);
         if (dict != null) {
-            mapper.loading(word, "'$.createTreeLoading'");
-            dict.getStruct().getParts().stream().filter(WordDict.Part::isRoot).forEach(part -> {
-                String root = part.getPart();
-                String desc = part.getMeaningTrans();
-                WordDictTree tree = treeMapper.byRootAndDesc(root, desc);
-                if (tree == null) {
-                    List<String> ws = fetchDerivatives(root, word, root);
-                    ws = ws.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
-                    List<WordDictTree.Derivative> derivatives = WordDerivativesLoader.build(word, root, ws).stream()
-                            .map(v -> new WordDictTree.Derivative(v.getWord(), v.getIndex(), 1, false))
-                            .collect(Collectors.toList());
-                    editTree(root, desc, 0, derivatives);
-                }
-            });
-            mapper.loaded(word, "'$.createTreeLoading'");
+            try {
+                mapper.loading(word, "'$.createTreeLoading'");
+                dict.getStruct().getParts().stream().filter(WordDict.Part::isRoot).forEach(part -> {
+                    String root = part.getPart();
+                    String desc = part.getMeaningTrans();
+                    WordDictTree tree = treeMapper.byRootAndDesc(root, desc);
+                    if (tree == null) {
+                        List<String> ws = fetchDerivatives(root, word, root);
+                        ws = ws.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
+                        List<WordDictTree.Derivative> derivatives = WordDerivativesLoader.build(word, root, ws).stream()
+                                .map(v -> new WordDictTree.Derivative(v.getWord(), v.getIndex(), 1, false))
+                                .collect(Collectors.toList());
+                        editTree(root, desc, 0, derivatives);
+                    }
+                });
+            } finally {
+                mapper.loaded(word, "'$.createTreeLoading'");
+            }
         }
     }
 
     public WordDictTree mergeTree(String treeId, String word) {
-        mapper.loading(word, "'$.mergeTreeLoading'");
-        WordDictTree tree = treeMapper.findById(treeId);
-        String root = tree.getRoot();
-        List<WordDictTree.Derivative> derivatives = tree.getDerivatives();
-        List<String> ws = fetchDerivatives(tree.getRoot(), word);
-        ws.removeIf(v -> derivatives.stream().anyMatch(d -> Objects.equals(d.getWord(), v)) || root.contains(v));
-        if (ws.isEmpty()) {
-            return tree;
-        }
-        ws.add(root);
-        ws = ws.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
-        List<WordDict.Derivative> news = WordDerivativesLoader.build(word, root, ws);
-        List<WordDictTree.Derivative> ds = tree.getDerivatives();
-        Set<String> es = new HashSet<>();
-        ds.forEach(d -> es.add(d.getWord()));
-        news.forEach(n -> es.add(n.getWord()));
-        for (int i = news.size() - 1; i >= 1; i--) {
-            WordDict.Derivative n = news.get(i);
-            if (n.getIndex() == 0) {
-                if (!n.getWord().equalsIgnoreCase(root)) {
-                    ds.add(new WordDictTree.Derivative(n.getWord(), 0, tree.getVersion() + 1, true));
-                }
-            } else {
-                ds.add(1, new WordDictTree.Derivative(n.getWord(), n.getIndex(), tree.getVersion() + 1, true));
+        try {
+            mapper.loading(word, "'$.mergeTreeLoading'");
+            WordDictTree tree = treeMapper.findById(treeId);
+            String root = tree.getRoot();
+            List<WordDictTree.Derivative> derivatives = tree.getDerivatives();
+            List<String> ws = fetchDerivatives(tree.getRoot(), word);
+            ws.removeIf(v -> derivatives.stream().anyMatch(d -> Objects.equals(d.getWord(), v)) || root.contains(v));
+            if (ws.isEmpty()) {
+                return tree;
             }
+            ws.add(root);
+            ws = ws.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
+            List<WordDict.Derivative> news = WordDerivativesLoader.build(word, root, ws);
+            List<WordDictTree.Derivative> ds = tree.getDerivatives();
+            for (int i = news.size() - 1; i >= 1; i--) {
+                WordDict.Derivative n = news.get(i);
+                if (n.getIndex() == 0) {
+                    if (!n.getWord().equalsIgnoreCase(root)) {
+                        ds.add(new WordDictTree.Derivative(n.getWord(), 0, tree.getVersion() + 1, true));
+                    }
+                } else {
+                    ds.add(1, new WordDictTree.Derivative(n.getWord(), n.getIndex(), tree.getVersion() + 1, true));
+                }
+            }
+            return editTree(tree.getRoot(), tree.getRootDesc(), tree.getVersion(), ds);
+        } finally {
+            mapper.loaded(word, "'$.mergeTreeLoading'");
         }
-        WordDictTree ret = editTree(tree.getRoot(), tree.getRootDesc(), tree.getVersion(), ds);
-        mapper.loaded(word, "'$.mergeTreeLoading'");
-        return ret;
     }
 
     public void editTreeDesc(String treeId, String desc, int version) {
@@ -695,9 +700,13 @@ public class WordDictLoader {
         }).filter(Objects::nonNull).collect(Collectors.toList());
         //去除lemmas
         for (String r : new CopyOnWriteArrayList<>(ret)) {
-            WordDictLemma lemma = lemmaMapper.byInf(r);
-            if (lemma != null && !root.contains(lemma.getId())) {
-                ret.add(lemma.getId());
+            try {
+                WordDictLemma lemma = lemmaMapper.byInf(r);
+                if (lemma != null && !root.contains(lemma.getId())) {
+                    ret.add(lemma.getId());
+                }
+            } catch (Exception ex) {
+                System.out.println(r);
             }
         }
         List<WordDictLemma> lemmas = lemmaMapper.findByIds(new HashSet<>(ret));
@@ -708,29 +717,23 @@ public class WordDictLoader {
     }
 
     private String has(String word) {
-        String w = word;
-        WordLoaderExist e = existMapper.findById(w);
-        if (e != null && Objects.equals(e.getId(), w)) {
-            return e.isHas() ? w : null;
+        WordLoaderExist e = existMapper.findById(word);
+        if (e != null && Objects.equals(e.getId(), word)) {
+            return e.isHas() ? word : null;
         }
-        boolean has = WordXxEnSpider.has(w);
-        if (has) {
-            has = WordYdSpider.has(w);
+        WordDictLemma lemma = lemmaMapper.findById(word);
+        if (lemma != null && lemma.getId().equalsIgnoreCase(word)) {
+            return lemma.isHas() ? word : null;
         }
-        if (has) {
-            try {
-                Document node = WordDictLoader.fetchDocument("https://www.oxfordlearnersdictionaries.com/definition/english/" + w + "_1?q=" + w);
-                has = XPaths.of(node, "//div[@id='didyoumean']").asArray().isEmpty();
-                if (has) {
-                    w = XPaths.of(node, "//h1[@class='headword']").asText();
-                    w = w.replaceAll("-", "");
-                }
-            } catch (Throwable ex) {
-                has = false;
-            }
+        boolean has;
+        try {
+            Document node = WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + word);
+            has = XPaths.of(node, "//div[@class='nearby-entries']").asArray().isEmpty();
+        } catch (Throwable ex) {
+            has = false;
         }
-        existMapper.replace(new WordLoaderExist(w, has));
-        return has ? w : null;
+        existMapper.replace(new WordLoaderExist(word, has));
+        return has ? word : null;
     }
 
     @Data

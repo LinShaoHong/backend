@@ -27,14 +27,4 @@ public class WordXxEnSpider {
         //            //do nothing
         //        }
     }
-
-    public static boolean has(String word) {
-//        try {
-//            Document node = WordDictLoader.fetchDocument("https://www.xxenglish.com/wd/" + word);
-//            return XPaths.of(node, "//div[@class='guess-title']").asArray().isEmpty();
-//        } catch (Exception ex) {
-//            //do nothing
-//        }
-        return true;
-    }
 }

@@ -5,7 +5,6 @@ import com.github.sun.word.WordDict;
 import com.github.sun.word.WordDictLoader;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -18,6 +17,10 @@ import java.util.Set;
 public class WordYdSpider {
     public static void main(String[] args) {
         try {
+            String w = "addict";
+            Document node = WordDictLoader.fetchDocument("https://www.oxfordlearnersdictionaries.com/definition/english/" + w + "_1?q=" + w);
+            boolean has = XPaths.of(node, "//div[@id='didyoumean']").asArray().isEmpty();
+            System.out.println(has);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -109,22 +112,5 @@ public class WordYdSpider {
         } catch (Exception ex) {
             //do nothing
         }
-    }
-
-    public static boolean has(String word) {
-        try {
-            Document node = WordDictLoader.fetchDocument("https://dict.youdao.com/result?lang=en&word=" + word);
-            boolean empty = XPaths.of(node, "//div[@class='maybe']").asArray().isEmpty();
-            if (!empty) {
-                return false;
-            }
-            WordDict dict = new WordDict();
-            dict.setId(word);
-            fetchPhonetic(dict);
-            return StringUtils.hasText(dict.getUkPhonetic()) || StringUtils.hasText(dict.getUsPhonetic());
-        } catch (Exception ex) {
-            //do nothing
-        }
-        return false;
     }
 }

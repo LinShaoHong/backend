@@ -216,9 +216,7 @@ public class WordDerivativesLoader extends WordBasicLoader {
         if (w != null) {
             return w.isHas();
         }
-        boolean has = WordXxEnSpider.has(word);
-        existMapper.insert(new WordLoaderExist(word, has));
-        return has;
+        return false;
     }
 
     private static void sort(List<WordNode> nodes) {

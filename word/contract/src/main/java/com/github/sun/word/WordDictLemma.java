@@ -25,6 +25,7 @@ public class WordDictLemma {
     private String id;
     @Converter(Handler.class)
     private List<String> inflections;
+    private boolean has;
     private int sort;
 
     public static class Handler extends JsonHandler.ListHandler<String> {
