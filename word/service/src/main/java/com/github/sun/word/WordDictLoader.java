@@ -72,6 +72,8 @@ public class WordDictLoader {
     private WordLoaderExistMapper existMapper;
     @Resource
     private WordDictLemmaMapper lemmaMapper;
+    @Resource
+    private WordDictFreqMapper freqMapper;
 
     public String chat(String q) {
         return assistant.chat(apiKey, model, q);
@@ -144,6 +146,13 @@ public class WordDictLoader {
                 }
                 dict.setPassed(false);
                 mapper.update(dict);
+                break;
+            case "formula":
+                if (dict.getCollocation() != null) {
+                    dict.getCollocation().setFormulas(new ArrayList<>());
+                    dict.setPassed(false);
+                    mapper.update(dict);
+                }
                 break;
             case "collocation":
                 if (StringUtils.hasText(path)) {
@@ -575,6 +584,9 @@ public class WordDictLoader {
         ws = ws.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
         List<WordDict.Derivative> news = WordDerivativesLoader.build(word, root, ws);
         List<WordDictTree.Derivative> ds = tree.getDerivatives();
+        Set<String> es = new HashSet<>();
+        ds.forEach(d -> es.add(d.getWord()));
+        news.forEach(n -> es.add(n.getWord()));
         for (int i = news.size() - 1; i >= 1; i--) {
             WordDict.Derivative n = news.get(i);
             if (n.getIndex() == 0) {
