@@ -707,10 +707,15 @@ public class WordDictLoader {
                 lemma = lemmaMapper.byInf(lemma.getId());
             }
         }
-        List<WordDictLemma> lemmas = lemmaMapper.findByIds(new HashSet<>(ret));
+        List<WordDictLemma> lemmas = lemmaMapper.findByIds(new HashSet<>(ret))
+                .stream().filter(WordDictLemma::isHas).collect(Collectors.toList());
         Set<String> vis = lemmas.stream().flatMap(v -> v.getInflections().stream()).collect(Collectors.toSet());
-        ret.removeAll(vis);
-        ret.removeIf(v -> !v.contains(root));
+        ret.removeIf(v -> {
+            if (Arrays.stream(words).anyMatch(s -> s.equalsIgnoreCase(v))) {
+                return false;
+            }
+            return !v.contains(root) || vis.stream().anyMatch(s -> s.equalsIgnoreCase(v));
+        });
         return ret;
     }
 
