@@ -12,7 +12,6 @@ import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.spider.Fetcher;
-import com.github.sun.spider.XPaths;
 import com.github.sun.word.loader.*;
 import com.github.sun.word.spider.WordHcSpider;
 import com.github.sun.word.spider.WordJsSpider;
@@ -724,10 +723,9 @@ public class WordDictLoader {
         if (lemma != null && lemma.getId().equalsIgnoreCase(word)) {
             return lemma.isHas() ? word : null;
         }
-        boolean has;
+        boolean has = true;
         try {
-            Document node = WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + word);
-            has = XPaths.of(node, "//div[@class='nearby-entries']").asArray().isEmpty();
+            WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + word);
         } catch (Throwable ex) {
             has = false;
         }
