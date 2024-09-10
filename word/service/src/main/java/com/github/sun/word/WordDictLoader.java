@@ -12,6 +12,7 @@ import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.spider.Fetcher;
+import com.github.sun.spider.XPaths;
 import com.github.sun.word.loader.*;
 import com.github.sun.word.spider.WordHcSpider;
 import com.github.sun.word.spider.WordJsSpider;
@@ -720,22 +721,24 @@ public class WordDictLoader {
     }
 
     private String has(String word) {
-        WordLoaderExist e = existMapper.findById(word);
-        if (e != null && Objects.equals(e.getId(), word)) {
-            return e.isHas() ? word : null;
+        String w = word;
+        WordLoaderExist e = existMapper.findById(w);
+        if (e != null && Objects.equals(e.getId(), w)) {
+            return e.isHas() ? w : null;
         }
-        WordDictLemma lemma = lemmaMapper.findById(word);
-        if (lemma != null && lemma.getId().equalsIgnoreCase(word)) {
-            return lemma.isHas() ? word : null;
+        WordDictLemma lemma = lemmaMapper.findById(w);
+        if (lemma != null && lemma.getId().equalsIgnoreCase(w)) {
+            return lemma.isHas() ? w : null;
         }
         boolean has = true;
         try {
-            WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + word);
+            Document node = WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + w);
+            w = XPaths.of(node, "//h1[@class='hword']").asText();
         } catch (Throwable ex) {
             has = false;
         }
-        existMapper.replace(new WordLoaderExist(word, has));
-        return has ? word : null;
+        existMapper.replace(new WordLoaderExist(w, has));
+        return has ? w : null;
     }
 
     @Data
