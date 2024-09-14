@@ -2,7 +2,10 @@ package com.github.sun.word.loader;
 
 import com.github.sun.foundation.boot.Injector;
 import com.github.sun.foundation.boot.utility.JSON;
-import com.github.sun.word.*;
+import com.github.sun.word.WordDict;
+import com.github.sun.word.WordDictFreq;
+import com.github.sun.word.WordDictFreqMapper;
+import com.github.sun.word.WordDictMapper;
 import com.github.sun.word.spider.WordHcSpider;
 import com.github.sun.word.spider.WordJsSpider;
 import com.github.sun.word.spider.WordXdfSpider;
@@ -27,10 +30,6 @@ public class WordDerivativesLoader extends WordBasicLoader {
     private WordDictMapper dictMapper;
     @Resource
     private WordLoaderAffixMapper affixMapper;
-    @Resource
-    private WordLoaderExistMapper existMapper;
-    @Resource
-    private WordDictTreeMapper treeMapper;
 
     @Override
     public void load(String word, JSON.Valuer attr, int userId) {
@@ -212,10 +211,6 @@ public class WordDerivativesLoader extends WordBasicLoader {
     }
 
     private boolean has(String word) {
-        WordLoaderExist w = existMapper.findById(word);
-        if (w != null) {
-            return w.isHas();
-        }
         return false;
     }
 

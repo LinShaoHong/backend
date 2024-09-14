@@ -67,11 +67,11 @@ public class WordDictLoader {
     @Resource
     private WordLoaderBookMapper tagMapper;
     @Resource
-    private WordLoaderExistMapper existMapper;
-    @Resource
     private WordDictLemmaMapper lemmaMapper;
     @Resource
     private WordLoaderEcMapper ecMapper;
+    @Resource
+    private WordDictFreqMapper freqMapper;
 
     public String chat(String q) {
         return assistant.chat(apiKey, model, q);
@@ -733,7 +733,10 @@ public class WordDictLoader {
         while (!list.isEmpty()) {
             for (String v : list) {
                 if (!root.contains(v)) {
-                    ret.add(v);
+                    String h = has(v);
+                    if (h != null) {
+                        ret.add(h);
+                    }
                 }
             }
             Set<String> tmp = new HashSet<>(list);
@@ -745,7 +748,8 @@ public class WordDictLoader {
 
         List<WordDictLemma> lemmas = lemmaMapper.findByIds(new HashSet<>(ret))
                 .stream().filter(WordDictLemma::isHas).collect(Collectors.toList());
-        Set<String> vis = lemmas.stream().flatMap(v -> v.getInflections().stream()).collect(Collectors.toSet());
+        Set<String> vis = lemmas.stream().flatMap(v -> v.getInflections().stream())
+                .map(this::has).filter(Objects::nonNull).collect(Collectors.toSet());
         ret.addAll(vis);
         vis.removeIf(vi -> {
             WordLoaderEc ec = ecMapper.findById(vi);
@@ -775,49 +779,29 @@ public class WordDictLoader {
             }
             return !v.contains(root) || vis.stream().anyMatch(s -> s.equalsIgnoreCase(v)) || v.contains("-") || v.contains(" ");
         });
-        return ret.stream().map(r -> {
-            if (Arrays.asList(words).contains(r) || root.equalsIgnoreCase(r)) {
-                return r;
-            }
-            WordLoaderEc ec = ecMapper.findById(r);
+        return ret;
+    }
+
+    private String has(String word) {
+        String w = word;
+        WordDictFreq freq = freqMapper.findById(w);
+        boolean has = freq != null;
+        if (has) {
+            WordLoaderEc ec = ecMapper.findById(w);
             if (ec != null) {
-                return ec.getId();
+                w = ec.getId();
             } else {
                 try {
-                    Document node = WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + r);
-                    List<org.w3c.dom.Node> arr = XPaths.of(node, "//div[@class='entry-word-section-container']").asArray();
+                    Document node = WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + w);
+                    List<org.w3c.dom.Node> arr = XPaths.of(node, "//h1[@class='hword']").asArray();
                     if (!arr.isEmpty()) {
-                        return XPaths.of(arr.get(0), ".//h1[@class='hword']").asText();
+                        w = arr.get(0).getTextContent();
                     }
                 } catch (Throwable ex) {
                     //do nothing
                 }
             }
-            return null;
-        }).filter(Objects::nonNull).distinct().collect(Collectors.toList());
-    }
-
-    private String has(String word) {
-        String w = word;
-        WordLoaderExist e = existMapper.findById(w);
-        if (e != null && Objects.equals(e.getId(), w)) {
-            return e.isHas() ? w : null;
         }
-        WordDictLemma lemma = lemmaMapper.findById(w);
-        if (lemma != null && lemma.getId().equalsIgnoreCase(w)) {
-            return lemma.isHas() ? w : null;
-        }
-        boolean has = true;
-        try {
-            Document node = WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + w);
-            List<org.w3c.dom.Node> arr = XPaths.of(node, "//h1[@class='hword']").asArray();
-            if (!arr.isEmpty()) {
-                w = arr.get(0).getTextContent();
-            }
-        } catch (Throwable ex) {
-            has = false;
-        }
-        existMapper.replace(new WordLoaderExist(w, has));
         return has ? w : null;
     }
 
