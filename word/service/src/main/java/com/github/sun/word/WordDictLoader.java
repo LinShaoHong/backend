@@ -16,6 +16,7 @@ import com.github.sun.word.spider.WordHcSpider;
 import com.github.sun.word.spider.WordJsSpider;
 import com.github.sun.word.spider.WordXdfSpider;
 import com.github.sun.word.spider.WordXxEnSpider;
+import com.ibm.icu.impl.data.ResourceReader;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,6 +32,11 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 
 import javax.annotation.Resource;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,6 +47,7 @@ import java.util.stream.Collectors;
 @Service
 @RefreshScope
 public class WordDictLoader {
+    private final static ClassLoader loader = ResourceReader.class.getClassLoader();
     private static final HtmlCleaner hc = new HtmlCleaner();
     private final static ExecutorService executor = Executors.newFixedThreadPool(10);
 
@@ -72,6 +79,8 @@ public class WordDictLoader {
     private WordLoaderEcMapper ecMapper;
     @Resource
     private WordDictFreqMapper freqMapper;
+    @Resource
+    private WordLoaderBookMapper bookMapper;
 
     public String chat(String q) {
         return assistant.chat(apiKey, model, q);
@@ -814,6 +823,41 @@ public class WordDictLoader {
             }
         }
         return has ? w : null;
+    }
+
+    public void loadBook(String path, String tag, String name) {
+        try (InputStream in = loader.getResourceAsStream(path + ".json")) {
+            assert in != null;
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+            String line = reader.readLine();
+            while (StringUtils.hasText(line)) {
+                String word = JSON.asJsonNode(line).get("headWord").asText();
+                WordLoaderBook book = bookMapper.findById(word);
+                List<WordLoaderBook.Scope> scopes = book == null ? new ArrayList<>() : book.getScopes();
+                WordLoaderBook.Scope scope = scopes.stream()
+                        .filter(s -> Objects.equals(s.getTag(), tag))
+                        .findFirst().orElse(null);
+                if (scope == null) {
+                    scope = new WordLoaderBook.Scope();
+                    scope.setTag(tag);
+                    scope.setNames(new HashSet<>());
+                    scopes.add(scope);
+                }
+                scope.getNames().add(name);
+
+                book = book == null ? new WordLoaderBook() : book;
+                book.setScopes(scopes);
+                if (book.getId() == null) {
+                    book.setId(word);
+                    bookMapper.insert(book);
+                } else {
+                    bookMapper.update(book);
+                }
+                line = reader.readLine();
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Data

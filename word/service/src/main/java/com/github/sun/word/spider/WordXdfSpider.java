@@ -49,40 +49,40 @@ public class WordXdfSpider {
         }
     }
 
-    @SuppressWarnings("Duplicates")
-    public void fetchWords(String uri,
-                           String tag,
-                           String name,
-                           int start,
-                           int end) {
-        for (int i = start; i <= end; i++) {
-            String url = String.format(uri, i);
-            Document node = WordDictLoader.fetchDocument(url);
-            List<Node> arr = XPaths.of(node, "//a[@class='word']").asArray();
-            arr.forEach(a -> {
-                String word = a.getTextContent();
-                WordLoaderBook book = mapper.findById(word);
-                List<WordLoaderBook.Scope> scopes = book == null ? new ArrayList<>() : book.getScopes();
-                WordLoaderBook.Scope scope = scopes.stream()
-                        .filter(s -> Objects.equals(s.getTag(), tag))
-                        .findFirst().orElse(null);
-                if (scope == null) {
-                    scope = new WordLoaderBook.Scope();
-                    scope.setTag(tag);
-                    scope.setNames(new HashSet<>());
-                    scopes.add(scope);
-                }
-                scope.getNames().add(name);
-
-                book = book == null ? new WordLoaderBook() : book;
-                book.setScopes(scopes);
-                if (book.getId() == null) {
-                    book.setId(word);
-                    mapper.insert(book);
-                } else {
-                    mapper.update(book);
-                }
-            });
-        }
-    }
+//    @SuppressWarnings("Duplicates")
+//    public void fetchWords(String uri,
+//                           String tag,
+//                           String name,
+//                           int start,
+//                           int end) {
+//        for (int i = start; i <= end; i++) {
+//            String url = String.format(uri, i);
+//            Document node = WordDictLoader.fetchDocument(url);
+//            List<Node> arr = XPaths.of(node, "//a[@class='word']").asArray();
+//            arr.forEach(a -> {
+//                String word = a.getTextContent();
+//                WordLoaderBook book = mapper.findById(word);
+//                List<WordLoaderBook.Scope> scopes = book == null ? new ArrayList<>() : book.getScopes();
+//                WordLoaderBook.Scope scope = scopes.stream()
+//                        .filter(s -> Objects.equals(s.getTag(), tag))
+//                        .findFirst().orElse(null);
+//                if (scope == null) {
+//                    scope = new WordLoaderBook.Scope();
+//                    scope.setTag(tag);
+//                    scope.setNames(new HashSet<>());
+//                    scopes.add(scope);
+//                }
+//                scope.getNames().add(name);
+//
+//                book = book == null ? new WordLoaderBook() : book;
+//                book.setScopes(scopes);
+//                if (book.getId() == null) {
+//                    book.setId(word);
+//                    mapper.insert(book);
+//                } else {
+//                    mapper.update(book);
+//                }
+//            });
+//        }
+//    }
 }

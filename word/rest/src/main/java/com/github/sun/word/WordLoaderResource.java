@@ -4,31 +4,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.rest.AbstractResource;
 import com.github.sun.word.loader.WordLoaderAffix;
 import com.github.sun.word.loader.WordLoaderCheck;
-import com.github.sun.word.spider.WordXdfSpider;
 import lombok.Data;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.InputStream;
 
 @Path("/loader")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class WordLoaderResource extends AbstractResource {
     private final WordDictLoader loader;
-    private final WordPdfService pdfService;
-    private final WordXdfSpider xdfSpider;
 
     @Inject
-    public WordLoaderResource(WordDictLoader loader,
-                              WordPdfService pdfService,
-                              WordXdfSpider xdfSpider) {
+    public WordLoaderResource(WordDictLoader loader) {
         this.loader = loader;
-        this.pdfService = pdfService;
-        this.xdfSpider = xdfSpider;
     }
 
     @GET
@@ -226,23 +216,12 @@ public class WordLoaderResource extends AbstractResource {
         return responseOf(loader.chat(q));
     }
 
-    @POST
-    @Path("/pdf")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response upload(@FormDataParam("file") InputStream in,
-                           @FormDataParam("file") FormDataContentDisposition meta) throws Exception {
-        pdfService.parseRoot(in);
-        return responseOf();
-    }
-
     @GET
-    @Path("/tag")
-    public Response tag(@QueryParam("uri") String uri,
-                        @QueryParam("category") String category,
+    @Path("/book")
+    public Response tag(@QueryParam("path") String path,
                         @QueryParam("tag") String tag,
-                        @QueryParam("start") int start,
-                        @QueryParam("end") int end) {
-        xdfSpider.fetchWords(uri, category, tag, start, end);
+                        @QueryParam("name") String name) {
+        loader.loadBook(path, tag, name);
         return responseOf();
     }
 }
