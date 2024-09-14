@@ -2,12 +2,12 @@ package com.github.sun.word.loader;
 
 import com.github.sun.foundation.ai.Assistant;
 import com.github.sun.foundation.boot.Injector;
+import com.github.sun.foundation.boot.utility.Dates;
 import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.foundation.boot.utility.Throws;
 import com.github.sun.foundation.boot.utility.Tuple;
 import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
-import com.github.sun.word.WordCodeService;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.WordDictMapper;
 import com.ibm.icu.impl.data.ResourceReader;
@@ -118,11 +118,37 @@ public abstract class WordBasicLoader implements WordLoader {
             WordDict.LoadState loadState = new WordDict.LoadState();
             db.setLoadState(loadState);
             db.setLoadTime(new Date());
-            WordCodeService codeService = Injector.getInstance(WordCodeService.class);
-            int sort = codeService.genWordSort(userId);
+            int sort = genWordSort(userId);
             db.setSort(sort);
             mapper.insert(db);
         }
         return db;
+    }
+
+    public static synchronized int genWordSort(int userId) {
+        WordLoaderCodeMapper mapper = Injector.getInstance(WordLoaderCodeMapper.class);
+        WordLoaderCheckMapper checkMapper = Injector.getInstance(WordLoaderCheckMapper.class);
+        String date = Dates.format(new Date());
+        long code = 1;
+        String id = date + ":" + code;
+        WordLoaderCode entity = mapper.queryForUpdate(id);
+        if (entity != null) {
+            code = entity.getCode() + 1;
+            mapper.updateById(entity.getId(), code);
+        } else {
+            WordLoaderCode v = new WordLoaderCode();
+            v.setId(id);
+            v.setType(date);
+            v.setCode(code);
+            mapper.insert(v);
+
+            WordLoaderCheck check = new WordLoaderCheck();
+            check.setId(date + ":" + userId);
+            check.setUserId(userId);
+            check.setDate(date);
+            check.setSort(1);
+            checkMapper.insert(check);
+        }
+        return ((Long) code).intValue();
     }
 }
