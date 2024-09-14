@@ -1,8 +1,6 @@
 package com.github.sun.word;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.sun.foundation.ai.Assistant;
 import com.github.sun.foundation.boot.Scanner;
 import com.github.sun.foundation.boot.exception.ConstraintException;
@@ -21,6 +19,7 @@ import com.github.sun.word.spider.WordXxEnSpider;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
@@ -33,21 +32,17 @@ import org.w3c.dom.Document;
 
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RefreshScope
 public class WordDictLoader {
     private static final HtmlCleaner hc = new HtmlCleaner();
     private final static ExecutorService executor = Executors.newFixedThreadPool(10);
-    private final static Cache<String, Document> documents = Caffeine.newBuilder()
-            .expireAfterWrite(10, TimeUnit.MINUTES)
-            .maximumSize(100)
-            .build();
 
     @Value("${qwen.key}")
     private String apiKey;
@@ -76,7 +71,7 @@ public class WordDictLoader {
     @Resource
     private WordDictLemmaMapper lemmaMapper;
     @Resource
-    private WordDictFreqMapper freqMapper;
+    private WordLoaderEcMapper ecMapper;
 
     public String chat(String q) {
         return assistant.chat(apiKey, model, q);
@@ -325,9 +320,35 @@ public class WordDictLoader {
         return mapper.byDate(date);
     }
 
-    public String root(String word) {
-        WordLoaderAffix affix = affixMapper.findById(word);
-        return affix == null ? "" : affix.getRoot();
+    public Set<Root> roots(String root) {
+        Set<Root> roots = new LinkedHashSet<>();
+        for (String ro : root.split(",")) {
+            List<WordLoaderAffix> list = affixMapper.byRoot(ro);
+            Set<String> desc = list.stream().map(WordLoaderAffix::getRootDesc)
+                    .filter(StringUtils::hasText).collect(Collectors.toSet());
+            if (!desc.isEmpty()) {
+                list.addAll(affixMapper.byRootDesc(desc));
+            }
+            list.forEach(v -> {
+                Root _root = roots.stream()
+                        .filter(r -> r.getDesc().equals(v.getRootDesc()))
+                        .findFirst().orElse(null);
+                if (_root == null) {
+                    _root = new Root();
+                    _root.setRoots(new LinkedHashSet<>());
+                    _root.setDesc(v.getRootDesc());
+                    roots.add(_root);
+                }
+                _root.getRoots().add(v.getRoot());
+            });
+        }
+        return roots;
+    }
+
+    @Data
+    public static class Root {
+        private Set<String> roots;
+        private String desc;
     }
 
     public WordLoaderAffix affix(String word) {
@@ -339,17 +360,15 @@ public class WordDictLoader {
     }
 
     public static synchronized Document fetchDocument(String url, Map<String, String> headers) {
-        return documents.get(url, u -> {
-            try {
-                String html = Fetcher.builder()
-                        .uri(url)
-                        .headers(headers)
-                        .fetch();
-                return new DomSerializer(new CleanerProperties()).createDOM(hc.clean(html));
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+        try {
+            String html = Fetcher.builder()
+                    .uri(url)
+                    .headers(headers)
+                    .fetch();
+            return new DomSerializer(new CleanerProperties()).createDOM(hc.clean(html));
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     public void editMeaning(String id, WordDict.TranslatedMeaning meaning) {
@@ -664,6 +683,7 @@ public class WordDictLoader {
         });
         List<String> _ws = ws.stream()
                 .flatMap(v -> Arrays.stream(v.split("/")))
+                .filter(v -> !v.contains(" ") && !v.contains("-") && !v.contains("'") && v.contains(root))
                 .distinct()
                 .collect(Collectors.toList());
         _ws.forEach(w -> {
@@ -676,11 +696,15 @@ public class WordDictLoader {
         });
         List<String> ret = ws.stream()
                 .flatMap(v -> Arrays.stream(v.split("/")))
+                .filter(v -> !v.contains(" ") && !v.contains("-") && !v.contains("'") && v.contains(root))
                 .distinct()
                 .collect(Collectors.toList());
         ret.removeIf(v -> !StringUtils.hasText(v.trim()));
         //去除无效
         ret = ret.stream().map(v -> {
+            if (!v.contains(root)) {
+                return null;
+            }
             if (Arrays.asList(words).contains(v)) {
                 return v;
             }
@@ -698,26 +722,79 @@ public class WordDictLoader {
             }
             return has(v);
         }).filter(Objects::nonNull).collect(Collectors.toList());
+
         //去除lemmas
-        for (String r : new CopyOnWriteArrayList<>(ret)) {
-            WordDictLemma lemma = lemmaMapper.byInf(r);
-            while (lemma != null) {
-                if (!root.contains(lemma.getId())) {
-                    ret.add(lemma.getId());
+        Function<Set<String>, Set<String>> lemmasFunc = arg -> {
+            Set<String> set = new HashSet<>();
+            arg.forEach(a -> lemmaMapper.byInf(a).forEach(v -> set.add(v.getId())));
+            return set;
+        };
+        Set<String> list = lemmasFunc.apply(new HashSet<>(ret));
+        while (!list.isEmpty()) {
+            for (String v : list) {
+                if (!root.contains(v)) {
+                    ret.add(v);
                 }
-                lemma = lemmaMapper.byInf(lemma.getId());
+            }
+            Set<String> tmp = new HashSet<>(list);
+            list = lemmasFunc.apply(list);
+            if (list.equals(tmp)) {
+                break;
             }
         }
+
         List<WordDictLemma> lemmas = lemmaMapper.findByIds(new HashSet<>(ret))
                 .stream().filter(WordDictLemma::isHas).collect(Collectors.toList());
         Set<String> vis = lemmas.stream().flatMap(v -> v.getInflections().stream()).collect(Collectors.toSet());
+        ret.addAll(vis);
+        vis.removeIf(vi -> {
+            WordLoaderEc ec = ecMapper.findById(vi);
+            if (ec != null) {
+                String trans = ec.getTranslation();
+                if (StringUtils.hasText(trans)) {
+                    return Arrays.stream(trans.split("\n")).anyMatch(s -> s.startsWith("a."));
+                }
+                return true;
+            } else {
+                try {
+                    Document node = WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + vi);
+                    List<org.w3c.dom.Node> arr = XPaths.of(node, "//div[@class='entry-word-section-container']").asArray();
+                    return arr.stream().anyMatch(a -> {
+                        String w = XPaths.of(a, ".//h1[@class='hword']").asText();
+                        String speech = XPaths.of(a, ".//h2[@class='parts-of-speech']/a").asText();
+                        return vi.equalsIgnoreCase(w) && "adjective".equalsIgnoreCase(speech);
+                    });
+                } catch (Throwable ex) {
+                    return false;
+                }
+            }
+        });
         ret.removeIf(v -> {
-            if (Arrays.stream(words).anyMatch(s -> s.equalsIgnoreCase(v))) {
+            if (Arrays.asList(words).contains(v)) {
                 return false;
             }
-            return !v.contains(root) || vis.stream().anyMatch(s -> s.equalsIgnoreCase(v));
+            return !v.contains(root) || vis.stream().anyMatch(s -> s.equalsIgnoreCase(v)) || v.contains("-") || v.contains(" ");
         });
-        return ret;
+        return ret.stream().map(r -> {
+            if (Arrays.asList(words).contains(r) || root.equalsIgnoreCase(r)) {
+                return r;
+            }
+            WordLoaderEc ec = ecMapper.findById(r);
+            if (ec != null) {
+                return ec.getId();
+            } else {
+                try {
+                    Document node = WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + r);
+                    List<org.w3c.dom.Node> arr = XPaths.of(node, "//div[@class='entry-word-section-container']").asArray();
+                    if (!arr.isEmpty()) {
+                        return XPaths.of(arr.get(0), ".//h1[@class='hword']").asText();
+                    }
+                } catch (Throwable ex) {
+                    //do nothing
+                }
+            }
+            return null;
+        }).filter(Objects::nonNull).distinct().collect(Collectors.toList());
     }
 
     private String has(String word) {
@@ -733,7 +810,10 @@ public class WordDictLoader {
         boolean has = true;
         try {
             Document node = WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + w);
-            w = XPaths.of(node, "//h1[@class='hword']").asText();
+            List<org.w3c.dom.Node> arr = XPaths.of(node, "//h1[@class='hword']").asArray();
+            if (!arr.isEmpty()) {
+                w = arr.get(0).getTextContent();
+            }
         } catch (Throwable ex) {
             has = false;
         }

@@ -144,9 +144,9 @@ public class WordLoaderResource extends AbstractResource {
     }
 
     @GET
-    @Path("/root")
-    public SingleResponse<String> root(@QueryParam("word") String word) {
-        return responseOf(loader.root(word));
+    @Path("/roots")
+    public SetResponse<WordDictLoader.Root> root(@QueryParam("root") String root) {
+        return responseOf(loader.roots(root));
     }
 
     @GET

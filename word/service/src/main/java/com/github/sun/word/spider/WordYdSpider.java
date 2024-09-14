@@ -17,10 +17,13 @@ import java.util.Set;
 public class WordYdSpider {
     public static void main(String[] args) {
         try {
-            String w = "addict";
-            Document node = WordDictLoader.fetchDocument("https://www.oxfordlearnersdictionaries.com/definition/english/" + w + "_1?q=" + w);
-            boolean has = XPaths.of(node, "//div[@id='didyoumean']").asArray().isEmpty();
-            System.out.println(has);
+            String w = "liked";
+            Document node = WordDictLoader.fetchDocument("https://www.merriam-webster.com/dictionary/" + w);
+            List<Node> arr = XPaths.of(node, "//div[@class='entry-word-section-container']").asArray();
+            arr.forEach(a -> {//adjective
+                System.out.println(XPaths.of(a, ".//h1[@class='hword']").asText());
+                System.out.println(XPaths.of(a, ".//h2[@class='parts-of-speech']/a").asText());
+            });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

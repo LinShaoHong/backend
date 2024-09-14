@@ -27,6 +27,16 @@ public class WordHcSpider {
                     words.add(n.split(" ")[0]);
                 }
             });
+
+            arr = XPaths.of(node, "//div[@class='layout nfo']//a").asArray();
+            arr.forEach(v -> {
+                String name = StringEscapeUtils.unescapeHtml4(v.getTextContent());
+                name = name.trim().split(" ")[0];
+                if (name.contains(root)) {
+                    words.add(name);
+                }
+            });
+
             arr = XPaths.of(node, "//div[@class='layout nwd']//a").asArray();
             arr.forEach(v -> {
                 String name = StringEscapeUtils.unescapeHtml4(v.getTextContent());
