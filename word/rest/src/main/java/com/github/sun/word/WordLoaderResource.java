@@ -217,11 +217,24 @@ public class WordLoaderResource extends AbstractResource {
     }
 
     @GET
-    @Path("/book")
-    public Response tag(@QueryParam("path") String path,
-                        @QueryParam("tag") String tag,
-                        @QueryParam("name") String name) {
+    @Path("/loadBook")
+    public Response loadBook(@QueryParam("path") String path,
+                             @QueryParam("tag") String tag,
+                             @QueryParam("name") String name) {
         loader.loadBook(path, tag, name);
         return responseOf();
+    }
+
+    @GET
+    @Path("/rectBook")
+    public Response rectBook() {
+        loader.rectBook();
+        return responseOf();
+    }
+
+    @GET
+    @Path("/suggest")
+    public SingleResponse<String> suggest(@QueryParam("w") String w) {
+        return responseOf(loader.suggest(w));
     }
 }

@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 
 import javax.annotation.Resource;
+import javax.ws.rs.client.Client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,6 +60,8 @@ public class WordDictLoader {
     private Assistant assistant;
     @Resource(name = "mysql")
     protected SqlBuilder.Factory factory;
+    @Resource
+    private Client client;
     @Resource
     private WordDictMapper mapper;
     @Resource
@@ -858,6 +861,31 @@ public class WordDictLoader {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    public void rectBook() {
+        List<WordLoaderBook> ws = bookMapper.notInFreq();
+        ws.forEach(w -> {
+            try {
+                Document node = WordDictLoader.fetchDocument("https://dict.youdao.com/result?lang=en&word=" + w.getId());
+                boolean empty = XPaths.of(node, "//div[@class='maybe']").asArray().isEmpty();
+                if (!empty) {
+                    System.out.println(w.getId());
+                }
+            } catch (Exception ex) {
+                //do nothing
+            }
+        });
+    }
+
+    public String suggest(String w) {
+        return client.target("http://dict.youdao.com/suggest")
+                .queryParam("num", 1)
+                .queryParam("doctype", "json")
+                .queryParam("q", w)
+                .request()
+                .get()
+                .readEntity(String.class);
     }
 
     @Data
