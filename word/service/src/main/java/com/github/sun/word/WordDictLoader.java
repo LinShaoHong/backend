@@ -635,12 +635,23 @@ public class WordDictLoader {
                 List<WordDictTree.Derivative> ds = tree.getDerivatives();
                 for (int i = news.size() - 1; i >= 0; i--) {
                     WordDict.Derivative n = news.get(i);
+                    if (derivatives.stream().anyMatch(d -> Objects.equals(d.getWord(), n.getWord()))) {
+                        continue;
+                    }
                     if (n.getIndex() == 0) {
                         if (!n.getWord().equalsIgnoreCase(root)) {
                             ds.add(1, new WordDictTree.Derivative(n.getWord(), n.getWord().contains(root) ? 0 : 1, tree.getVersion() + 1, true));
                         }
                     } else {
                         ds.add(1, new WordDictTree.Derivative(n.getWord(), n.getWord().contains(root) ? n.getIndex() : n.getIndex() + 1, tree.getVersion() + 1, true));
+                    }
+                }
+                int max = 0;
+                for (WordDictTree.Derivative d : ds) {
+                    if (d.getIndex() > max + 1) {
+                        d.setIndex(max + 1);
+                    } else {
+                        max = d.getIndex();
                     }
                 }
                 return editTree(tree.getRoot(), tree.getRootDesc(), tree.getVersion(), ds);
@@ -804,7 +815,18 @@ public class WordDictLoader {
             }
             return !v.contains(root) || vis.stream().anyMatch(s -> s.equalsIgnoreCase(v)) || v.contains("-") || v.contains(" ");
         });
-        return ret;
+
+        List<String> _ret = ret;
+        if (!_ret.isEmpty()) {
+            List<WordLoaderAffix> affixes = affixMapper.findByIds(new HashSet<>(_ret));
+            affixes.stream()
+                    .filter(a -> Objects.equals(a.getRoot(), root) && StringUtils.hasText(a.getRootDesc()))
+                    .findFirst()
+                    .ifPresent(a -> {
+                        affixMapper.byRootDesc(Collections.singleton(a.getRootDesc())).forEach(aa -> _ret.add(aa.getId()));
+                    });
+        }
+        return _ret;
     }
 
     private String has(String word) {
@@ -831,7 +853,7 @@ public class WordDictLoader {
     }
 
     public void loadBooks(String dir) {
-        Map<String, String> map = new HashMap<>() {{
+        Map<String, String> map = new LinkedHashMap<>() {{
             put("cz:zk", "中考词汇");
             put("gz:gk", "高考词汇");
             put("ky:ky", "考研词汇");
@@ -847,6 +869,7 @@ public class WordDictLoader {
         }};
         map.forEach((k, v) -> {
             try {
+                System.out.println(v);
                 String[] arr = k.split(":");
                 Files.walkFileTree(Paths.get(dir + arr[1]), new SimpleFileVisitor<>() {
                     @Override
