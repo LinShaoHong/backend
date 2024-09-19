@@ -217,6 +217,13 @@ public class WordLoaderResource extends AbstractResource {
     }
 
     @GET
+    @Path("/loadBooks")
+    public Response loadAllBook(@QueryParam("dir") String dir) {
+        loader.loadBooks(dir);
+        return responseOf();
+    }
+
+    @GET
     @Path("/loadBook")
     public Response loadBook(@QueryParam("path") String path,
                              @QueryParam("tag") String tag,

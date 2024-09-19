@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -828,38 +830,78 @@ public class WordDictLoader {
         return has ? w : null;
     }
 
+    public void loadBooks(String dir) {
+        Map<String, String> map = new HashMap<>() {{
+            put("cz:zk", "中考词汇");
+            put("gz:gk", "高考词汇");
+            put("ky:ky", "考研词汇");
+            put("un:cet4", "CET-4四级词汇");
+            put("un:cet6", "CET-6六级词汇");
+            put("un:level4", "专业四级词汇");
+            put("un:level8", "专业八级词汇");
+            put("cg:sat", "SAT词汇");
+            put("cg:gre", "GRE词汇");
+            put("cg:gmat", "GMAT词汇");
+            put("cg:ielts", "雅思词汇");
+            put("cg:toefl", "TOEFL托福词汇");
+        }};
+        map.forEach((k, v) -> {
+            try {
+                String[] arr = k.split(":");
+                Files.walkFileTree(Paths.get(dir + arr[1]), new SimpleFileVisitor<>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        Files.lines(file).forEach(line -> _loadBook(arr[0], v, line));
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            } catch (Throwable ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+    }
+
     public void loadBook(String path, String tag, String name) {
         try (InputStream in = loader.getResourceAsStream(path + ".json")) {
             assert in != null;
             BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
             String line = reader.readLine();
             while (StringUtils.hasText(line)) {
-                String word = JSON.asJsonNode(line).get("headWord").asText();
-                WordLoaderBook book = bookMapper.findById(word);
-                List<WordLoaderBook.Scope> scopes = book == null ? new ArrayList<>() : book.getScopes();
-                WordLoaderBook.Scope scope = scopes.stream()
-                        .filter(s -> Objects.equals(s.getTag(), tag))
-                        .findFirst().orElse(null);
-                if (scope == null) {
-                    scope = new WordLoaderBook.Scope();
-                    scope.setTag(tag);
-                    scope.setNames(new HashSet<>());
-                    scopes.add(scope);
-                }
-                scope.getNames().add(name);
-
-                book = book == null ? new WordLoaderBook() : book;
-                book.setScopes(scopes);
-                if (book.getId() == null) {
-                    book.setId(word);
-                    bookMapper.insert(book);
-                } else {
-                    bookMapper.update(book);
-                }
+                _loadBook(tag, name, line);
                 line = reader.readLine();
             }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    private void _loadBook(String tag, String name, String line) {
+        String word = JSON.asJsonNode(line).get("headWord").asText();
+        WordLoaderBook book = bookMapper.findById(word);
+        List<WordLoaderBook.Scope> scopes = book == null ? new ArrayList<>() : book.getScopes();
+        WordLoaderBook.Scope scope = scopes.stream()
+                .filter(s -> Objects.equals(s.getTag(), tag))
+                .findFirst().orElse(null);
+        if (scope == null) {
+            scope = new WordLoaderBook.Scope();
+            scope.setTag(tag);
+            scope.setNames(new HashSet<>());
+            scopes.add(scope);
+        }
+        scope.getNames().add(name);
+
+        book = book == null ? new WordLoaderBook() : book;
+        book.setScopes(scopes);
+        if (book.getId() == null) {
+            book.setId(word);
+            bookMapper.insert(book);
+        } else {
+            bookMapper.update(book);
         }
     }
 
