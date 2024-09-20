@@ -180,6 +180,8 @@ public class WordDerivativesLoader extends WordBasicLoader {
                     .collect(Collectors.toList());
             sort(trees);
             trees.forEach(util::walk);
+        } else if (nodes.size() == 1) {
+            derivatives.add(new WordDict.Derivative(nodes.get(0).getWord(), 0));
         }
         return derivatives;
     }

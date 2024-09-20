@@ -593,22 +593,35 @@ public class WordDictLoader {
             }
             try {
                 mapper.loading(word, "'$.createTreeLoading'");
-                dict.getStruct().getParts().stream().filter(WordDict.Part::isRoot).forEach(part -> {
-                    String root = part.getPart();
-                    String desc = part.getMeaningTrans();
-                    WordDictTree tree = treeMapper.byRootAndDesc(root, desc);
-                    if (tree == null) {
-                        List<String> ws = fetchDerivatives(root, word, root);
-                        ws = ws.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
-                        List<WordDictTree.Derivative> derivatives = WordDerivativesLoader.build(word, root, ws).stream()
-                                .map(v -> new WordDictTree.Derivative(v.getWord(), v.getIndex(), 1, false))
-                                .collect(Collectors.toList());
-                        editTree(root, desc, 0, derivatives);
-                    }
-                });
+                if (dict.getStruct() == null || dict.getStruct().getParts() == null ||
+                        dict.getStruct().getParts().stream().noneMatch(WordDict.Part::isRoot)) {
+                    String desc = dict.getMeaning().getNouns();
+                    desc = StringUtils.hasText(desc) ? desc : dict.getMeaning().getAdjectives();
+                    desc = StringUtils.hasText(desc) ? desc : dict.getMeaning().getVerbs();
+                    desc = StringUtils.hasText(desc) ? desc : dict.getMeaning().getAdverbs();
+                    createTree(word, word, desc);
+                } else {
+                    dict.getStruct().getParts().stream().filter(WordDict.Part::isRoot).forEach(part -> {
+                        String root = part.getPart();
+                        String desc = part.getMeaningTrans();
+                        createTree(word, root, desc);
+                    });
+                }
             } finally {
                 mapper.loaded(word, "'$.createTreeLoading'");
             }
+        }
+    }
+
+    private void createTree(String word, String root, String desc) {
+        WordDictTree tree = treeMapper.byRootAndDesc(root, desc);
+        if (tree == null) {
+            List<String> ws = fetchDerivatives(root, word, root);
+            ws = ws.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
+            List<WordDictTree.Derivative> derivatives = WordDerivativesLoader.build(word, root, ws).stream()
+                    .map(v -> new WordDictTree.Derivative(v.getWord(), v.getIndex(), 1, false))
+                    .collect(Collectors.toList());
+            editTree(root, desc, 0, derivatives);
         }
     }
 
