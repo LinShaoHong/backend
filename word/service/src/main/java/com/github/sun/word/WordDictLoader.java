@@ -837,7 +837,7 @@ public class WordDictLoader {
                     .findFirst()
                     .ifPresent(a -> {
                         affixMapper.byRootDesc(Collections.singleton(a.getRootDesc()))
-                                .stream().filter(aa -> Objects.equals(aa.getRoot(), root))
+                                .stream().filter(aa -> aa.getId().contains(root))
                                 .forEach(aa -> _ret.add(aa.getId()));
                     });
         }
