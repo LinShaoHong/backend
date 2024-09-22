@@ -29,6 +29,24 @@ public class WordMeaningLoader extends WordBasicLoader {
                     return "形容词";
                 } else if ("adverbs".equals(v)) {
                     return "副词";
+                } else if ("preposition".equals(v)) {
+                    return "介词";
+                } else if ("pronoun".equals(v)) {
+                    return "代词";
+                } else if ("conjunction".equals(v)) {
+                    return "连词";
+                } else if ("article".equals(v)) {
+                    return "冠词";
+                } else if ("interjection".equals(v)) {
+                    return "感叹词";
+                } else if ("numeral".equals(v)) {
+                    return "数词";
+                } else if ("determiner".equals(v)) {
+                    return "限定词";
+                } else if ("auxiliary".equals(v)) {
+                    return "助词";
+                } else if ("modal".equals(v)) {
+                    return "情态动词";
                 }
                 return null;
             }).filter(Objects::nonNull).collect(Collectors.joining("、"));
@@ -40,6 +58,15 @@ public class WordMeaningLoader extends WordBasicLoader {
                     .verbs(prettify(valuer.get("translated_meanings").get("verbs").asText("")))
                     .adjectives(prettify(valuer.get("translated_meanings").get("adjectives").asText("")))
                     .adverbs(prettify(valuer.get("translated_meanings").get("adverbs").asText("")))
+                    .preposition(prettify(valuer.get("translated_meanings").get("preposition").asText("")))
+                    .pronoun(prettify(valuer.get("translated_meanings").get("pronoun").asText("")))
+                    .conjunction(prettify(valuer.get("translated_meanings").get("conjunction").asText("")))
+                    .article(prettify(valuer.get("translated_meanings").get("article").asText("")))
+                    .interjection(prettify(valuer.get("translated_meanings").get("interjection").asText("")))
+                    .numeral(prettify(valuer.get("translated_meanings").get("numeral").asText("")))
+                    .determiner(prettify(valuer.get("translated_meanings").get("determiner").asText("")))
+                    .auxiliary(prettify(valuer.get("translated_meanings").get("auxiliary").asText("")))
+                    .modal(prettify(valuer.get("translated_meanings").get("modalVerb").asText("")))
                     .build());
         }, "meaning");
     }

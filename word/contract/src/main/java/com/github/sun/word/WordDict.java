@@ -62,6 +62,15 @@ public class WordDict {
         private String verbs;
         private String adjectives;
         private String adverbs;
+        private String preposition;
+        private String pronoun;
+        private String conjunction;
+        private String article;
+        private String interjection;
+        private String numeral;
+        private String determiner;
+        private String auxiliary;
+        private String modal;
     }
 
     public static class MeaningHandler extends JsonHandler<TranslatedMeaning> {

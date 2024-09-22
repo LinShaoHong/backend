@@ -110,6 +110,33 @@ public class WordJsSpider {
                 if ("adv.".equals(text)) {
                     set.add("adverbs");
                 }
+                if ("prep.".equals(text)) {
+                    set.add("preposition");
+                }
+                if ("pron.".equals(text)) {
+                    set.add("pronoun");
+                }
+                if ("conj.".equals(text)) {
+                    set.add("conjunction");
+                }
+                if ("art.".equals(text)) {
+                    set.add("article");
+                }
+                if ("int.".equals(text)) {
+                    set.add("interjection");
+                }
+                if ("num.".equals(text)) {
+                    set.add("numeral");
+                }
+                if ("det.".equals(text)) {
+                    set.add("determiner");
+                }
+                if ("aux.".equals(text)) {
+                    set.add("auxiliary");
+                }
+                if ("modal.".equals(text)) {
+                    set.add("modal");
+                }
             });
         } catch (Exception ex) {
             //do nothing
