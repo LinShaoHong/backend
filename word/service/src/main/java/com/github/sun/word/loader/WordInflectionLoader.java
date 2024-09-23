@@ -1,6 +1,7 @@
 package com.github.sun.word.loader;
 
 import com.github.sun.foundation.boot.utility.JSON;
+import com.github.sun.word.WordDict;
 import com.github.sun.word.spider.WordJsSpider;
 import com.github.sun.word.spider.WordYdSpider;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -19,6 +20,7 @@ public class WordInflectionLoader extends WordBasicLoader {
                         !StringUtils.hasText(dict.getUkPhonetic())) {
                     WordJsSpider.fetchPhonetic(dict);
                 }
+                dict.setInflection(new WordDict.Inflection());
                 WordYdSpider.fetchInflection(dict);
                 WordJsSpider.fetchInflection(dict);
             } catch (Exception ex) {

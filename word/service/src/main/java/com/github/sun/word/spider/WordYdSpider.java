@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -109,36 +109,34 @@ public class WordYdSpider {
         try {
             Document node = WordDictLoader.fetchDocument("https://dict.youdao.com/result?lang=en&word=" + dict.getId());
             WordDict.Inflection inflection = dict.getInflection();
-            if (inflection == null) {
-                inflection = new WordDict.Inflection();
-            }
             List<Node> arr = XPaths.of(node, "//li[@class='word-wfs-cell-less']").asArray();
             for (Node n : arr) {
                 String name = XPaths.of(n, ".//span[@class='wfs-name']").asText();
                 String words = XPaths.of(n, ".//span[@class='transformation']").asText();
                 name = StringEscapeUtils.unescapeHtml4(name);
                 words = StringEscapeUtils.unescapeHtml4(words);
+                List<String> ws = Arrays.asList(words.split("或"));
                 switch (name) {
                     case "复数":
-                        inflection.setPlural(Collections.singletonList(words));
+                        inflection.setPlural(ws);
                         break;
                     case "第三人称单数":
-                        inflection.setThirdPresent(Collections.singletonList(words));
+                        inflection.setThirdPresent(ws);
                         break;
                     case "现在分词":
-                        inflection.setProgressive(Collections.singletonList(words));
+                        inflection.setProgressive(ws);
                         break;
                     case "过去式":
-                        inflection.setPast(Collections.singletonList(words));
+                        inflection.setPast(ws);
                         break;
                     case "过去分词":
-                        inflection.setPerfect(Collections.singletonList(words));
+                        inflection.setPerfect(ws);
                         break;
                     case "比较级":
-                        inflection.setComparative(Collections.singletonList(words));
+                        inflection.setComparative(ws);
                         break;
                     case "最高级":
-                        inflection.setSuperlative(Collections.singletonList(words));
+                        inflection.setSuperlative(ws);
                         break;
                     default:
                         break;

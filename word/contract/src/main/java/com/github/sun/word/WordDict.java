@@ -31,7 +31,7 @@ public class WordDict {
     @Converter(MeaningHandler.class)
     private TranslatedMeaning meaning;//中文释义
     @Converter(ExamplesHandler.class)
-    private List<ExampleSentence> examples;//例句
+    private List<Example> examples;//例句
     @Converter(StructHandler.class)
     private Struct struct;//词根词缀结构
     private String origin;//词源历史
@@ -73,9 +73,23 @@ public class WordDict {
         private String interjection;
         private String numeral;
         private String determiner;
+        private List<String> sorts;
     }
 
     public static class MeaningHandler extends JsonHandler<TranslatedMeaning> {
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Example {
+        private String speech;
+        private List<ExampleSentence> sentences;
+    }
+
+    public static class ExamplesHandler extends JsonHandler.ListHandler<Example> {
     }
 
     @Data
@@ -87,9 +101,6 @@ public class WordDict {
         private String audioId;
         private String sentence;
         private String translation;
-    }
-
-    public static class ExamplesHandler extends JsonHandler.ListHandler<ExampleSentence> {
     }
 
     @Data
@@ -149,9 +160,6 @@ public class WordDict {
     }
 
     public static class DerivativesHandler extends JsonHandler.ListHandler<Derivative> {
-    }
-
-    public static class DiffersHandler extends JsonHandler.ListHandler<String> {
     }
 
     @Data
