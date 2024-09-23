@@ -37,6 +37,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -595,10 +596,13 @@ public class WordDictLoader {
                 mapper.loading(word, "'$.createTreeLoading'");
                 if (dict.getStruct() == null || dict.getStruct().getParts() == null ||
                         dict.getStruct().getParts().stream().noneMatch(WordDict.Part::isRoot)) {
-                    String desc = dict.getMeaning().getNouns();
-                    desc = StringUtils.hasText(desc) ? desc : dict.getMeaning().getAdjectives();
-                    desc = StringUtils.hasText(desc) ? desc : dict.getMeaning().getVerbs();
-                    desc = StringUtils.hasText(desc) ? desc : dict.getMeaning().getAdverbs();
+                    String desc = null;
+                    for (Field f : WordDict.TranslatedMeaning.class.getDeclaredFields()) {
+                        desc = (String) Reflections.getValue(dict.getMeaning(), f);
+                        if (StringUtils.hasText(desc)) {
+                            break;
+                        }
+                    }
                     createTree(word, word, desc);
                 } else {
                     dict.getStruct().getParts().stream().filter(WordDict.Part::isRoot).forEach(part -> {

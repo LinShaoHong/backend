@@ -3,7 +3,6 @@ package com.github.sun.word.loader;
 import com.github.sun.foundation.boot.utility.JSON;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.spider.WordJsSpider;
-import com.github.sun.word.spider.WordYdSpider;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
@@ -18,17 +17,24 @@ public class WordMeaningLoader extends WordBasicLoader {
     @Override
     public void load(String word, JSON.Valuer attr, int userId) {
         retry(word, userId, dict -> {
-            Set<String> set = WordYdSpider.fetchMeaning(dict);
-            set.addAll(WordJsSpider.fetchMeaning(dict));
+            Set<String> set = WordJsSpider.fetchMeaning(dict);
             String ms = set.stream().map(v -> {
                 if ("nouns".equals(v)) {
                     return "名词";
-                } else if ("verbs".equals(v)) {
+                } else if ("verb".equals(v)) {
                     return "动词";
-                } else if ("adjectives".equals(v)) {
-                    return "形容词";
-                } else if ("adverbs".equals(v)) {
+                } else if ("transitiveVerb".equals(v)) {
+                    return "及物动词";
+                } else if ("intransitiveVerb".equals(v)) {
+                    return "不及物动词";
+                } else if ("auxiliaryVerb".equals(v)) {
+                    return "助动词";
+                } else if ("modalVerb".equals(v)) {
+                    return "情态动词";
+                } else if ("adverb".equals(v)) {
                     return "副词";
+                } else if ("adjective".equals(v)) {
+                    return "形容词";
                 } else if ("preposition".equals(v)) {
                     return "介词";
                 } else if ("pronoun".equals(v)) {
@@ -43,10 +49,6 @@ public class WordMeaningLoader extends WordBasicLoader {
                     return "数词";
                 } else if ("determiner".equals(v)) {
                     return "限定词";
-                } else if ("auxiliary".equals(v)) {
-                    return "助词";
-                } else if ("modal".equals(v)) {
-                    return "情态动词";
                 }
                 return null;
             }).filter(Objects::nonNull).collect(Collectors.joining("、"));
@@ -54,10 +56,14 @@ public class WordMeaningLoader extends WordBasicLoader {
             q = q.replace("$word", word).replace("$scope", ms);
             JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, q)));
             dict.setMeaning(WordDict.TranslatedMeaning.builder()
-                    .nouns(prettify(valuer.get("translated_meanings").get("nouns").asText("")))
-                    .verbs(prettify(valuer.get("translated_meanings").get("verbs").asText("")))
-                    .adjectives(prettify(valuer.get("translated_meanings").get("adjectives").asText("")))
-                    .adverbs(prettify(valuer.get("translated_meanings").get("adverbs").asText("")))
+                    .noun(prettify(valuer.get("translated_meanings").get("noun").asText("")))
+                    .verb(prettify(valuer.get("translated_meanings").get("verb").asText("")))
+                    .transitiveVerb(prettify(valuer.get("translated_meanings").get("transitiveVerb").asText("")))
+                    .intransitiveVerb(prettify(valuer.get("translated_meanings").get("intransitiveVerb").asText("")))
+                    .auxiliaryVerb(prettify(valuer.get("translated_meanings").get("auxiliaryVerb").asText("")))
+                    .modalVerb(prettify(valuer.get("translated_meanings").get("modalVerb").asText("")))
+                    .adverb(prettify(valuer.get("translated_meanings").get("adverb").asText("")))
+                    .adjective(prettify(valuer.get("translated_meanings").get("adjective").asText("")))
                     .preposition(prettify(valuer.get("translated_meanings").get("preposition").asText("")))
                     .pronoun(prettify(valuer.get("translated_meanings").get("pronoun").asText("")))
                     .conjunction(prettify(valuer.get("translated_meanings").get("conjunction").asText("")))
@@ -65,8 +71,6 @@ public class WordMeaningLoader extends WordBasicLoader {
                     .interjection(prettify(valuer.get("translated_meanings").get("interjection").asText("")))
                     .numeral(prettify(valuer.get("translated_meanings").get("numeral").asText("")))
                     .determiner(prettify(valuer.get("translated_meanings").get("determiner").asText("")))
-                    .auxiliary(prettify(valuer.get("translated_meanings").get("auxiliary").asText("")))
-                    .modal(prettify(valuer.get("translated_meanings").get("modalVerb").asText("")))
                     .build());
         }, "meaning");
     }

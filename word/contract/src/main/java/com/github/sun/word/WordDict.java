@@ -58,10 +58,14 @@ public class WordDict {
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class TranslatedMeaning {
-        private String nouns;
-        private String verbs;
-        private String adjectives;
-        private String adverbs;
+        private String noun;
+        private String verb;
+        private String transitiveVerb;
+        private String intransitiveVerb;
+        private String auxiliaryVerb;
+        private String modalVerb;
+        private String adjective;
+        private String adverb;
         private String preposition;
         private String pronoun;
         private String conjunction;
@@ -69,8 +73,6 @@ public class WordDict {
         private String interjection;
         private String numeral;
         private String determiner;
-        private String auxiliary;
-        private String modal;
     }
 
     public static class MeaningHandler extends JsonHandler<TranslatedMeaning> {

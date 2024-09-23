@@ -53,16 +53,28 @@ public class WordYdSpider {
             arr.forEach(v -> {
                 String text = XPaths.of(v, "./span[@class='pos']").asText();
                 if ("n.".equals(text)) {
-                    set.add("nouns");
+                    set.add("noun");
                 }
                 if ("v.".equals(text)) {
-                    set.add("verbs");
+                    set.add("verb");
                 }
-                if ("adj.".equals(text)) {
-                    set.add("adjectives");
+                if ("vt.".equals(text)) {
+                    set.add("transitiveVerb");
+                }
+                if ("vi.".equals(text)) {
+                    set.add("intransitiveVerb");
+                }
+                if ("aux.".equals(text)) {
+                    set.add("auxiliaryVerb");
+                }
+                if ("modal.".equals(text)) {
+                    set.add("modalVerb");
                 }
                 if ("adv.".equals(text)) {
-                    set.add("adverbs");
+                    set.add("adverb");
+                }
+                if ("adj.".equals(text)) {
+                    set.add("adjective");
                 }
                 if ("prep.".equals(text)) {
                     set.add("preposition");
@@ -84,12 +96,6 @@ public class WordYdSpider {
                 }
                 if ("det.".equals(text)) {
                     set.add("determiner");
-                }
-                if ("aux.".equals(text)) {
-                    set.add("auxiliary");
-                }
-                if ("modal.".equals(text)) {
-                    set.add("modal");
                 }
             });
         } catch (Exception ex) {
