@@ -1,11 +1,13 @@
 package com.github.sun.word.loader;
 
 import com.github.sun.foundation.boot.utility.JSON;
+import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.spider.WordJsSpider;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
@@ -19,7 +21,7 @@ public class WordMeaningLoader extends WordBasicLoader {
         retry(word, userId, dict -> {
             Set<String> set = WordJsSpider.fetchMeaning(dict);
             String ms = set.stream().map(v -> {
-                if ("nouns".equals(v)) {
+                if ("noun".equals(v)) {
                     return "名词";
                 } else if ("verb".equals(v)) {
                     return "动词";
@@ -55,23 +57,14 @@ public class WordMeaningLoader extends WordBasicLoader {
             String q = loadQ("cues/释义.md");
             q = q.replace("$word", word).replace("$scope", ms);
             JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, q)));
-            dict.setMeaning(WordDict.TranslatedMeaning.builder()
-                    .noun(prettify(valuer.get("translated_meanings").get("noun").asText("")))
-                    .verb(prettify(valuer.get("translated_meanings").get("verb").asText("")))
-                    .transitiveVerb(prettify(valuer.get("translated_meanings").get("transitiveVerb").asText("")))
-                    .intransitiveVerb(prettify(valuer.get("translated_meanings").get("intransitiveVerb").asText("")))
-                    .auxiliaryVerb(prettify(valuer.get("translated_meanings").get("auxiliaryVerb").asText("")))
-                    .modalVerb(prettify(valuer.get("translated_meanings").get("modalVerb").asText("")))
-                    .adverb(prettify(valuer.get("translated_meanings").get("adverb").asText("")))
-                    .adjective(prettify(valuer.get("translated_meanings").get("adjective").asText("")))
-                    .preposition(prettify(valuer.get("translated_meanings").get("preposition").asText("")))
-                    .pronoun(prettify(valuer.get("translated_meanings").get("pronoun").asText("")))
-                    .conjunction(prettify(valuer.get("translated_meanings").get("conjunction").asText("")))
-                    .article(prettify(valuer.get("translated_meanings").get("article").asText("")))
-                    .interjection(prettify(valuer.get("translated_meanings").get("interjection").asText("")))
-                    .numeral(prettify(valuer.get("translated_meanings").get("numeral").asText("")))
-                    .determiner(prettify(valuer.get("translated_meanings").get("determiner").asText("")))
-                    .build());
+
+            WordDict.TranslatedMeaning meaning = new WordDict.TranslatedMeaning();
+            for (Field f : WordDict.TranslatedMeaning.class.getDeclaredFields()) {
+                String v = !set.contains(f.getName()) ? null :
+                        prettify(valuer.get("translated_meanings").get(f.getName()).asText(""));
+                Reflections.setValue(meaning, f, v);
+            }
+            dict.setMeaning(meaning);
         }, "meaning");
     }
 

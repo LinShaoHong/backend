@@ -104,43 +104,43 @@ public class WordJsSpider {
                 if ("v.".equals(text)) {
                     set.add("verb");
                 }
-                if ("vt.".equals(text)) {
+                if (text.startsWith("vt")) {
                     set.add("transitiveVerb");
                 }
-                if ("vi.".equals(text)) {
+                if (text.startsWith("vi")) {
                     set.add("intransitiveVerb");
                 }
-                if ("aux.".equals(text)) {
+                if (text.startsWith("aux")) {
                     set.add("auxiliaryVerb");
                 }
-                if ("modal.".equals(text)) {
+                if (text.startsWith("modal")) {
                     set.add("modalVerb");
                 }
-                if ("adv.".equals(text)) {
+                if (text.startsWith("adv")) {
                     set.add("adverb");
                 }
-                if ("adj.".equals(text)) {
+                if (text.startsWith("adj")) {
                     set.add("adjective");
                 }
-                if ("prep.".equals(text)) {
+                if (text.startsWith("prep")) {
                     set.add("preposition");
                 }
-                if ("pron.".equals(text)) {
+                if (text.startsWith("pron")) {
                     set.add("pronoun");
                 }
-                if ("conj.".equals(text)) {
+                if (text.startsWith("conj")) {
                     set.add("conjunction");
                 }
-                if ("art.".equals(text)) {
+                if (text.startsWith("art")) {
                     set.add("article");
                 }
-                if ("int.".equals(text)) {
+                if (text.startsWith("int")) {
                     set.add("interjection");
                 }
-                if ("num.".equals(text)) {
+                if (text.startsWith("num")) {
                     set.add("numeral");
                 }
-                if ("det.".equals(text)) {
+                if (text.startsWith("det")) {
                     set.add("determiner");
                 }
             });
