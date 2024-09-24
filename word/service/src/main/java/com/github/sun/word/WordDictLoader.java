@@ -512,33 +512,8 @@ public class WordDictLoader {
         return editTree(tree.getRoot(), tree.getRootDesc(), version, derivatives);
     }
 
-    public WordDictTree addDerivative(String id, String word, String input, int version) {
-        WordDictTree tree = treeMapper.findById(id);
-        List<WordDictTree.Derivative> list = tree.getDerivatives();
-        if (list.stream().noneMatch(v -> Objects.equals(v.getWord(), input))) {
-            if (!StringUtils.hasText(word)) {
-                tree.getDerivatives().add(new WordDictTree.Derivative(input, 0, tree.getVersion() + 1, true));
-            } else {
-                int j = -1;
-                for (int i = 0; i < list.size(); i++) {
-                    if (list.get(i).getWord().equals(word)) {
-                        j = i;
-                    }
-                }
-                if (j >= 0) {
-                    int z = j;
-                    for (int k = j + 1; k < list.size(); k++) {
-                        if (list.get(k).getIndex() <= list.get(j).getIndex()) {
-                            break;
-                        }
-                        z = k;
-                    }
-                    tree.getDerivatives().add(z + 1, new WordDictTree.Derivative(input, list.get(j).getIndex() + 1, tree.getVersion() + 1, true));
-                }
-            }
-            return editTree(tree.getRoot(), tree.getRootDesc(), version, tree.getDerivatives());
-        }
-        return null;
+    public WordDictTree addDerivative(String id, String word, String input) {
+        return mergeTree(id, word, input);
     }
 
     public List<WordDict> search(String q) {
@@ -635,7 +610,7 @@ public class WordDictLoader {
         }
     }
 
-    public WordDictTree mergeTree(String treeId, String word) {
+    public WordDictTree mergeTree(String treeId, String word, String merged) {
         WordDict dict = mapper.findById(word);
         if (dict != null) {
             if (dict.getLoadState().isMergeTreeLoading()) {
@@ -646,15 +621,15 @@ public class WordDictLoader {
                 WordDictTree tree = treeMapper.findById(treeId);
                 String root = tree.getRoot();
                 List<WordDictTree.Derivative> derivatives = tree.getDerivatives();
-                List<String> ws = fetchDerivatives(word, word);
+                List<String> ws = fetchDerivatives(merged, merged);
                 ws.removeIf(v -> derivatives.stream().anyMatch(d -> Objects.equals(d.getWord(), v)) || root.contains(v));
                 if (ws.isEmpty()) {
                     return tree;
                 }
                 ws.add(root);
-                ws.add(word);
+                ws.add(merged);
                 ws = ws.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
-                List<WordDict.Derivative> news = WordDerivativesLoader.build(word, root, ws);
+                List<WordDict.Derivative> news = WordDerivativesLoader.build(merged, root, ws);
                 List<WordDictTree.Derivative> ds = tree.getDerivatives();
                 for (int i = news.size() - 1; i >= 0; i--) {
                     WordDict.Derivative n = news.get(i);

@@ -91,9 +91,8 @@ public class WordLoaderResource extends AbstractResource {
     @Path("/add/derivative")
     public SingleResponse<WordDictTree> addDerivative(@QueryParam("id") String id,
                                                       @QueryParam("word") String word,
-                                                      @QueryParam("input") String input,
-                                                      @QueryParam("version") int version) {
-        return responseOf(loader.addDerivative(id, word, input, version));
+                                                      @QueryParam("input") String input) {
+        return responseOf(loader.addDerivative(id, word, input));
     }
 
     @POST
@@ -198,7 +197,7 @@ public class WordLoaderResource extends AbstractResource {
     @GET
     @Path("/mergeTree")
     public SingleResponse<WordDictTree> mergeTree(@QueryParam("treeId") String treeId, @QueryParam("word") String word) {
-        return responseOf(loader.mergeTree(treeId, word));
+        return responseOf(loader.mergeTree(treeId, word, word));
     }
 
     @GET

@@ -8,10 +8,7 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class WordYdSpider {
@@ -55,51 +52,64 @@ public class WordYdSpider {
                 if ("n.".equals(text)) {
                     set.add("noun");
                 }
-                if ("v.".equals(text)) {
+                if ("v.".equals(text) || (text.contains("vt.") && text.contains("vi."))) {
                     set.add("verb");
                 }
-                if ("vt.".equals(text)) {
+                if (text.equals("vt.")) {
                     set.add("transitiveVerb");
                 }
-                if ("vi.".equals(text)) {
+                if (text.equals("vi.")) {
                     set.add("intransitiveVerb");
                 }
-                if ("aux.".equals(text)) {
+                if (text.startsWith("aux")) {
                     set.add("auxiliaryVerb");
                 }
-                if ("modal.".equals(text)) {
+                if (text.startsWith("modal")) {
                     set.add("modalVerb");
                 }
-                if ("adv.".equals(text)) {
+                if (text.startsWith("adv")) {
                     set.add("adverb");
                 }
-                if ("adj.".equals(text)) {
+                if (text.startsWith("adj")) {
                     set.add("adjective");
                 }
-                if ("prep.".equals(text)) {
+                if (text.startsWith("prep")) {
                     set.add("preposition");
                 }
-                if ("pron.".equals(text)) {
+                if (text.startsWith("pron")) {
                     set.add("pronoun");
                 }
-                if ("conj.".equals(text)) {
+                if (text.startsWith("conj")) {
                     set.add("conjunction");
                 }
-                if ("art.".equals(text)) {
+                if (text.startsWith("art")) {
                     set.add("article");
                 }
-                if ("int.".equals(text)) {
+                if (text.startsWith("int")) {
                     set.add("interjection");
                 }
-                if ("num.".equals(text)) {
+                if (text.startsWith("num")) {
                     set.add("numeral");
                 }
-                if ("det.".equals(text)) {
+                if (text.startsWith("det")) {
                     set.add("determiner");
+                }
+                if (text.startsWith("abbr")) {
+                    set.add("abbreviation");
                 }
             });
         } catch (Exception ex) {
             //do nothing
+        }
+        List<String> ret = new ArrayList<>(set);
+        if (ret.contains("verb")) {
+            int i = ret.indexOf("verb");
+            if (ret.contains("transitiveVerb") && !ret.contains("intransitiveVerb")) {
+                ret.set(i, "intransitiveVerb");
+            }
+            if (ret.contains("intransitiveVerb") && !ret.contains("transitiveVerb")) {
+                ret.set(i, "transitiveVerb");
+            }
         }
         return set;
     }

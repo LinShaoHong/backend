@@ -155,6 +155,18 @@ public class WordJsSpider {
                 ret.set(i, "transitiveVerb");
             }
         }
+        Set<String> _ret = WordYdSpider.fetchMeaning(dict);
+        ret.forEach(_ret::remove);
+        ret.addAll(_ret);
+        if (ret.contains("verb")) {
+            int i = ret.indexOf("verb");
+            if (ret.contains("transitiveVerb") && !ret.contains("intransitiveVerb")) {
+                ret.set(i, "intransitiveVerb");
+            }
+            if (ret.contains("intransitiveVerb") && !ret.contains("transitiveVerb")) {
+                ret.set(i, "transitiveVerb");
+            }
+        }
         return ret;
     }
 
