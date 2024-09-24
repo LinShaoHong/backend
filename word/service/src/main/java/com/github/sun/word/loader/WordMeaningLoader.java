@@ -38,7 +38,7 @@ public class WordMeaningLoader extends WordBasicLoader {
             List<String> set = WordJsSpider.fetchMeaning(dict);
             String ms = set.stream().map(SPEECHES::get)
                     .filter(Objects::nonNull)
-                    .map(s -> "\t-" + s)
+                    .map(s -> "\t- " + s)
                     .collect(Collectors.joining("\n"));
             String q = loadQ("cues/释义.md");
             q = q.replace("$word", word).replace("$scope", ms);
