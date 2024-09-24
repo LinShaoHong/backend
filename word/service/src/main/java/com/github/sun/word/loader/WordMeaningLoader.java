@@ -30,6 +30,7 @@ public class WordMeaningLoader extends WordBasicLoader {
         put("interjection", "感叹词");
         put("numeral", "数词");
         put("determiner", "限定词");
+        put("abbreviation", "缩写词");
     }};
 
     @Override

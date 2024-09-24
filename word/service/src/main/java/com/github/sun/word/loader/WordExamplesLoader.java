@@ -21,6 +21,7 @@ public class WordExamplesLoader extends WordBasicLoader {
         retry(word, userId, dict -> {
             String q = loadQ("cues/例句.md");
             List<String> set = WordJsSpider.fetchMeaning(dict);
+            set.remove("abbreviation");
             int[] arr = distribute(set.size());
             int i = 0;
             List<WordDict.Example> examples = new ArrayList<>();

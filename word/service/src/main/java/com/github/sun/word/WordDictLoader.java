@@ -969,13 +969,23 @@ public class WordDictLoader {
     }
 
     public String suggest(String w) {
-        return client.target("http://dict.youdao.com/suggest")
+        WordLoaderEc ec = ecMapper.findById(w);
+        if (ec != null) {
+            return ec.getTranslation();
+        }
+        String ret = client.target("http://dict.youdao.com/suggest")
                 .queryParam("num", 1)
                 .queryParam("doctype", "json")
                 .queryParam("q", w)
                 .request()
                 .get()
                 .readEntity(String.class);
+        JsonNode node = JSON.asJsonNode(ret);
+        if (node.get("result").get("code").asInt() == 200) {
+            JSON.Valuer valuer = JSON.newValuer(node);
+            return valuer.get("data").get("entries").asArray().iterator().next().get("explain").asText("");
+        }
+        return null;
     }
 
     @Data

@@ -19,7 +19,7 @@ public class WordJsSpider {
     public static void fetchPhonetic(WordDict dict) {
         Document node = WordDictLoader.fetchDocument("https://www.iciba.com/word?w=" + dict.getId());
         List<Node> arr = XPaths.of(node, "//ul[@class='Mean_symbols__fpCmS']/li").asArray();
-        if (arr.size() > 0) {
+        if (!arr.isEmpty()) {
             String uk = StringEscapeUtils.unescapeHtml4(arr.get(0).getTextContent());
             uk = StringEscapeUtils.unescapeHtml4(uk);
             dict.setUkPhonetic("/ " + parsePhonetic(uk) + " /");
@@ -96,17 +96,13 @@ public class WordJsSpider {
                 if ("n.".equals(text)) {
                     set.add("noun");
                 }
-                if ("v.".equals(text)) {
+                if ("v.".equals(text) || (text.contains("vt.") && text.contains("vi."))) {
                     set.add("verb");
                 }
-                if (text.contains("vt.") && text.contains("vi.")) {
-                    set.add("intransitiveVerb");
+                if (text.equals("vt.")) {
                     set.add("transitiveVerb");
                 }
-                if (text.startsWith("vt")) {
-                    set.add("transitiveVerb");
-                }
-                if (text.startsWith("vi")) {
+                if (text.equals("vi.")) {
                     set.add("intransitiveVerb");
                 }
                 if (text.startsWith("aux")) {
@@ -142,11 +138,24 @@ public class WordJsSpider {
                 if (text.startsWith("det")) {
                     set.add("determiner");
                 }
+                if (text.startsWith("abbr")) {
+                    set.add("abbreviation");
+                }
             });
         } catch (Exception ex) {
             //do nothing
         }
-        return new ArrayList<>(set);
+        List<String> ret = new ArrayList<>(set);
+        if (ret.contains("verb")) {
+            int i = ret.indexOf("verb");
+            if (ret.contains("transitiveVerb") && !ret.contains("intransitiveVerb")) {
+                ret.set(i, "intransitiveVerb");
+            }
+            if (ret.contains("intransitiveVerb") && !ret.contains("transitiveVerb")) {
+                ret.set(i, "transitiveVerb");
+            }
+        }
+        return ret;
     }
 
     @SuppressWarnings("Duplicates")

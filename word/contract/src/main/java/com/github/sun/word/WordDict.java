@@ -73,6 +73,7 @@ public class WordDict {
         private String interjection;
         private String numeral;
         private String determiner;
+        private String abbreviation;
         private List<String> sorts;
     }
 
