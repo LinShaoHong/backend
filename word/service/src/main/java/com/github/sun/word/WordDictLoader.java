@@ -2,6 +2,7 @@ package com.github.sun.word;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.sun.foundation.ai.Assistant;
+import com.github.sun.foundation.boot.Injector;
 import com.github.sun.foundation.boot.Scanner;
 import com.github.sun.foundation.boot.exception.ConstraintException;
 import com.github.sun.foundation.boot.utility.Dates;
@@ -103,10 +104,15 @@ public class WordDictLoader {
     public void loadAll(String words, int userId) {
         for (String word : words.split(",")) {
             WordBasicLoader.init(word, userId);
+            executor.submit(() -> {
+                Injector.getInstance(WordMeaningLoader.class).load(word, userId);
+                Injector.getInstance(WordExamplesLoader.class).load(word, userId);
+            });
             Scanner.getClassesWithInterface(WordLoader.class)
                     .stream()
                     .filter(Scanner.ClassTag::isImplementClass)
-                    .filter(v -> v.runtimeClass() != WordDerivativesLoader.class)
+                    .filter(v -> v.runtimeClass() != WordMeaningLoader.class &&
+                            v.runtimeClass() != WordExamplesLoader.class)
                     .forEach(loader -> executor.submit(() -> loader.getInstance().load(word, userId)));
         }
     }

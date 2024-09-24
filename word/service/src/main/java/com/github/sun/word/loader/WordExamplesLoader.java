@@ -1,6 +1,7 @@
 package com.github.sun.word.loader;
 
 import com.github.sun.foundation.boot.utility.JSON;
+import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.spider.WordJsSpider;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RefreshScope
 @Service("examples")
@@ -26,6 +28,15 @@ public class WordExamplesLoader extends WordBasicLoader {
                 String _q = q.replace("#word", word);
                 _q = _q.replace("#num", "" + arr[i++]);
                 _q = _q.replace("#partOfSpeech", WordMeaningLoader.SPEECHES.get(sp));
+                String means = (String) Reflections.getValue(dict.getMeaning(), sp);
+                if (means != null) {
+                    means = Arrays.stream(means.split("，"))
+                            .flatMap(s -> Arrays.stream(s.split("；")))
+                            .map(s -> "\t- " + s).collect(Collectors.joining("\n"));
+                }
+                means = means == null ? "" : means;
+                _q = _q.replace("$means", means);
+
                 JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, _q)));
                 WordDict.Example example = new WordDict.Example();
                 example.setSpeech(sp);
