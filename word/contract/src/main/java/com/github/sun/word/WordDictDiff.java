@@ -30,9 +30,12 @@ public class WordDictDiff {
     private List<String> words;
     private String definition;
     private String scenario;
-    @Converter(WordDict.ExamplesHandler.class)
+    @Converter(ExamplesHandler.class)
     private List<WordDict.ExampleSentence> examples;
 
     public static class Handler extends JsonHandler.ListHandler<String> {
+    }
+
+    public static class ExamplesHandler extends JsonHandler.ListHandler<WordDict.ExampleSentence> {
     }
 }
