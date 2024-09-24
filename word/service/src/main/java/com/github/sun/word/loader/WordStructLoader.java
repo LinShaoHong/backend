@@ -34,14 +34,14 @@ public class WordStructLoader extends WordBasicLoader {
             root = StringUtils.hasText(root) ? root : WordJsSpider.fetchRoot(dict);
             if (StringUtils.hasText(root)) {
                 if (root.contains("-") || root.contains("+")) {
-                    resp = assistant.chat(apiKey, model, q.replace("$input", "限定" + word + "的结构为" + root + "，以此分析并直接给出其(词根、前缀、中缀、后缀)结构"));
+                    resp = assistant.chat(apiKey, model, q.replace("$input", "限定" + word + "的结构为" + root + "，以此分析并直接给出其词根、前缀、中缀和后缀结构"));
                 } else if (!Objects.equals(root, word)) {
-                    resp = assistant.chat(apiKey, model, q.replace("$input", "限定" + word + "的词根为" + root + "，分析并直接给出其(词根、前缀、中缀、后缀)结构"));
+                    resp = assistant.chat(apiKey, model, q.replace("$input", "限定" + word + "的词根为" + root + "，分析并直接给出其词根、前缀、中缀和后缀结构"));
                 } else {
                     resp = assistant.chat(apiKey, model, q.replace("$input", word + "是一个基本的单词，并无词缀"));
                 }
             } else {
-                resp = assistant.chat(apiKey, model, q.replace("$input", "分析并直接给出单词'" + word + "'的(词根、前缀、中缀、后缀)结构"));
+                resp = assistant.chat(apiKey, model, q.replace("$input", "分析并直接给出单词'" + word + "'的词根、前缀、中缀和后缀结构"));
             }
             JSON.Valuer valuer = JSON.newValuer(parse(resp));
             WordDict.Struct struct = new WordDict.Struct();
