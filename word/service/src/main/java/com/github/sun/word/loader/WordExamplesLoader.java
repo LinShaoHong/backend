@@ -36,7 +36,7 @@ public class WordExamplesLoader extends WordBasicLoader {
                             .map(s -> "\t- " + s).collect(Collectors.joining("\n"));
                 }
                 means = means == null ? "" : means;
-                _q = _q.replace("$means", means);
+                _q = _q.replace("$means", "noun".equals(sp) ? "" : "- 要求该单词在例句中的涵义如下：\n" + means);
 
                 JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, _q)));
                 WordDict.Example example = new WordDict.Example();

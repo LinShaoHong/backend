@@ -160,11 +160,15 @@ public class WordJsSpider {
         ret.addAll(_ret);
         if (ret.contains("verb")) {
             int i = ret.indexOf("verb");
-            if (ret.contains("transitiveVerb") && !ret.contains("intransitiveVerb")) {
-                ret.set(i, "intransitiveVerb");
-            }
-            if (ret.contains("intransitiveVerb") && !ret.contains("transitiveVerb")) {
-                ret.set(i, "transitiveVerb");
+            if (ret.contains("transitiveVerb") && ret.contains("intransitiveVerb")) {
+                ret.remove("verb");
+            } else {
+                if (ret.contains("transitiveVerb") && !ret.contains("intransitiveVerb")) {
+                    ret.set(i, "intransitiveVerb");
+                }
+                if (ret.contains("intransitiveVerb") && !ret.contains("transitiveVerb")) {
+                    ret.set(i, "transitiveVerb");
+                }
             }
         }
         return ret;
