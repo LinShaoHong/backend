@@ -106,12 +106,14 @@ public class WordDictLoader {
             WordBasicLoader.init(word, userId);
             executor.submit(() -> {
                 Injector.getInstance(WordMeaningLoader.class).load(word, userId);
+                Injector.getInstance(WordInflectionLoader.class).load(word, userId);
                 Injector.getInstance(WordExamplesLoader.class).load(word, userId);
             });
             Scanner.getClassesWithInterface(WordLoader.class)
                     .stream()
                     .filter(Scanner.ClassTag::isImplementClass)
                     .filter(v -> v.runtimeClass() != WordMeaningLoader.class &&
+                            v.runtimeClass() != WordInflectionLoader.class &&
                             v.runtimeClass() != WordExamplesLoader.class)
                     .forEach(loader -> executor.submit(() -> loader.getInstance().load(word, userId)));
         }

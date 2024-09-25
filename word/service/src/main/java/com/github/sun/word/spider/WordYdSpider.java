@@ -115,7 +115,7 @@ public class WordYdSpider {
     }
 
     @SuppressWarnings("Duplicates")
-    public static void fetchInflection(WordDict dict) {
+    public static void fetchInflection(WordDict dict, List<String> ms) {
         try {
             Document node = WordDictLoader.fetchDocument("https://dict.youdao.com/result?lang=en&word=" + dict.getId());
             WordDict.Inflection inflection = dict.getInflection();
@@ -128,25 +128,39 @@ public class WordYdSpider {
                 List<String> ws = Arrays.asList(words.split("或"));
                 switch (name) {
                     case "复数":
-                        inflection.setPlural(ws);
+                        if (ms.contains("noun")) {
+                            inflection.setPlural(ws);
+                        }
                         break;
                     case "第三人称单数":
-                        inflection.setThirdPresent(ws);
+                        if (ms.stream().anyMatch(s -> s.equals("verb") || s.endsWith("Verb"))) {
+                            inflection.setThirdPresent(ws);
+                        }
                         break;
                     case "现在分词":
-                        inflection.setProgressive(ws);
+                        if (ms.stream().anyMatch(s -> s.equals("verb") || s.endsWith("Verb"))) {
+                            inflection.setProgressive(ws);
+                        }
                         break;
                     case "过去式":
-                        inflection.setPast(ws);
+                        if (ms.stream().anyMatch(s -> s.equals("verb") || s.endsWith("Verb"))) {
+                            inflection.setPast(ws);
+                        }
                         break;
                     case "过去分词":
-                        inflection.setPerfect(ws);
+                        if (ms.stream().anyMatch(s -> s.equals("verb") || s.endsWith("Verb"))) {
+                            inflection.setPerfect(ws);
+                        }
                         break;
                     case "比较级":
-                        inflection.setComparative(ws);
+                        if (ms.contains("adjective")) {
+                            inflection.setComparative(ws);
+                        }
                         break;
                     case "最高级":
-                        inflection.setSuperlative(ws);
+                        if (ms.contains("adjective")) {
+                            inflection.setSuperlative(ws);
+                        }
                         break;
                     default:
                         break;

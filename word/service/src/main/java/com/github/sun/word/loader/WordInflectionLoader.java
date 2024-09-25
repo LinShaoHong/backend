@@ -1,12 +1,16 @@
 package com.github.sun.word.loader;
 
 import com.github.sun.foundation.boot.utility.JSON;
+import com.github.sun.foundation.boot.utility.Reflections;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.spider.WordJsSpider;
 import com.github.sun.word.spider.WordYdSpider;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RefreshScope
 @Service("inflection")
@@ -21,8 +25,14 @@ public class WordInflectionLoader extends WordBasicLoader {
                     WordJsSpider.fetchPhonetic(dict);
                 }
                 dict.setInflection(new WordDict.Inflection());
-                WordYdSpider.fetchInflection(dict);
-                WordJsSpider.fetchInflection(dict);
+                List<String> set = dict.getMeaning() != null ? dict.getMeaning().getSorts() : new ArrayList<>();
+                set.removeIf(sp -> {
+                    String means = (String) Reflections.getValue(dict.getMeaning(), sp);
+                    return !StringUtils.hasText(means);
+                });
+                WordYdSpider.fetchInflection(dict, set);
+                WordJsSpider.fetchInflection(dict, set);
+
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
