@@ -603,7 +603,7 @@ public class WordDictLoader {
     private void createTree(String word, String root, String desc) {
         WordDictTree tree = treeMapper.byRootAndDesc(root, desc);
         if (tree == null) {
-            List<String> ws = fetchDerivatives(root, word, root);
+            List<String> ws = fetchDerivatives(root, !Objects.equals(root, word), word, root);
             ws = ws.stream().distinct().sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
             List<WordDictTree.Derivative> derivatives = WordDerivativesLoader.build(word, root, ws).stream()
                     .map(v -> new WordDictTree.Derivative(v.getWord(), v.getIndex(), 1, false))
@@ -623,7 +623,7 @@ public class WordDictLoader {
                 WordDictTree tree = treeMapper.findById(treeId);
                 String root = tree.getRoot();
                 List<WordDictTree.Derivative> derivatives = tree.getDerivatives();
-                List<String> ws = fetchDerivatives(merged, merged);
+                List<String> ws = fetchDerivatives(merged, false, merged);
                 ws.removeIf(v -> derivatives.stream().anyMatch(d -> Objects.equals(d.getWord(), v)) || root.contains(v));
                 if (ws.isEmpty()) {
                     return tree;
@@ -708,7 +708,7 @@ public class WordDictLoader {
     }
 
     @SuppressWarnings("Duplicates")
-    private List<String> fetchDerivatives(String root, String... words) {
+    private List<String> fetchDerivatives(String root, boolean strict, String... words) {
         List<String> ws = new ArrayList<>();
         Arrays.asList(words).forEach(w -> {
             ws.add(w);
@@ -719,7 +719,7 @@ public class WordDictLoader {
         });
         List<String> _ws = ws.stream()
                 .flatMap(v -> Arrays.stream(v.split("/")))
-                .filter(v -> !v.contains(" ") && !v.contains("-") && !v.contains("'") && v.contains(root))
+                .filter(v -> !v.contains(" ") && !v.contains("-") && !v.contains("'") && (!strict || v.contains(root)))
                 .distinct()
                 .collect(Collectors.toList());
         _ws.forEach(w -> {
@@ -732,13 +732,13 @@ public class WordDictLoader {
         });
         List<String> ret = ws.stream()
                 .flatMap(v -> Arrays.stream(v.split("/")))
-                .filter(v -> !v.contains(" ") && !v.contains("-") && !v.contains("'") && v.contains(root))
+                .filter(v -> !v.contains(" ") && !v.contains("-") && !v.contains("'") && (!strict || v.contains(root)))
                 .distinct()
                 .collect(Collectors.toList());
         ret.removeIf(v -> !StringUtils.hasText(v.trim()));
         //去除无效
         ret = ret.stream().map(v -> {
-            if (!v.contains(root)) {
+            if (strict && v.contains(root)) {
                 return null;
             }
             if (Arrays.asList(words).contains(v)) {
@@ -813,7 +813,7 @@ public class WordDictLoader {
             if (Arrays.asList(words).contains(v)) {
                 return false;
             }
-            return !v.contains(root) || vis.stream().anyMatch(s -> s.equalsIgnoreCase(v)) || v.contains("-") || v.contains(" ");
+            return (strict && !v.contains(root)) || vis.stream().anyMatch(s -> s.equalsIgnoreCase(v)) || v.contains("-") || v.contains(" ");
         });
 
         List<String> _ret = ret;
@@ -824,7 +824,7 @@ public class WordDictLoader {
                     .findFirst()
                     .ifPresent(a -> {
                         affixMapper.byRootDesc(Collections.singleton(a.getRootDesc()))
-                                .stream().filter(aa -> aa.getId().contains(root))
+                                .stream().filter(aa -> strict && aa.getId().contains(root))
                                 .forEach(aa -> _ret.add(aa.getId()));
                     });
         }
