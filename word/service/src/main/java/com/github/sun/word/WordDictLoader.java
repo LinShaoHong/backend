@@ -738,7 +738,7 @@ public class WordDictLoader {
         ret.removeIf(v -> !StringUtils.hasText(v.trim()));
         //去除无效
         ret = ret.stream().map(v -> {
-            if (strict && v.contains(root)) {
+            if (strict && !v.contains(root)) {
                 return null;
             }
             if (Arrays.asList(words).contains(v)) {
