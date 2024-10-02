@@ -23,7 +23,7 @@ public class WordCollocationLoader extends WordBasicLoader {
             boolean verbs = set.stream().anyMatch(s -> s.contains("verb") || s.endsWith("Verb"));
             String q = verbs ? loadQ("cues/公式词组.md") : loadQ("cues/短语词组.md");
             try {
-                String resp = assistant.chat(apiKey, model, q.replace("$word", word));
+                String resp = callAi(q.replace("$word", word));
                 JSON.Valuer valuer = JSON.newValuer(parse(resp));
                 if (verbs) {
                     valuer.get("formulas").asArray().forEach(a -> {

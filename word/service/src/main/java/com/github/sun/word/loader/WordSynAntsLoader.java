@@ -21,7 +21,7 @@ public class WordSynAntsLoader extends WordBasicLoader {
             Set<String> antonyms = new LinkedHashSet<>();
 
             String q = loadQ("cues/近反义词.md");
-            String resp = assistant.chat(apiKey, model, q.replace("$word", word));
+            String resp = callAi(q.replace("$word", word));
             JSON.Valuer valuer = JSON.newValuer(parse(resp));
 
             WordDict.SynAnt synAnt = new WordDict.SynAnt();

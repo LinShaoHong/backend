@@ -12,7 +12,8 @@ public class WordOriginLoader extends WordBasicLoader {
         retry(word, userId, dict -> {
             //词源历史
             String q = loadQ("cues/词源历史.md");
-            String resp = assistant.chat(apiKey, "qwen-max", q.replace("$word", word));
+            String resp = callAi("qwen", "qwen-max", q.replace("$word", word));
+            //            String resp = callAi(q.replace("$word", word));
             JSON.Valuer valuer = JSON.newValuer(parse(resp));
             dict.setOrigin(valuer.get("origin_history_zh").asText());
         }, "origin");

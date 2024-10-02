@@ -11,7 +11,7 @@ import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.word.WordDict;
 import com.github.sun.word.WordDictMapper;
 import com.ibm.icu.impl.data.ResourceReader;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
@@ -27,16 +27,12 @@ import java.util.stream.Collectors;
 public abstract class WordBasicLoader implements WordLoader {
     private final static Map<String, String> MDS = new HashMap<>();
     private final static ClassLoader loader = ResourceReader.class.getClassLoader();
-    @Value("${qwen.key}")
-    protected String apiKey;
-    @Value("${qwen.model}")
-    protected String model;
+    @Resource
+    protected WordLoaderConfig config;
     @Resource
     protected WordDictMapper mapper;
     @Resource
     protected WordLoaderErrorMapper errorMapper;
-    @Resource(name = "qwen")
-    protected Assistant assistant;
     @Resource(name = "mysql")
     protected SqlBuilder.Factory factory;
 
@@ -150,5 +146,28 @@ public abstract class WordBasicLoader implements WordLoader {
             checkMapper.insert(check);
         }
         return ((Long) code).intValue();
+    }
+
+
+    protected String callAi(String message) {
+        return callAi(message);
+    }
+
+    protected String callAi(String name, String userMessage) {
+        return callAi(name, null, userMessage);
+    }
+
+    protected String callAi(String name, String model, String userMessage) {
+        name = StringUtils.hasText(name) ? name : config.getAi().getUse();
+        model = StringUtils.hasText(model) ? model : (name.equals("qwen") ?
+                config.getAi().getQwen().getModel() : config.getAi().getDoubao().getModel());
+        Assistant assistant = (Assistant) Injector.getInstance(name);
+        String apiKey = name.equals("qwen") ?
+                config.getAi().getQwen().getKey() : config.getAi().getDoubao().getKey();
+        return assistant.apiKey(apiKey)
+                .model(model)
+                .systemMessage("你是一名中英文双语教育专家，拥有帮助将中文视为母语的用户理解和记忆英语单词的专长。")
+                .userMessage(userMessage)
+                .fetch();
     }
 }

@@ -28,7 +28,7 @@ public class WordDiffersLoader extends WordBasicLoader {
                     String q = loadQ("cues/辨析.md");
                     String ws = String.join("、", d.getWords());
                     try {
-                        String resp = assistant.chat(apiKey, model, q.replace("$word", ws));
+                        String resp = callAi(q.replace("$word", ws));
                         JSON.Valuer valuer = JSON.newValuer(parse(resp));
                         String meaning = valuer.get("common_meaning").asText("");
                         valuer.get("words").asArray().forEach(a -> {

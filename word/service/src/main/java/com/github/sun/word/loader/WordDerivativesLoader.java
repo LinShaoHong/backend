@@ -73,9 +73,9 @@ public class WordDerivativesLoader extends WordBasicLoader {
                     affixes.forEach(a -> words.add(a.getId()));
                 }
                 q = q.replace("$input", word + "的词根为" + root + "(" + rootDesc + ")，以此直接列出它的所有同根词。注意移除含义已完全变化的单词");
-                resp = assistant.chat(apiKey, model, q);
+                resp = callAi(q);
             } else {
-                resp = assistant.chat(apiKey, model, q.replace("$input", "直接列出单词\"" + word + "\"的所有派生词"));
+                resp = callAi(q.replace("$input", "直接列出单词\"" + word + "\"的所有派生词"));
             }
             JSON.Valuer valuer = JSON.newValuer(parse(resp));
             for (JSON.Valuer v : valuer.asArray()) {

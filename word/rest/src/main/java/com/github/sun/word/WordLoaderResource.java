@@ -209,11 +209,11 @@ public class WordLoaderResource extends AbstractResource {
         return responseOf();
     }
 
-    @GET
-    @Path("/chat")
-    public SingleResponse<String> chat(@QueryParam("q") String q) {
-        return responseOf(loader.chat(q));
-    }
+//    @GET
+//    @Path("/chat")
+//    public SingleResponse<String> chat(@QueryParam("q") String q) {
+//        return responseOf(loader.chat(q));
+//    }
 
     @GET
     @Path("/loadBooks")

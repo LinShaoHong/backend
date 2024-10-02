@@ -1,7 +1,6 @@
 package com.github.sun.word;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.sun.foundation.ai.Assistant;
 import com.github.sun.foundation.boot.Injector;
 import com.github.sun.foundation.boot.Scanner;
 import com.github.sun.foundation.boot.exception.ConstraintException;
@@ -25,8 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -56,12 +57,8 @@ public class WordDictLoader {
     private static final HtmlCleaner hc = new HtmlCleaner();
     private final static ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    @Value("${qwen.key}")
-    private String apiKey;
-    @Value("${qwen.model}")
-    private String model;
-    @Resource(name = "qwen")
-    private Assistant assistant;
+    @Resource
+    private  WordLoaderConfig config;
     @Resource(name = "mysql")
     protected SqlBuilder.Factory factory;
     @Resource
@@ -88,10 +85,6 @@ public class WordDictLoader {
     private WordDictFreqMapper freqMapper;
     @Resource
     private WordLoaderBookMapper bookMapper;
-
-    public String chat(String q) {
-        return assistant.chat(apiKey, model, q);
-    }
 
     public void fetch(int userId) {
         SqlBuilder sb = factory.create();
@@ -963,6 +956,16 @@ public class WordDictLoader {
             return valuer.get("data").get("entries").asArray().iterator().next().get("explain").asText("");
         }
         return null;
+    }
+
+    @Slf4j
+    @Configuration
+    public static class WordLoaderConfiguration {
+        @Bean
+        @ConfigurationProperties("config")
+        public WordLoaderConfig config() {
+            return new WordLoaderConfig();
+        }
     }
 
     @Data

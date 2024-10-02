@@ -43,7 +43,7 @@ public class WordMeaningLoader extends WordBasicLoader {
                     .collect(Collectors.joining("\n"));
             String q = loadQ("cues/释义.md");
             q = q.replace("$word", word).replace("$scope", ms);
-            JSON.Valuer valuer = JSON.newValuer(parse(assistant.chat(apiKey, model, q)));
+            JSON.Valuer valuer = JSON.newValuer(parse(callAi(q)));
 
             WordDict.TranslatedMeaning meaning = new WordDict.TranslatedMeaning();
             for (Field f : WordDict.TranslatedMeaning.class.getDeclaredFields()) {
