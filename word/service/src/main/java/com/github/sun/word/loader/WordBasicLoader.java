@@ -166,7 +166,7 @@ public abstract class WordBasicLoader implements WordLoader {
                         config.getAi().getQwen().getModel() : config.getAi().getDoubao().getModel();
             }
         }
-        Assistant assistant = (Assistant) Injector.getInstance(name);
+        Assistant assistant = Injector.getInstance(name, Assistant.class);
 
         String apiKey = name.equals("qwen") ?
                 config.getAi().getQwen().getKey() : config.getAi().getDoubao().getKey();

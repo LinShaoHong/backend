@@ -117,6 +117,7 @@ public class WordDictLoader {
     }
 
     public void loadPart(String word, String part, JsonNode attr, int userId) {
+        ((ObjectNode) attr).put("$part", part);
         WordBasicLoader.init(word, userId);
         mapper.loading(word, "'$." + part + "Loading'");
         mapper.fromModel(word, "'$." + part + "'", WordBasicLoader.parseAiName(JSON.newValuer(attr)));
@@ -124,10 +125,8 @@ public class WordDictLoader {
                 .stream().filter(v -> v.isImplementClass() && v.runtimeClass().isAnnotationPresent(Service.class) &&
                         v.runtimeClass().getAnnotation(Service.class).value().equals(part))
                 .findFirst()
-                .ifPresent(loader -> executor.submit(() -> {
-                    ((ObjectNode) attr).put("$part", part);
-                    loader.getInstance().load(word, JSON.newValuer(attr), userId);
-                }));
+                .ifPresent(loader -> executor.submit(() ->
+                        loader.getInstance().load(word, JSON.newValuer(attr), userId)));
     }
 
     @Transactional
