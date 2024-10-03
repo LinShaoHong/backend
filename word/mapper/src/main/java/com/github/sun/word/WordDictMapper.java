@@ -22,6 +22,9 @@ public interface WordDictMapper extends CompositeMapper<WordDict> {
     @Update("update word_dict set loadState = JSON_SET(loadState, ${field}, true) where id=#{id}")
     void loading(@Param("id") String id, @Param("field") String field);
 
+    @Update("update word_dict set fromModel = JSON_SET(fromModel, ${field}, #{value}) where id=#{id}")
+    void fromModel(@Param("id") String id, @Param("field") String field, @Param("value") String value);
+
     @Update("update word_dict set loadState = JSON_SET(loadState, ${field}, false) where id=#{id}")
     void loaded(@Param("id") String id, @Param("field") String field);
 

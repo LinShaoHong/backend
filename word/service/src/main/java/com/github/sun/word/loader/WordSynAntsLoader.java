@@ -16,12 +16,12 @@ import java.util.Set;
 public class WordSynAntsLoader extends WordBasicLoader {
     @Override
     public void load(String word, JSON.Valuer attr, int userId) {
-        retry(word, userId, dict -> {
+        retry(word, attr, userId, dict -> {
             Set<String> synonyms = new LinkedHashSet<>();
             Set<String> antonyms = new LinkedHashSet<>();
 
             String q = loadQ("cues/近反义词.md");
-            String resp = callAi(q.replace("$word", word));
+            String resp = callAi(attr, q.replace("$word", word));
             JSON.Valuer valuer = JSON.newValuer(parse(resp));
 
             WordDict.SynAnt synAnt = new WordDict.SynAnt();

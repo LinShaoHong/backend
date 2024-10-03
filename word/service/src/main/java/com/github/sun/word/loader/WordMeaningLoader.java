@@ -35,7 +35,7 @@ public class WordMeaningLoader extends WordBasicLoader {
 
     @Override
     public void load(String word, JSON.Valuer attr, int userId) {
-        retry(word, userId, dict -> {
+        retry(word, attr, userId, dict -> {
             List<String> set = WordJsSpider.fetchMeaning(dict);
             String ms = set.stream().map(SPEECHES::get)
                     .filter(Objects::nonNull)
@@ -43,7 +43,7 @@ public class WordMeaningLoader extends WordBasicLoader {
                     .collect(Collectors.joining("\n"));
             String q = loadQ("cues/释义.md");
             q = q.replace("$word", word).replace("$scope", ms);
-            JSON.Valuer valuer = JSON.newValuer(parse(callAi(q)));
+            JSON.Valuer valuer = JSON.newValuer(parse(callAi(attr, q)));
 
             WordDict.TranslatedMeaning meaning = new WordDict.TranslatedMeaning();
             for (Field f : WordDict.TranslatedMeaning.class.getDeclaredFields()) {

@@ -1,6 +1,7 @@
 package com.github.sun.word;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.sun.foundation.boot.Injector;
 import com.github.sun.foundation.boot.Scanner;
 import com.github.sun.foundation.boot.exception.ConstraintException;
@@ -58,7 +59,7 @@ public class WordDictLoader {
     private final static ExecutorService executor = Executors.newFixedThreadPool(10);
 
     @Resource
-    private  WordLoaderConfig config;
+    private WordLoaderConfig config;
     @Resource(name = "mysql")
     protected SqlBuilder.Factory factory;
     @Resource
@@ -98,9 +99,9 @@ public class WordDictLoader {
         for (String word : words.split(",")) {
             WordBasicLoader.init(word, userId);
             executor.submit(() -> {
-                Injector.getInstance(WordMeaningLoader.class).load(word, userId);
-                Injector.getInstance(WordInflectionLoader.class).load(word, userId);
-                Injector.getInstance(WordExamplesLoader.class).load(word, userId);
+                Injector.getInstance(WordMeaningLoader.class).load(word, "meaning", userId);
+                Injector.getInstance(WordInflectionLoader.class).load(word, "inflection", userId);
+                Injector.getInstance(WordExamplesLoader.class).load(word, "examples", userId);
             });
             Scanner.getClassesWithInterface(WordLoader.class)
                     .stream()
@@ -108,18 +109,25 @@ public class WordDictLoader {
                     .filter(v -> v.runtimeClass() != WordMeaningLoader.class &&
                             v.runtimeClass() != WordInflectionLoader.class &&
                             v.runtimeClass() != WordExamplesLoader.class)
-                    .forEach(loader -> executor.submit(() -> loader.getInstance().load(word, userId)));
+                    .forEach(loader -> executor.submit(() -> {
+                        String part = loader.runtimeClass().getAnnotation(Service.class).value();
+                        loader.getInstance().load(word, part, userId);
+                    }));
         }
     }
 
     public void loadPart(String word, String part, JsonNode attr, int userId) {
         WordBasicLoader.init(word, userId);
         mapper.loading(word, "'$." + part + "Loading'");
+        mapper.fromModel(word, "'$." + part + "'", WordBasicLoader.parseAiName(JSON.newValuer(attr)));
         Scanner.getClassesWithInterface(WordLoader.class)
                 .stream().filter(v -> v.isImplementClass() && v.runtimeClass().isAnnotationPresent(Service.class) &&
                         v.runtimeClass().getAnnotation(Service.class).value().equals(part))
                 .findFirst()
-                .ifPresent(loader -> executor.submit(() -> loader.getInstance().load(word, attr == null ? null : JSON.newValuer(attr), userId)));
+                .ifPresent(loader -> executor.submit(() -> {
+                    ((ObjectNode) attr).put("$part", part);
+                    loader.getInstance().load(word, JSON.newValuer(attr), userId);
+                }));
     }
 
     @Transactional

@@ -16,14 +16,14 @@ import java.util.Objects;
 public class WordCollocationLoader extends WordBasicLoader {
     @Override
     public void load(String word, JSON.Valuer attr, int userId) {
-        retry(word, userId, dict -> {
+        retry(word, attr, userId, dict -> {
             List<WordDict.Phrase> phrases = new ArrayList<>();
             List<WordDict.Formula> formulas = new ArrayList<>();
             List<String> set = WordJsSpider.fetchMeaning(dict);
             boolean verbs = set.stream().anyMatch(s -> s.contains("verb") || s.endsWith("Verb"));
             String q = verbs ? loadQ("cues/公式词组.md") : loadQ("cues/短语词组.md");
             try {
-                String resp = callAi(q.replace("$word", word));
+                String resp = callAi(attr, q.replace("$word", word));
                 JSON.Valuer valuer = JSON.newValuer(parse(resp));
                 if (verbs) {
                     valuer.get("formulas").asArray().forEach(a -> {

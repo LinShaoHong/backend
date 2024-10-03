@@ -21,28 +21,27 @@ public class WordStructLoader extends WordBasicLoader {
     @Override
     public void load(String word, JSON.Valuer attr, int userId) {
         WordLoaderAffix affix = affixMapper.findById(word);
-        retry(word, userId, dict -> {
-            String model = attr == null ? null : attr.get("model").asText("");
+        retry(word, attr, userId, dict -> {
             //词根词缀
             String q = loadQ("cues/词根词缀.md");
             q = q.replace("$word", word);
             String resp;
-            String root = attr == null ? null : attr.get("root").asText();
+            String root = attr.get("root").asText("");
             root = StringUtils.hasText(root) ? root : (affix != null ? affix.getRoot() : null);
             root = StringUtils.hasText(root) ? root : WordJsSpider.fetchRoot(dict);
             if (StringUtils.hasText(root)) {
                 if (root.contains("-") || root.contains("+")) {
-                    resp = callAi("doubao", model,
+                    resp = callAi(attr,
                             q.replace("$input", "限定" + word + "的结构为" + root + "，以此分析并直接给出其词根、前缀、中缀和后缀结构"));
                 } else if (!Objects.equals(root, word)) {
-                    resp = callAi("doubao", model,
+                    resp = callAi(attr,
                             q.replace("$input", "限定" + word + "的词根为" + root + "，分析并直接给出其词根、前缀、中缀和后缀结构"));
                 } else {
-                    resp = callAi("doubao", model,
+                    resp = callAi(attr,
                             q.replace("$input", word + "是一个基本的单词，并无词缀"));
                 }
             } else {
-                resp = callAi(q.replace("$input", "分析并直接给出单词'" + word + "'的词根、前缀、中缀和后缀结构"));
+                resp = callAi(attr, q.replace("$input", "分析并直接给出单词'" + word + "'的词根、前缀、中缀和后缀结构"));
             }
             JSON.Valuer valuer = JSON.newValuer(parse(resp));
             WordDict.Struct struct = new WordDict.Struct();

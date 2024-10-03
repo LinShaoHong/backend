@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class WordExamplesLoader extends WordBasicLoader {
     @Override
     public void load(String word, JSON.Valuer attr, int userId) {
-        retry(word, userId, dict -> {
+        retry(word, attr, userId, dict -> {
             String q = loadQ("cues/例句.md");
             List<String> set = dict.getMeaning() != null ? dict.getMeaning().getSorts() : new ArrayList<>();
             set.remove("abbreviation");
@@ -41,7 +41,7 @@ public class WordExamplesLoader extends WordBasicLoader {
                                 .map(s -> "\t- " + s).collect(Collectors.joining("\n"));
                         _q = _q.replace("$means", "noun".equals(sp) ? "" : "- 要求该单词在例句中的涵义如下：\n" + means);
 
-                        JSON.Valuer valuer = JSON.newValuer(parse(callAi(_q)));
+                        JSON.Valuer valuer = JSON.newValuer(parse(callAi(attr, _q)));
                         WordDict.Example example = new WordDict.Example();
                         example.setSpeech(sp);
                         List<WordDict.ExampleSentence> sentences = new ArrayList<>();

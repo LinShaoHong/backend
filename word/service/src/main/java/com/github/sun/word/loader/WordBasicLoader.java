@@ -2,10 +2,7 @@ package com.github.sun.word.loader;
 
 import com.github.sun.foundation.ai.Assistant;
 import com.github.sun.foundation.boot.Injector;
-import com.github.sun.foundation.boot.utility.Dates;
-import com.github.sun.foundation.boot.utility.Reflections;
-import com.github.sun.foundation.boot.utility.Throws;
-import com.github.sun.foundation.boot.utility.Tuple;
+import com.github.sun.foundation.boot.utility.*;
 import com.github.sun.foundation.sql.IdGenerator;
 import com.github.sun.foundation.sql.SqlBuilder;
 import com.github.sun.word.WordDict;
@@ -36,14 +33,17 @@ public abstract class WordBasicLoader implements WordLoader {
     @Resource(name = "mysql")
     protected SqlBuilder.Factory factory;
 
-    protected void retry(String word, int userId, Consumer<WordDict> run, String... fields) {
+    protected void retry(String word, JSON.Valuer attr, int userId, Consumer<WordDict> run, String... fields) {
+        String part = attr.get("$part").asText();
         Throwable ex = null;
         WordDict dict = init(word, userId);
         List<String> dictFS = Arrays.stream(WordDict.class.getDeclaredFields())
                 .map(Field::getName).collect(Collectors.toList());
         mapper.noPass(word);
         List<String> fs = Arrays.asList(fields);
-        fs.forEach(f -> mapper.loading(word, "'$." + f + "Loading'"));
+        mapper.loading(word, "'$." + part + "Loading'");
+        mapper.fromModel(word, "'$." + part + "'", parseAiName(attr));
+
         for (int i = 0; i < 2; i++) {
             try {
                 run.accept(dict);
@@ -79,7 +79,7 @@ public abstract class WordBasicLoader implements WordLoader {
                 errorMapper.update(error);
             }
         }
-        fs.forEach(f -> mapper.loaded(word, "'$." + f + "Loading'"));
+        mapper.loaded(word, "'$." + part + "Loading'");
     }
 
     protected String parse(String resp) {
@@ -111,8 +111,8 @@ public abstract class WordBasicLoader implements WordLoader {
             db.setId(word);
             db.setUsAudioId(IdGenerator.next());
             db.setUkAudioId(IdGenerator.next());
-            WordDict.LoadState loadState = new WordDict.LoadState();
-            db.setLoadState(loadState);
+            db.setLoadState(new WordDict.LoadState());
+            db.setFromModel(new WordDict.FromModel());
             db.setLoadTime(new Date());
             int sort = genWordSort(userId);
             db.setSort(sort);
@@ -148,20 +148,26 @@ public abstract class WordBasicLoader implements WordLoader {
         return ((Long) code).intValue();
     }
 
+    protected String callAi(JSON.Valuer attr, String userMessage) {
+        WordLoaderConfig.Ai.Loader loader = parseConfigAiLoader(attr);
 
-    protected String callAi(String message) {
-        return callAi(message);
-    }
+        String name = attr.get("$name").asText("");
+        name = StringUtils.hasText(name) ? name : loader == null || !StringUtils.hasText(loader.getName()) ?
+                config.getAi().getUse() : loader.getName();
 
-    protected String callAi(String name, String userMessage) {
-        return callAi(name, null, userMessage);
-    }
-
-    protected String callAi(String name, String model, String userMessage) {
-        name = StringUtils.hasText(name) ? name : config.getAi().getUse();
-        model = StringUtils.hasText(model) ? model : (name.equals("qwen") ?
-                config.getAi().getQwen().getModel() : config.getAi().getDoubao().getModel());
+        String model = attr.get("$model").asText("");
+        if (!StringUtils.hasText(model)) {
+            if (loader != null &&
+                    StringUtils.hasText(loader.getName()) &&
+                    StringUtils.hasText(loader.getModel()) && loader.getName().equals(name)) {
+                model = loader.getModel();
+            } else {
+                model = name.equals("qwen") ?
+                        config.getAi().getQwen().getModel() : config.getAi().getDoubao().getModel();
+            }
+        }
         Assistant assistant = (Assistant) Injector.getInstance(name);
+
         String apiKey = name.equals("qwen") ?
                 config.getAi().getQwen().getKey() : config.getAi().getDoubao().getKey();
         return assistant.apiKey(apiKey)
@@ -169,5 +175,21 @@ public abstract class WordBasicLoader implements WordLoader {
                 .systemMessage("你是一名中英文双语教育专家，拥有帮助将中文视为母语的用户理解和记忆英语单词的专长。")
                 .userMessage(userMessage)
                 .fetch();
+    }
+
+    public static WordLoaderConfig.Ai.Loader parseConfigAiLoader(JSON.Valuer attr) {
+        String part = attr.get("$part").asText();
+        WordLoaderConfig config = Injector.getInstance(WordLoaderConfig.class);
+        return config.getAi().getLoaders().stream()
+                .filter(v -> Objects.equals(v.getPart(), part)).findFirst().orElse(null);
+    }
+
+    public static String parseAiName(JSON.Valuer attr) {
+        WordLoaderConfig.Ai.Loader loader = parseConfigAiLoader(attr);
+        String name = attr.get("$name").asText("");
+        WordLoaderConfig config = Injector.getInstance(WordLoaderConfig.class);
+        name = StringUtils.hasText(name) ? name : loader == null || !StringUtils.hasText(loader.getName()) ?
+                config.getAi().getUse() : loader.getName();
+        return name;
     }
 }

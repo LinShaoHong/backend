@@ -22,13 +22,13 @@ public class WordDiffersLoader extends WordBasicLoader {
 
     @Override
     public void load(String word, JSON.Valuer attr, int userId) {
-        retry(word, userId, dict -> {
+        retry(word, attr, userId, dict -> {
             loaderDiffMapper.byWord(word).forEach(d -> {
                 if (mapper.byDiffId(d.getId()).isEmpty()) {
                     String q = loadQ("cues/辨析.md");
                     String ws = String.join("、", d.getWords());
                     try {
-                        String resp = callAi(q.replace("$word", ws));
+                        String resp = callAi(attr, q.replace("$word", ws));
                         JSON.Valuer valuer = JSON.newValuer(parse(resp));
                         String meaning = valuer.get("common_meaning").asText("");
                         valuer.get("words").asArray().forEach(a -> {

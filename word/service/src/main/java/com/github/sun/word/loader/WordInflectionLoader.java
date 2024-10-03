@@ -17,7 +17,7 @@ import java.util.List;
 public class WordInflectionLoader extends WordBasicLoader {
     @Override
     public void load(String word, JSON.Valuer attr, int userId) {
-        retry(word, userId, dict -> {
+        retry(word, attr, userId, dict -> {
             try {
                 WordYdSpider.fetchPhonetic(dict);
                 if (!StringUtils.hasText(dict.getUsPhonetic()) ||

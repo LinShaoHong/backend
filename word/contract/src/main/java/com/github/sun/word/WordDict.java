@@ -46,6 +46,8 @@ public class WordDict {
     //----------- loader ----------
     @Converter(LoadStateHandler.class)
     private LoadState loadState;//获取状态
+    @Converter(FromModelHandler.class)
+    private FromModel fromModel;//语言模型
     private boolean passed; //是否已通过
     private boolean viewed; //是否已查看
     private Date loadTime;//获取时间
@@ -230,5 +232,23 @@ public class WordDict {
     }
 
     public static class LoadStateHandler extends JsonHandler<LoadState> {
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class FromModel {
+        private String meaning;
+        private String examples;
+        private String struct;
+        private String origin;
+        private String synAnts;
+        private String differs;
+        private String collocation;
+    }
+
+    public static class FromModelHandler extends JsonHandler<FromModel> {
     }
 }
